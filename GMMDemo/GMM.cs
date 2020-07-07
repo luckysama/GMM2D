@@ -36,6 +36,7 @@ namespace GMMDemo
             dummy_gaussian.Sigma.m10 = 30;
             dummy_gaussian.Sigma.m11 = 100;
             gaussian_list.Add(dummy_gaussian);
+            //change
             return gaussian_list;
         }
 
