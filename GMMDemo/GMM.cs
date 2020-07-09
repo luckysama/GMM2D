@@ -35,6 +35,7 @@ namespace GMMDemo
                 pdfs.Add(pdf);
             }
 
+            //TODO List.Sum()
             for (int i = 0; i < pts.Count; ++i)
             {
                 //calculate denominator: sum(pdfs, axis = 1)
@@ -54,9 +55,40 @@ namespace GMMDemo
             return pdfs;
         }
 
-        public List<int> MStep()
+        public (List<Gaussian_2D> gaussian_list, List<double> class_prior) MStep(List<List<double>> W)
         {
-            return null;
+            List<Gaussian_2D> gaussian_list = new List<Gaussian_2D>();
+            List<double> class_prior = new List<double>();
+
+            //calculate class prior
+            for (int j = 0; j < W.Count; j++)
+            {
+                double sum = 0;
+                Vector2 sum_prior = new Vector2();
+                Matrix22 sum_sigma = new Matrix22();
+                for (int i = 0; i < W[0].Count; i++)
+                {
+                    sum += W[j][i];
+                    sum_prior.x += (float)W[j][i] * pts[i].x;
+                    sum_prior.y += (float)W[j][i] * pts[i].y;
+                    sum_sigma.m00 += 1;
+                }
+                class_prior.Add(sum / W[0].Count);
+            }
+
+            //calculate mean
+            for (int j = 0; j < W.Count; j++)
+            {
+                double sum = 0;
+                for (int i = 0; i < W[0].Count; i++)
+                {
+                    sum += W[j][i];
+                }
+                gaussian_list[j].miu.x = 0;
+                gaussian_list[j].miu.y = 0;
+            }
+
+            return (gaussian_list, class_prior);
         }
 
         public List<Vector2> GenerateRandomPoints(int num_of_points, int xmax, int ymax) //x and y range from 0
@@ -105,7 +137,8 @@ namespace GMMDemo
             int iter = 0;
             do
             {
-                W = EStep(gaussian_list, class_prior);
+                //W = EStep(gaussian_list, class_prior);
+                //(gaussian_list, class_prior) = MStep(W);
                 iter++;
             } while (iter < max_iter);
 
