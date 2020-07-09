@@ -167,5 +167,12 @@ namespace GMMDemo
         {
 
         }
+
+        private void drawDummyGaussianToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            drawingGaussians = gmm.DrawDummyGaussian();
+            label_status.Text = "Fit Dummy Gaussian (flat). " + DateTime.Now;
+            this.Refresh();
+        }
     }
 }

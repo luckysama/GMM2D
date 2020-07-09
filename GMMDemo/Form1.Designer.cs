@@ -40,6 +40,7 @@
             this.fit8ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fitHGMsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupbox_canvas = new System.Windows.Forms.GroupBox();
+            this.drawDummyGaussianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -67,6 +68,7 @@
             this.dataToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.regenerateRandomDataToolStripMenuItem,
             this.generateDummyGaussianDataToolStripMenuItem,
+            this.drawDummyGaussianToolStripMenuItem,
             this.fitGMMsToolStripMenuItem,
             this.fitHGMsToolStripMenuItem});
             this.dataToolStripMenuItem.Name = "dataToolStripMenuItem";
@@ -147,6 +149,13 @@
             this.groupbox_canvas.Text = "Data Plot";
             this.groupbox_canvas.Paint += new System.Windows.Forms.PaintEventHandler(this.groupbox_canvans_Paint);
             // 
+            // drawDummyGaussianToolStripMenuItem
+            // 
+            this.drawDummyGaussianToolStripMenuItem.Name = "drawDummyGaussianToolStripMenuItem";
+            this.drawDummyGaussianToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
+            this.drawDummyGaussianToolStripMenuItem.Text = "Draw Dummy Gaussian";
+            this.drawDummyGaussianToolStripMenuItem.Click += new System.EventHandler(this.drawDummyGaussianToolStripMenuItem_Click);
+            // 
             // GMMDemoWnd
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -179,6 +188,7 @@
         private System.Windows.Forms.ToolStripMenuItem generateDummyGaussianDataToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mixtureToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mixtureToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem drawDummyGaussianToolStripMenuItem;
     }
 }
 

@@ -151,8 +151,11 @@ namespace GMMDemo
             } while (iter < max_iter);
 
             Gaussian_2D dummy_gaussian = new Gaussian_2D();
+            return gaussian_list;
+        }
 
-        public DrawDummyGaussian(){
+        public List<Gaussian_2D> DrawDummyGaussian(){
+            List<Gaussian_2D> gaussian_list = new List<Gaussian_2D>();
             gaussian_list.Add(CreateDummyGaussian());
             return gaussian_list;
         }
