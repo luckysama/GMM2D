@@ -43,7 +43,6 @@ namespace GMMDemo
                 {
                     sum += pdfs[j][i];
                 }
-
                 //calculate W (inplace)
                 for (int j = 0; j < num_gaussians; ++j)
                 {
@@ -99,12 +98,6 @@ namespace GMMDemo
                 pts.Add(new Vector2(rand.Next(0, xmax), rand.Next(0, ymax)));
             }
 
-            //pts[0].x = 200;
-            //pts[0].y = 200;
-            //pts[1].x = 200;
-            //pts[1].y = 190;
-            //pts[2].x = 190;
-            //pts[2].y = 200;
             return pts;
         }
 
@@ -154,22 +147,16 @@ namespace GMMDemo
         {
             int num_gaussians = 4;
             int max_iter = 1;
+            Random rand = new Random();
 
             //init gaussians and class prior (weight)
             List<Gaussian_2D> gaussian_list = new List<Gaussian_2D>();
             List<double> class_prior = new List<double>();
             for (int i = 0; i < num_gaussians; i++)
             {
-                gaussian_list.Add(new Gaussian_2D());
+                gaussian_list.Add(new Gaussian_2D(rand));
                 class_prior.Add(1 / (double)(num_gaussians));
             }
-
-            //gaussian_list[0].miu = new Vector2(200, 200);
-            ///used the example matrix in https://en.wikipedia.org/wiki/Multivariate_normal_distribution
-            //gaussian_list[0].Sigma.m00 = 50;
-            //gaussian_list[0].Sigma.m01 = 30;
-            //gaussian_list[0].Sigma.m10 = 30;
-            //gaussian_list[0].Sigma.m11 = 100;
 
             //init P(gaussian=j | point=i)
             List<List<double>> W = new List<List<double>>();
@@ -178,12 +165,11 @@ namespace GMMDemo
             int iter = 0;
             do
             {
-                //W = EStep(gaussian_list, class_prior);
-                //(gaussian_list, class_prior) = MStep(W);
+                W = EStep(gaussian_list, class_prior);
+                (gaussian_list, class_prior) = MStep(W);
                 iter++;
             } while (iter < max_iter);
 
-            Gaussian_2D dummy_gaussian = new Gaussian_2D();
             return gaussian_list;
         }
 

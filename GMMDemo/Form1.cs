@@ -28,7 +28,7 @@ namespace GMMDemo
         Color ellipse_drawing_color = Color.Blue;
         Color miu_color = Color.Green;
 
-        int num_of_points = 20000;//todo: have an interface to adjust how many points we place?
+        int num_of_points = 80;//todo: have an interface to adjust how many points we place?
 
         GMM gmm;
 
