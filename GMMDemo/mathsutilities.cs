@@ -30,6 +30,16 @@ namespace GMMDemo
             m00 = m01 = m10 = m11 = 0;
         }
 
+        public Matrix22(float m00_init, float m01_init, float m10_init, float m11_init)
+        {
+            //matrix with init value
+
+            m00 = m00_init;
+            m10 = m01 = m01_init;
+            //m10 = m10_init;
+            m11 = m11_init;
+        }
+
         public void UpdateEigens()
         {
             degenerate = false;
@@ -78,8 +88,77 @@ namespace GMMDemo
         public Matrix22 Sigma; //variance
         public Gaussian_2D()
         {
-            miu = new Vector2();
-            Sigma = new Matrix22();
+            //init with random value
+
+            Random rand = new Random();
+            miu = new Vector2(rand.Next(100, 300), rand.Next(100, 300));
+            Sigma = new Matrix22(rand.Next(100, 300), rand.Next(-50, 50), 
+                                 rand.Next(-50, 50), rand.Next(100, 300));
         }
+    }
+
+    /// <summary>
+    /// Hardcoded matrix computations for multivariate normal PDF.
+    /// Input: Vector2 and Matrix22
+    /// </summary>
+    public class MatrixMath
+    {
+        public static float Det(Matrix22 m)
+        {
+            return m.m00 * m.m11 - m.m10 * m.m01;
+        }
+
+
+        public static Vector2 Minus(Vector2 v1, Vector2 v2)
+        {
+            Vector2 min = new Vector2(v1.x - v2.x, v1.y - v2.y);
+            return min;
+        }
+
+        public static Matrix22 Inverse(Matrix22 m)
+        {
+            Matrix22 inv_M = new Matrix22();
+
+            inv_M.m00 = m.m11 / Det(m);
+            inv_M.m01 = -m.m01 / Det(m);
+            inv_M.m10 = -m.m10 / Det(m);
+            inv_M.m11 = m.m00 / Det(m);
+
+            return inv_M;
+        }
+
+        public static float Dot(Vector2 v1, Vector2 v2)
+        {
+            return v1.x * v2.x + v1.y * v2.y;
+        }
+
+
+        public static List<int> LogLikeliHood()
+        {
+            return null;
+        }
+
+
+        public static double MultivariateNormalPDF(Vector2 pt, Vector2 miu, Matrix22 covariance)
+        {
+            Vector2 x_minus_miu = Minus(pt, miu);
+            Matrix22 inv_cov = Inverse(covariance);
+
+            //Break Matrix22 into two rows (Vector2) for dot product 
+            Vector2 row1 = new Vector2(inv_cov.m00, inv_cov.m01);
+            Vector2 row2 = new Vector2(inv_cov.m10, inv_cov.m11);
+
+            float dot_row1 = Dot(row1, x_minus_miu);
+            float dot_row2 = Dot(row2, x_minus_miu);
+
+            //Assemble two rows
+            Vector2 temp_v = new Vector2(dot_row1, dot_row2);
+
+            double numerator = Math.Exp(-Dot(x_minus_miu, temp_v) / 2);
+            double denom = 2 * Math.PI * Math.Sqrt(Det(covariance));
+
+            return numerator / denom;
+        }
+
     }
 }
