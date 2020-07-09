@@ -88,12 +88,16 @@ namespace GMMDemo
         public Matrix22 Sigma; //variance
         public Gaussian_2D()
         {
+            //init with zeros
+            miu = new Vector2(0, 0);
+            Sigma = new Matrix22(0, 0, 0, 0);
+        }
+        public Gaussian_2D(Random rand)
+        {
             //init with random value
-
-            Random rand = new Random();
             miu = new Vector2(rand.Next(100, 300), rand.Next(100, 300));
             Sigma = new Matrix22(rand.Next(100, 300), rand.Next(-50, 50), 
-                                 rand.Next(-50, 50), rand.Next(100, 300));
+                                rand.Next(-50, 50), rand.Next(100, 300));
         }
     }
 
@@ -107,7 +111,6 @@ namespace GMMDemo
         {
             return m.m00 * m.m11 - m.m10 * m.m01;
         }
-
 
         public static Vector2 Minus(Vector2 v1, Vector2 v2)
         {
@@ -132,12 +135,10 @@ namespace GMMDemo
             return v1.x * v2.x + v1.y * v2.y;
         }
 
-
         public static List<int> LogLikeliHood()
         {
             return null;
         }
-
 
         public static double MultivariateNormalPDF(Vector2 pt, Vector2 miu, Matrix22 covariance)
         {
@@ -159,6 +160,5 @@ namespace GMMDemo
 
             return numerator / denom;
         }
-
     }
 }

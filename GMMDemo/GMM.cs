@@ -34,6 +34,7 @@ namespace GMMDemo
                 pdfs.Add(pdf);
             }
 
+            //TODO List.Sum()
             for (int i = 0; i < pts.Count; ++i)
             {
                 //calculate denominator: sum(pdfs, axis = 1)
@@ -42,7 +43,6 @@ namespace GMMDemo
                 {
                     sum += pdfs[j][i];
                 }
-
                 //calculate W (inplace)
                 for (int j = 0; j < num_gaussians; ++j)
                 {
@@ -53,9 +53,40 @@ namespace GMMDemo
             return pdfs;
         }
 
-        public List<int> MStep()
+        public (List<Gaussian_2D> gaussian_list, List<double> class_prior) MStep(List<List<double>> W)
         {
-            return null;
+            List<Gaussian_2D> gaussian_list = new List<Gaussian_2D>();
+            List<double> class_prior = new List<double>();
+
+            //calculate class prior
+            for (int j = 0; j < W.Count; j++)
+            {
+                double sum = 0;
+                Vector2 sum_prior = new Vector2();
+                Matrix22 sum_sigma = new Matrix22();
+                for (int i = 0; i < W[0].Count; i++)
+                {
+                    sum += W[j][i];
+                    sum_prior.x += (float)W[j][i] * pts[i].x;
+                    sum_prior.y += (float)W[j][i] * pts[i].y;
+                    sum_sigma.m00 += 1;
+                }
+                class_prior.Add(sum / W[0].Count);
+            }
+
+            //calculate mean
+            for (int j = 0; j < W.Count; j++)
+            {
+                double sum = 0;
+                for (int i = 0; i < W[0].Count; i++)
+                {
+                    sum += W[j][i];
+                }
+                gaussian_list[j].miu.x = 0;
+                gaussian_list[j].miu.y = 0;
+            }
+
+            return (gaussian_list, class_prior);
         }
 
         public List<Vector2> GenerateRandomPoints(int num_of_points, int xmax, int ymax) //x and y range from 0
@@ -67,12 +98,6 @@ namespace GMMDemo
                 pts.Add(new Vector2(rand.Next(0, xmax), rand.Next(0, ymax)));
             }
 
-            //pts[0].x = 200;
-            //pts[0].y = 200;
-            //pts[1].x = 200;
-            //pts[1].y = 190;
-            //pts[2].x = 190;
-            //pts[2].y = 200;
             return pts;
         }
 
@@ -122,22 +147,16 @@ namespace GMMDemo
         {
             int num_gaussians = 4;
             int max_iter = 1;
+            Random rand = new Random();
 
             //init gaussians and class prior (weight)
             List<Gaussian_2D> gaussian_list = new List<Gaussian_2D>();
             List<double> class_prior = new List<double>();
             for (int i = 0; i < num_gaussians; i++)
             {
-                gaussian_list.Add(new Gaussian_2D());
+                gaussian_list.Add(new Gaussian_2D(rand));
                 class_prior.Add(1 / (double)(num_gaussians));
             }
-
-            //gaussian_list[0].miu = new Vector2(200, 200);
-            ///used the example matrix in https://en.wikipedia.org/wiki/Multivariate_normal_distribution
-            //gaussian_list[0].Sigma.m00 = 50;
-            //gaussian_list[0].Sigma.m01 = 30;
-            //gaussian_list[0].Sigma.m10 = 30;
-            //gaussian_list[0].Sigma.m11 = 100;
 
             //init P(gaussian=j | point=i)
             List<List<double>> W = new List<List<double>>();
@@ -147,10 +166,10 @@ namespace GMMDemo
             do
             {
                 W = EStep(gaussian_list, class_prior);
+                (gaussian_list, class_prior) = MStep(W);
                 iter++;
             } while (iter < max_iter);
 
-            Gaussian_2D dummy_gaussian = new Gaussian_2D();
             return gaussian_list;
         }
 
