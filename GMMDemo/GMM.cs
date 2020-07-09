@@ -100,8 +100,46 @@ namespace GMMDemo
 
             return pts;
         }
+        public List<Vector2> GenerateGaussianPoints(int num_of_points, Random rand, int number_of_gaussians)
+        {
+            List<Vector2> local_pts = new List<Vector2>();
+            int points_per_gaussian = (int)Math.Round((double)num_of_points / number_of_gaussians);
+            Gaussian_2D gaussian;
+            double angle;
+            double u1, u2;
+            int x_old, y_old;
+            int x, y;
 
-        public List<Vector2> GenerateDummyGaussianPoints(int num_of_points, int xmax, int ymax) //x and y range from 0
+            for(int i = 0; i<number_of_gaussians; i++)
+            {
+                gaussian = new Gaussian_2D();
+                gaussian.Sigma.UpdateEigens();
+                if (gaussian.Sigma.eigenvalue_0 > gaussian.Sigma.eigenvalue_1)
+                {
+                    angle = Math.Atan2(gaussian.Sigma.eigenvector_0.y, gaussian.Sigma.eigenvector_0.x);
+                }
+                else
+                {
+                    angle = Math.Atan2(gaussian.Sigma.eigenvector_1.y, gaussian.Sigma.eigenvector_1.x);
+                }
+
+                for (i = 0; i < points_per_gaussian; i++)
+                {
+                    do
+                    {
+                        u1 = rand.NextDouble();
+                        u2 = rand.NextDouble();
+                    } while (u1 == 0 && u2 == 0);
+                    x_old = (int)Math.Round(Math.Sqrt(gaussian.Sigma.m00) * Math.Sqrt(-2 * Math.Log(u2)) * Math.Cos(2 * Math.PI * u1));
+                    y_old = (int)Math.Round(Math.Sqrt(gaussian.Sigma.m11) * Math.Sqrt(-2 * Math.Log(u2)) * Math.Sin(2 * Math.PI * u1));
+                    x = (int)Math.Round(x_old * Math.Cos(angle) - y_old * Math.Sin(angle) + gaussian.miu.x);
+                    y = (int)Math.Round(x_old * Math.Sin(angle) + y_old * Math.Cos(angle) + gaussian.miu.y);
+                    local_pts.Add(new Vector2(x, y));
+                }
+            }
+            return local_pts;
+        }
+        public List<Vector2> GenerateDummyGaussianPoints(int num_of_points)
         {
             pts = new List<Vector2>();
             Random rand = new Random();
@@ -143,12 +181,11 @@ namespace GMMDemo
             return pts;
         }
 
-        public List<Gaussian_2D> Fit4Gaussians()
+        public List<Gaussian_2D> Fit4Gaussians(List<Vector2> pts, Random rand)
         {
             int num_gaussians = 4;
             int max_iter = 1;
-            Random rand = new Random();
-
+            
             //init gaussians and class prior (weight)
             List<Gaussian_2D> gaussian_list = new List<Gaussian_2D>();
             List<double> class_prior = new List<double>();
@@ -157,7 +194,7 @@ namespace GMMDemo
                 gaussian_list.Add(new Gaussian_2D(rand));
                 class_prior.Add(1 / (double)(num_gaussians));
             }
-
+            
             //init P(gaussian=j | point=i)
             List<List<double>> W = new List<List<double>>();
 
@@ -165,8 +202,8 @@ namespace GMMDemo
             int iter = 0;
             do
             {
-                W = EStep(gaussian_list, class_prior);
-                (gaussian_list, class_prior) = MStep(W);
+                //W = EStep(gaussian_list, class_prior);
+                // (gaussian_list, class_prior) = MStep(W);
                 iter++;
             } while (iter < max_iter);
 

@@ -47,7 +47,16 @@ namespace GMMDemo
 
         private void fit4ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            drawingGaussians = gmm.Fit4Gaussians();
+            int number_of_gaussians = 4;
+            Random rand = new Random();
+            drawingPts = new List<Point>();
+            List<Vector2> pts;
+            pts = gmm.GenerateGaussianPoints(num_of_points, rand, number_of_gaussians);
+            drawingGaussians = gmm.Fit4Gaussians(pts, rand);
+            for (int i = 0; i < pts.Count; ++i)
+            {
+                 drawingPts.Add(new Point((int)pts[i].x, (int)pts[i].y));
+            }
             label_status.Text = "Fit 4 Gaussians (flat). " + DateTime.Now;
             this.Refresh();
         }
@@ -130,10 +139,7 @@ namespace GMMDemo
             {
                 angle = Math.Atan2(gaussian.Sigma.eigenvector_1.y, gaussian.Sigma.eigenvector_1.x);
             }
-            Console.WriteLine("Ellipse angle");
-            Console.WriteLine(angle * 180 / Math.PI);
-            //angle = 0;
-
+            
             g.TranslateTransform(gaussian.miu.x, gaussian.miu.y);
             g.RotateTransform((float)(angle * 180 / Math.PI)); //Rad to Deg
             g.DrawEllipse(pen, new RectangleF(-(int)Math.Round(axis_x / 2),
@@ -160,7 +166,7 @@ namespace GMMDemo
 
         private void mixtureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<Vector2> geometry_pts = gmm.GenerateDummyGaussianPoints(num_of_points, groupbox_canvas.Width, groupbox_canvas.Height);
+            List<Vector2> geometry_pts = gmm.GenerateDummyGaussianPoints(num_of_points);
             drawingPts = new List<Point>();
             for (int i = 0; i < geometry_pts.Count; ++i)
             {
