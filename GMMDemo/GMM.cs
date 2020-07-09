@@ -9,8 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace GMMDemo
 {
-
-    public class GMM
+        public class GMM
     {
         public List<Vector2> pts;
 
@@ -109,6 +108,48 @@ namespace GMMDemo
             return pts;
         }
 
+        public List<Vector2> GenerateDummyGaussianPoints(int num_of_points, int xmax, int ymax) //x and y range from 0
+        {
+            pts = new List<Vector2>();
+            Random rand = new Random();
+            Gaussian_2D dummy_gaussian = CreateDummyGaussian();
+
+            dummy_gaussian.Sigma.UpdateEigens();
+            double angle;
+            Console.WriteLine("Eigenvalues");
+            Console.WriteLine(dummy_gaussian.Sigma.eigenvalue_0);
+            Console.WriteLine(dummy_gaussian.Sigma.eigenvalue_1);
+            if (dummy_gaussian.Sigma.eigenvalue_0 > dummy_gaussian.Sigma.eigenvalue_1)
+            {
+                angle = Math.PI + Math.Atan2(dummy_gaussian.Sigma.eigenvector_0.y, dummy_gaussian.Sigma.eigenvector_0.x);
+            }
+            else
+            {
+                angle = Math.PI + Math.Atan2(dummy_gaussian.Sigma.eigenvector_1.y, dummy_gaussian.Sigma.eigenvector_1.x);
+            }
+          
+            Console.WriteLine("Sample angle");
+            Console.WriteLine(angle * 180 / Math.PI);
+            double u1, u2;
+            int x_old, y_old;
+            int x, y;
+
+            for (int i = 0; i < num_of_points; i++)
+            {
+                do
+                {
+                    u1 = rand.NextDouble();
+                    u2 = rand.NextDouble();
+                } while (u1 == 0 && u2 == 0);
+                x_old = (int)Math.Round(Math.Sqrt(dummy_gaussian.Sigma.m00) * Math.Sqrt(-2 * Math.Log(u2)) * Math.Cos(2 * Math.PI * u1));
+                y_old = (int)Math.Round(Math.Sqrt(dummy_gaussian.Sigma.m11) * Math.Sqrt(-2 * Math.Log(u2)) * Math.Sin(2 * Math.PI * u1));
+                x = (int)Math.Round(x_old * Math.Cos(angle) - y_old * Math.Sin(angle) + dummy_gaussian.miu.x);
+                y = (int)Math.Round(x_old * Math.Sin(angle) + y_old * Math.Cos(angle) + dummy_gaussian.miu.y);
+                pts.Add(new Vector2(x, y));
+            }
+            return pts;
+        }
+
         public List<Gaussian_2D> Fit4Gaussians()
         {
             int num_gaussians = 4;
@@ -143,17 +184,25 @@ namespace GMMDemo
             } while (iter < max_iter);
 
             Gaussian_2D dummy_gaussian = new Gaussian_2D();
+            return gaussian_list;
+        }
 
-            dummy_gaussian.miu = new Vector2(100, 100);
+        public List<Gaussian_2D> DrawDummyGaussian(){
+            List<Gaussian_2D> gaussian_list = new List<Gaussian_2D>();
+            gaussian_list.Add(CreateDummyGaussian());
+            return gaussian_list;
+        }
+        public Gaussian_2D CreateDummyGaussian()
+        {
+            Gaussian_2D dummy_gaussian = new Gaussian_2D();
+            
+            dummy_gaussian.miu = new Vector2(200, 200);
             ///used the example matrix in https://en.wikipedia.org/wiki/Multivariate_normal_distribution
             dummy_gaussian.Sigma.m00 = 50;
             dummy_gaussian.Sigma.m01 = 30;
             dummy_gaussian.Sigma.m10 = 30;
             dummy_gaussian.Sigma.m11 = 100;
-            gaussian_list.Add(dummy_gaussian);
-
-
-            return gaussian_list;
+            return dummy_gaussian;
         }
 
         public List<Gaussian_2D> Fit8Gaussians()
