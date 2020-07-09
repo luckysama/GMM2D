@@ -96,16 +96,31 @@ namespace GMMDemo
         void Draw3SigmaEllipse(Graphics g, Gaussian_2D gaussian, Pen pen)
         {
             gaussian.Sigma.UpdateEigens();
-            float axis_0 = 0;
-            if (gaussian.Sigma.eigenvalue_0 >= 0)
+            float axis_x = 0;
+            float axis_y = 0;
+            if (gaussian.Sigma.m00 > gaussian.Sigma.m11)
             {
-                axis_0 = (float)(2 * Math.Sqrt(5.991f * gaussian.Sigma.eigenvalue_0));
+                if (gaussian.Sigma.eigenvalue_0 >= 0)
+                {
+                    axis_x = (float)(2 * Math.Sqrt(5.991f * gaussian.Sigma.eigenvalue_0));
+                }
+                if (gaussian.Sigma.eigenvalue_1 >= 0)
+                {
+                    axis_y = (float)(2 * Math.Sqrt(5.991f * gaussian.Sigma.eigenvalue_1));
+                }
             }
-            float axis_1 = 0;
-            if (gaussian.Sigma.eigenvalue_1 >= 0)
+            else
             {
-                axis_1 = (float)(2 * Math.Sqrt(5.991f * gaussian.Sigma.eigenvalue_1));
+                if (gaussian.Sigma.eigenvalue_0 >= 0)
+                {
+                    axis_y = (float)(2 * Math.Sqrt(5.991f * gaussian.Sigma.eigenvalue_0));
+                }
+                if (gaussian.Sigma.eigenvalue_1 >= 0)
+                {
+                    axis_x = (float)(2 * Math.Sqrt(5.991f * gaussian.Sigma.eigenvalue_1));
+                }
             }
+            
             double angle;
             if (gaussian.Sigma.eigenvalue_0 > gaussian.Sigma.eigenvalue_1) 
             {
@@ -117,13 +132,14 @@ namespace GMMDemo
             }
             Console.WriteLine("Ellipse angle");
             Console.WriteLine(angle * 180 / Math.PI);
+            //angle = 0;
 
             g.TranslateTransform(gaussian.miu.x, gaussian.miu.y);
             g.RotateTransform((float)(angle * 180 / Math.PI)); //Rad to Deg
-            g.DrawEllipse(pen, new RectangleF(-(int)Math.Round(axis_0 / 2),
-                                            -(int)Math.Round(axis_1 / 2),
-                                            axis_0,
-                                            axis_1));
+            g.DrawEllipse(pen, new RectangleF(-(int)Math.Round(axis_x / 2),
+                                            -(int)Math.Round(axis_y / 2),
+                                            axis_x,
+                                            axis_y));
             g.ResetTransform();
         }
         

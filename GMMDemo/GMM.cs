@@ -89,11 +89,11 @@ namespace GMMDemo
             Console.WriteLine(dummy_gaussian.Sigma.eigenvalue_1);
             if (dummy_gaussian.Sigma.eigenvalue_0 > dummy_gaussian.Sigma.eigenvalue_1)
             {
-                angle = Math.PI + Math.Atan2(dummy_gaussian.Sigma.eigenvector_0.y, dummy_gaussian.Sigma.eigenvector_0.x);
+                angle = Math.Atan2(dummy_gaussian.Sigma.eigenvector_0.y, dummy_gaussian.Sigma.eigenvector_0.x);
             }
             else
             {
-                angle = Math.PI + Math.Atan2(dummy_gaussian.Sigma.eigenvector_1.y, dummy_gaussian.Sigma.eigenvector_1.x);
+                angle = Math.Atan2(dummy_gaussian.Sigma.eigenvector_1.y, dummy_gaussian.Sigma.eigenvector_1.x);
             }
           
             Console.WriteLine("Sample angle");
@@ -165,10 +165,10 @@ namespace GMMDemo
             
             dummy_gaussian.miu = new Vector2(200, 200);
             ///used the example matrix in https://en.wikipedia.org/wiki/Multivariate_normal_distribution
-            dummy_gaussian.Sigma.m00 = 50;
+            dummy_gaussian.Sigma.m00 = 100;
             dummy_gaussian.Sigma.m01 = 30;
             dummy_gaussian.Sigma.m10 = 30;
-            dummy_gaussian.Sigma.m11 = 100;
+            dummy_gaussian.Sigma.m11 = 50;
             return dummy_gaussian;
         }
 
