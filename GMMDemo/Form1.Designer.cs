@@ -28,20 +28,32 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.label_status = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.dataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.regenerateRandomDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.generateDummyGaussianDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mixtureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mixtureToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.drawDummyGaussianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fitGMMsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.fit4ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.fit8ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fitHGMsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupbox_canvas = new System.Windows.Forms.GroupBox();
-            this.drawDummyGaussianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.label5 = new System.Windows.Forms.Label();
+            this.PointNumber = new System.Windows.Forms.NumericUpDown();
+            this.LayerNumber = new System.Windows.Forms.NumericUpDown();
+            this.SampleNumber = new System.Windows.Forms.NumericUpDown();
+            this.FitNumber = new System.Windows.Forms.NumericUpDown();
+            this.HierarchicalLayers = new System.Windows.Forms.Label();
+            this.GaussiansPerLevel = new System.Windows.Forms.Label();
+            this.GaussianSamples = new System.Windows.Forms.Label();
+            this.generatedPoints = new System.Windows.Forms.Label();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.menuStrip1.SuspendLayout();
+            this.groupbox_canvas.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.PointNumber)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.LayerNumber)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SampleNumber)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.FitNumber)).BeginInit();
             this.SuspendLayout();
             // 
             // label_status
@@ -52,6 +64,7 @@
             this.label_status.Size = new System.Drawing.Size(35, 13);
             this.label_status.TabIndex = 0;
             this.label_status.Text = "label1";
+            this.label_status.Click += new System.EventHandler(this.label_status_Click);
             // 
             // menuStrip1
             // 
@@ -59,7 +72,7 @@
             this.dataToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(529, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1033, 24);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -79,88 +92,182 @@
             // regenerateRandomDataToolStripMenuItem
             // 
             this.regenerateRandomDataToolStripMenuItem.Name = "regenerateRandomDataToolStripMenuItem";
-            this.regenerateRandomDataToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
-            this.regenerateRandomDataToolStripMenuItem.Text = "Regenerate Random Data";
+            this.regenerateRandomDataToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.regenerateRandomDataToolStripMenuItem.Text = "Generate Random Data";
             this.regenerateRandomDataToolStripMenuItem.Click += new System.EventHandler(this.regenerateRandomDataToolStripMenuItem_Click);
             // 
             // generateDummyGaussianDataToolStripMenuItem
             // 
-            this.generateDummyGaussianDataToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mixtureToolStripMenuItem,
-            this.mixtureToolStripMenuItem1});
             this.generateDummyGaussianDataToolStripMenuItem.Name = "generateDummyGaussianDataToolStripMenuItem";
-            this.generateDummyGaussianDataToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
-            this.generateDummyGaussianDataToolStripMenuItem.Text = "Generate Dummy Gaussian Data";
+            this.generateDummyGaussianDataToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.generateDummyGaussianDataToolStripMenuItem.Text = "Generate Gaussian Data";
             this.generateDummyGaussianDataToolStripMenuItem.Click += new System.EventHandler(this.generateDummyGaussianDataToolStripMenuItem_Click_1);
-            // 
-            // mixtureToolStripMenuItem
-            // 
-            this.mixtureToolStripMenuItem.Name = "mixtureToolStripMenuItem";
-            this.mixtureToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
-            this.mixtureToolStripMenuItem.Text = "4-Mixture";
-            this.mixtureToolStripMenuItem.Click += new System.EventHandler(this.mixtureToolStripMenuItem_Click);
-            // 
-            // mixtureToolStripMenuItem1
-            // 
-            this.mixtureToolStripMenuItem1.Name = "mixtureToolStripMenuItem1";
-            this.mixtureToolStripMenuItem1.Size = new System.Drawing.Size(126, 22);
-            this.mixtureToolStripMenuItem1.Text = "8-Mixture";
-            this.mixtureToolStripMenuItem1.Click += new System.EventHandler(this.mixtureToolStripMenuItem1_Click);
-            // 
-            // fitGMMsToolStripMenuItem
-            // 
-            this.fitGMMsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fit4ToolStripMenuItem,
-            this.fit8ToolStripMenuItem});
-            this.fitGMMsToolStripMenuItem.Name = "fitGMMsToolStripMenuItem";
-            this.fitGMMsToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
-            this.fitGMMsToolStripMenuItem.Text = "Fit Flat GMMs ";
-            this.fitGMMsToolStripMenuItem.Click += new System.EventHandler(this.fitGMMsToolStripMenuItem_Click);
-            // 
-            // fit4ToolStripMenuItem
-            // 
-            this.fit4ToolStripMenuItem.Name = "fit4ToolStripMenuItem";
-            this.fit4ToolStripMenuItem.Size = new System.Drawing.Size(96, 22);
-            this.fit4ToolStripMenuItem.Text = "Fit 4";
-            this.fit4ToolStripMenuItem.Click += new System.EventHandler(this.fit4ToolStripMenuItem_Click);
-            // 
-            // fit8ToolStripMenuItem
-            // 
-            this.fit8ToolStripMenuItem.Name = "fit8ToolStripMenuItem";
-            this.fit8ToolStripMenuItem.Size = new System.Drawing.Size(96, 22);
-            this.fit8ToolStripMenuItem.Text = "Fit 8";
-            this.fit8ToolStripMenuItem.Click += new System.EventHandler(this.fit8ToolStripMenuItem_Click);
-            // 
-            // fitHGMsToolStripMenuItem
-            // 
-            this.fitHGMsToolStripMenuItem.Name = "fitHGMsToolStripMenuItem";
-            this.fitHGMsToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
-            this.fitHGMsToolStripMenuItem.Text = "Fit HGMs";
-            this.fitHGMsToolStripMenuItem.Click += new System.EventHandler(this.fitHGMsToolStripMenuItem_Click);
-            // 
-            // groupbox_canvas
-            // 
-            this.groupbox_canvas.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupbox_canvas.Location = new System.Drawing.Point(0, 0);
-            this.groupbox_canvas.Name = "groupbox_canvas";
-            this.groupbox_canvas.Size = new System.Drawing.Size(529, 549);
-            this.groupbox_canvas.TabIndex = 2;
-            this.groupbox_canvas.TabStop = false;
-            this.groupbox_canvas.Text = "Data Plot";
-            this.groupbox_canvas.Paint += new System.Windows.Forms.PaintEventHandler(this.groupbox_canvans_Paint);
             // 
             // drawDummyGaussianToolStripMenuItem
             // 
             this.drawDummyGaussianToolStripMenuItem.Name = "drawDummyGaussianToolStripMenuItem";
-            this.drawDummyGaussianToolStripMenuItem.Size = new System.Drawing.Size(244, 22);
-            this.drawDummyGaussianToolStripMenuItem.Text = "Draw Dummy Gaussian";
+            this.drawDummyGaussianToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.drawDummyGaussianToolStripMenuItem.Text = "Draw Gaussian Ground Truth";
             this.drawDummyGaussianToolStripMenuItem.Click += new System.EventHandler(this.drawDummyGaussianToolStripMenuItem_Click);
+            // 
+            // fitGMMsToolStripMenuItem
+            // 
+            this.fitGMMsToolStripMenuItem.Name = "fitGMMsToolStripMenuItem";
+            this.fitGMMsToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.fitGMMsToolStripMenuItem.Text = "Fit Flat GMMs ";
+            this.fitGMMsToolStripMenuItem.Click += new System.EventHandler(this.fitGMMsToolStripMenuItem_Click);
+            // 
+            // fitHGMsToolStripMenuItem
+            // 
+            this.fitHGMsToolStripMenuItem.Name = "fitHGMsToolStripMenuItem";
+            this.fitHGMsToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.fitHGMsToolStripMenuItem.Text = "Fit HGMMs";
+            this.fitHGMsToolStripMenuItem.Click += new System.EventHandler(this.fitHGMsToolStripMenuItem_Click);
+            // 
+            // groupbox_canvas
+            // 
+            this.groupbox_canvas.Controls.Add(this.label5);
+            this.groupbox_canvas.Controls.Add(this.PointNumber);
+            this.groupbox_canvas.Controls.Add(this.LayerNumber);
+            this.groupbox_canvas.Controls.Add(this.SampleNumber);
+            this.groupbox_canvas.Controls.Add(this.FitNumber);
+            this.groupbox_canvas.Controls.Add(this.HierarchicalLayers);
+            this.groupbox_canvas.Controls.Add(this.GaussiansPerLevel);
+            this.groupbox_canvas.Controls.Add(this.GaussianSamples);
+            this.groupbox_canvas.Controls.Add(this.generatedPoints);
+            this.groupbox_canvas.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupbox_canvas.Location = new System.Drawing.Point(0, 0);
+            this.groupbox_canvas.Name = "groupbox_canvas";
+            this.groupbox_canvas.Size = new System.Drawing.Size(1033, 549);
+            this.groupbox_canvas.TabIndex = 2;
+            this.groupbox_canvas.TabStop = false;
+            this.groupbox_canvas.Text = "Data Plot";
+            this.groupbox_canvas.Paint += new System.Windows.Forms.PaintEventHandler(this.groupbox_canvans_Paint);
+            this.groupbox_canvas.Enter += new System.EventHandler(this.groupbox_canvas_Enter_1);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(949, 424);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(69, 13);
+            this.label5.TabIndex = 9;
+            this.label5.Text = "Configuration";
+            // 
+            // PointNumber
+            // 
+            this.PointNumber.Location = new System.Drawing.Point(952, 452);
+            this.PointNumber.Maximum = new decimal(new int[] {
+            1000000000,
+            0,
+            0,
+            0});
+            this.PointNumber.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.PointNumber.Name = "PointNumber";
+            this.PointNumber.Size = new System.Drawing.Size(81, 20);
+            this.PointNumber.TabIndex = 8;
+            this.PointNumber.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.PointNumber.ValueChanged += new System.EventHandler(this.PointNumber_ValueChanged);
+            this.PointNumber.Enter += new System.EventHandler(this.PointNumber_ValueChanged);
+            // 
+            // LayerNumber
+            // 
+            this.LayerNumber.Location = new System.Drawing.Point(952, 530);
+            this.LayerNumber.Name = "LayerNumber";
+            this.LayerNumber.Size = new System.Drawing.Size(81, 20);
+            this.LayerNumber.TabIndex = 7;
+            this.LayerNumber.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.LayerNumber.ValueChanged += new System.EventHandler(this.LayerNumber_ValueChanged);
+            this.LayerNumber.Enter += new System.EventHandler(this.LayerNumber_ValueChanged);
+            // 
+            // SampleNumber
+            // 
+            this.SampleNumber.Location = new System.Drawing.Point(952, 478);
+            this.SampleNumber.Name = "SampleNumber";
+            this.SampleNumber.Size = new System.Drawing.Size(81, 20);
+            this.SampleNumber.TabIndex = 6;
+            this.SampleNumber.Value = new decimal(new int[] {
+            4,
+            0,
+            0,
+            0});
+            this.SampleNumber.ValueChanged += new System.EventHandler(this.SampleNumber_ValueChanged);
+            this.SampleNumber.Enter += new System.EventHandler(this.SampleNumber_ValueChanged);
+            // 
+            // FitNumber
+            // 
+            this.FitNumber.Location = new System.Drawing.Point(952, 504);
+            this.FitNumber.Name = "FitNumber";
+            this.FitNumber.Size = new System.Drawing.Size(81, 20);
+            this.FitNumber.TabIndex = 5;
+            this.FitNumber.Value = new decimal(new int[] {
+            4,
+            0,
+            0,
+            0});
+            this.FitNumber.ValueChanged += new System.EventHandler(this.FitNumber_ValueChanged);
+            this.FitNumber.Enter += new System.EventHandler(this.FitNumber_ValueChanged);
+            // 
+            // HierarchicalLayers
+            // 
+            this.HierarchicalLayers.AutoSize = true;
+            this.HierarchicalLayers.Location = new System.Drawing.Point(858, 533);
+            this.HierarchicalLayers.Name = "HierarchicalLayers";
+            this.HierarchicalLayers.Size = new System.Drawing.Size(88, 13);
+            this.HierarchicalLayers.TabIndex = 3;
+            this.HierarchicalLayers.Text = "Hierchical Layers";
+            this.HierarchicalLayers.Click += new System.EventHandler(this.label4_Click);
+            // 
+            // GaussiansPerLevel
+            // 
+            this.GaussiansPerLevel.AutoSize = true;
+            this.GaussiansPerLevel.Location = new System.Drawing.Point(842, 506);
+            this.GaussiansPerLevel.Name = "GaussiansPerLevel";
+            this.GaussiansPerLevel.Size = new System.Drawing.Size(104, 13);
+            this.GaussiansPerLevel.TabIndex = 2;
+            this.GaussiansPerLevel.Text = "Gaussians Per Level";
+            // 
+            // GaussianSamples
+            // 
+            this.GaussianSamples.AutoSize = true;
+            this.GaussianSamples.Location = new System.Drawing.Point(852, 480);
+            this.GaussianSamples.Name = "GaussianSamples";
+            this.GaussianSamples.Size = new System.Drawing.Size(94, 13);
+            this.GaussianSamples.TabIndex = 1;
+            this.GaussianSamples.Text = "Gaussian Samples";
+            // 
+            // generatedPoints
+            // 
+            this.generatedPoints.AutoSize = true;
+            this.generatedPoints.Location = new System.Drawing.Point(854, 459);
+            this.generatedPoints.Name = "generatedPoints";
+            this.generatedPoints.Size = new System.Drawing.Size(92, 13);
+            this.generatedPoints.TabIndex = 0;
+            this.generatedPoints.Text = "Generated  Points";
+            this.generatedPoints.Click += new System.EventHandler(this.label1_Click);
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
             // GMMDemoWnd
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(529, 549);
+            this.ClientSize = new System.Drawing.Size(1033, 549);
             this.Controls.Add(this.label_status);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.groupbox_canvas);
@@ -169,6 +276,12 @@
             this.Text = "GMMDemo";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.groupbox_canvas.ResumeLayout(false);
+            this.groupbox_canvas.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.PointNumber)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.LayerNumber)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SampleNumber)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.FitNumber)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -181,14 +294,20 @@
         private System.Windows.Forms.ToolStripMenuItem dataToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem regenerateRandomDataToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fitGMMsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem fit4ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem fit8ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fitHGMsToolStripMenuItem;
         private System.Windows.Forms.GroupBox groupbox_canvas;
         private System.Windows.Forms.ToolStripMenuItem generateDummyGaussianDataToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem mixtureToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem mixtureToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem drawDummyGaussianToolStripMenuItem;
+        private System.Windows.Forms.Label generatedPoints;
+        private System.Windows.Forms.Label HierarchicalLayers;
+        private System.Windows.Forms.Label GaussiansPerLevel;
+        private System.Windows.Forms.Label GaussianSamples;
+        private System.Windows.Forms.NumericUpDown LayerNumber;
+        private System.Windows.Forms.NumericUpDown SampleNumber;
+        private System.Windows.Forms.NumericUpDown FitNumber;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.NumericUpDown PointNumber;
     }
 }
 
