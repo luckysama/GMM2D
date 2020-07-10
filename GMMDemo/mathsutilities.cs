@@ -92,12 +92,21 @@ namespace GMMDemo
             miu = new Vector2(0, 0);
             Sigma = new Matrix22(0, 0, 0, 0);
         }
-        public Gaussian_2D(Random rand)
+        public Gaussian_2D(Random rand, bool init=false)
         {
             //init with random value
-            miu = new Vector2(rand.Next(100, 300), rand.Next(100, 300));
-            Sigma = new Matrix22(rand.Next(1000, 3000), rand.Next(-50, 50), 
-                                rand.Next(-50, 50), rand.Next(1000, 3000));
+            if (!init)
+            {
+                miu = new Vector2(rand.Next(10, 1000), rand.Next(10, 400));
+                Sigma = new Matrix22(rand.Next(100, 300), rand.Next(-200, 300),
+                                rand.Next(-200, 300), rand.Next(100, 300));
+            }
+            else
+            {
+                miu = new Vector2(rand.Next(10, 1000), rand.Next(10, 400));
+                Sigma = new Matrix22(rand.Next(100, 300), rand.Next(-200, 300),
+                                rand.Next(-200, 300), rand.Next(100, 300));
+            }
         }
     }
 

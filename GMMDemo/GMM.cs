@@ -14,15 +14,13 @@ namespace GMMDemo
         public List<Vector2> pts = null;
         public List<Gaussian_2D> sample_gaussian_list = null;
 
-        
-
         public List<Vector2> GenerateRandomPoints(int num_of_points, int xmax, int ymax) //x and y range from 0
         {
             if (pts == null)
             {
                 pts = new List<Vector2>();
-
             }
+
             Random rand = new Random();
             for (int i = 0; i < num_of_points; ++i)
             {
@@ -34,17 +32,17 @@ namespace GMMDemo
 
         public List<Vector2> GenerateGaussianPoints(int num_of_points, int num_gaussians)
         {
-            int ptsPerGaussian = (int)Math.Round((double)num_of_points / num_gaussians);
-            if(pts == null)
+            if (pts == null)
             {
                 pts = new List<Vector2>();
-
             }
-            if(sample_gaussian_list == null)
+            if (sample_gaussian_list == null)
             {
                 sample_gaussian_list = new List<Gaussian_2D>();
-
             }
+
+            int ptsPerGaussian = (int)Math.Round((double)num_of_points / num_gaussians);
+
             Random rand = new Random();
             for(int loop = 0; loop < num_gaussians; loop++)
             {
@@ -97,11 +95,15 @@ namespace GMMDemo
             for (int j = 0; j < num_gaussians; ++j)
             {
                 List<double> pdf = new List<double>();//init pdfs of gaussian j
+                double pdf_elm = new double();
                 for (int i = 0; i < pts.Count; ++i)
                 {
-                    pdf.Add(class_prior[j] * MatrixMath.MultivariateNormalPDF(pts[i],
+                    pdf_elm = class_prior[j] * MatrixMath.MultivariateNormalPDF(pts[i],
                                                                             gaussian_list[j].miu,
-                                                                            gaussian_list[j].Sigma));
+                                                                            gaussian_list[j].Sigma);
+
+                    //if (pdf_elm == 0) pdf_elm = 1E-323;
+                    pdf.Add(pdf_elm);
                 }
                 pdfs.Add(pdf);
             }
@@ -134,12 +136,12 @@ namespace GMMDemo
             {
                 double sum = 0;
                 Gaussian_2D gau = new Gaussian_2D();
-
+                //double gau.miu.x = Convert.ToDouble(gau.miu.x);
                 //calculate class prior and mean
                 for (int i = 0; i < W[0].Count; i++)
                 {
                     sum += W[j][i];//sum(W, axis=0)
-                    gau.miu.x += (float)W[j][i] * pts[i].x;//sum(Wi, xi)
+                    gau.miu.x += (float)W[j][i] * (pts[i].x);//sum(Wi, xi)
                     gau.miu.y += (float)W[j][i] * pts[i].y;//sum(Wi, yi)
                 }
                 gau.miu.x /= (float)sum;
@@ -162,9 +164,10 @@ namespace GMMDemo
 
             return (gaussian_list, class_prior);
         }
+
         public List<Gaussian_2D> FitGaussians(int num_gaussians)
         {
-            int max_iter = 10;
+            int max_iter = 20;
             Random rand = new Random();
 
             //init gaussians and class prior (weight)
@@ -175,7 +178,7 @@ namespace GMMDemo
                 List<double> class_prior = new List<double>();
                 for (int i = 0; i < num_gaussians; i++)
                 {
-                    gaussian_list.Add(new Gaussian_2D(rand));
+                    gaussian_list.Add(new Gaussian_2D(rand, true));
                     class_prior.Add(1 / (double)(num_gaussians));
                 }
                 //init P(gaussian=j | point=i)
