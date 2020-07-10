@@ -48,6 +48,7 @@
             this.GaussianSamples = new System.Windows.Forms.Label();
             this.generatedPoints = new System.Windows.Forms.Label();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.rESETMEMORYToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.groupbox_canvas.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PointNumber)).BeginInit();
@@ -83,7 +84,8 @@
             this.generateDummyGaussianDataToolStripMenuItem,
             this.drawDummyGaussianToolStripMenuItem,
             this.fitGMMsToolStripMenuItem,
-            this.fitHGMsToolStripMenuItem});
+            this.fitHGMsToolStripMenuItem,
+            this.rESETMEMORYToolStripMenuItem});
             this.dataToolStripMenuItem.Name = "dataToolStripMenuItem";
             this.dataToolStripMenuItem.Size = new System.Drawing.Size(79, 20);
             this.dataToolStripMenuItem.Text = "Data Points";
@@ -263,6 +265,13 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
+            // rESETMEMORYToolStripMenuItem
+            // 
+            this.rESETMEMORYToolStripMenuItem.Name = "rESETMEMORYToolStripMenuItem";
+            this.rESETMEMORYToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.rESETMEMORYToolStripMenuItem.Text = "RESET MEMORY";
+            this.rESETMEMORYToolStripMenuItem.Click += new System.EventHandler(this.rESETMEMORYToolStripMenuItem_Click);
+            // 
             // GMMDemoWnd
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -308,6 +317,7 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.NumericUpDown PointNumber;
+        private System.Windows.Forms.ToolStripMenuItem rESETMEMORYToolStripMenuItem;
     }
 }
 
