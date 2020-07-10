@@ -12,6 +12,7 @@ namespace GMMDemo
         public class GMM
     {
         public List<Vector2> pts;
+        public List<Gaussian_2D> dummy_gaussian_list;
 
         public List<List<double>> EStep(List<Gaussian_2D> gaussian_list, List<double> class_prior)
         {
@@ -58,32 +59,34 @@ namespace GMMDemo
             List<Gaussian_2D> gaussian_list = new List<Gaussian_2D>();
             List<double> class_prior = new List<double>();
 
-            //calculate class prior
             for (int j = 0; j < W.Count; j++)
             {
                 double sum = 0;
-                Vector2 sum_prior = new Vector2();
-                Matrix22 sum_sigma = new Matrix22();
-                for (int i = 0; i < W[0].Count; i++)
-                {
-                    sum += W[j][i];
-                    sum_prior.x += (float)W[j][i] * pts[i].x;
-                    sum_prior.y += (float)W[j][i] * pts[i].y;
-                    sum_sigma.m00 += 1;
-                }
-                class_prior.Add(sum / W[0].Count);
-            }
+                Gaussian_2D gau = new Gaussian_2D();
 
-            //calculate mean
-            for (int j = 0; j < W.Count; j++)
-            {
-                double sum = 0;
+                //calculate class prior and mean
                 for (int i = 0; i < W[0].Count; i++)
                 {
-                    sum += W[j][i];
+                    sum += W[j][i];//sum(W, axis=0)
+                    gau.miu.x += (float)W[j][i] * pts[i].x;//sum(Wi, xi)
+                    gau.miu.y += (float)W[j][i] * pts[i].y;//sum(Wi, yi)
                 }
-                gaussian_list[j].miu.x = 0;
-                gaussian_list[j].miu.y = 0;
+                gau.miu.x /= (float)sum;
+                gau.miu.y /= (float)sum;
+                class_prior.Add(sum / W[0].Count);
+
+                //calculate covariance
+                for (int i = 0; i < W[0].Count; i++)
+                {
+                    gau.Sigma.m00 += (float)(W[j][i] * Math.Pow(pts[i].x - gau.miu.x, 2));
+                    gau.Sigma.m10 = gau.Sigma.m01 += (float)W[j][i] * (pts[i].x - gau.miu.x) * (pts[i].y - gau.miu.y);
+                    gau.Sigma.m11 += (float)(W[j][i] * Math.Pow(pts[i].y - gau.miu.y, 2));
+                }
+                gau.Sigma.m00 /= (float)sum;
+                gau.Sigma.m10 = gau.Sigma.m01 /= (float)sum;
+                gau.Sigma.m11 /= (float)sum;
+
+                gaussian_list.Add(gau);
             }
 
             return (gaussian_list, class_prior);
@@ -104,8 +107,10 @@ namespace GMMDemo
         public List<Vector2> GenerateDummyGaussianPoints(int num_of_points, int xmax, int ymax) //x and y range from 0
         {
             pts = new List<Vector2>();
+            dummy_gaussian_list = new List<Gaussian_2D>();
             Random rand = new Random();
-            Gaussian_2D dummy_gaussian = CreateDummyGaussian();
+            Gaussian_2D dummy_gaussian = new Gaussian_2D(rand);
+            dummy_gaussian_list.Add(dummy_gaussian);
 
             dummy_gaussian.Sigma.UpdateEigens();
             double angle;
@@ -145,8 +150,8 @@ namespace GMMDemo
 
         public List<Gaussian_2D> Fit4Gaussians()
         {
-            int num_gaussians = 4;
-            int max_iter = 1;
+            int num_gaussians = 1;
+            int max_iter = 10;
             Random rand = new Random();
 
             //init gaussians and class prior (weight)
@@ -168,27 +173,15 @@ namespace GMMDemo
                 W = EStep(gaussian_list, class_prior);
                 (gaussian_list, class_prior) = MStep(W);
                 iter++;
+                //TODO: loglikelihood
             } while (iter < max_iter);
 
             return gaussian_list;
         }
 
-        public List<Gaussian_2D> DrawDummyGaussian(){
-            List<Gaussian_2D> gaussian_list = new List<Gaussian_2D>();
-            gaussian_list.Add(CreateDummyGaussian());
-            return gaussian_list;
-        }
-        public Gaussian_2D CreateDummyGaussian()
+        public List<Gaussian_2D> DrawDummyGaussian()
         {
-            Gaussian_2D dummy_gaussian = new Gaussian_2D();
-            
-            dummy_gaussian.miu = new Vector2(200, 200);
-            ///used the example matrix in https://en.wikipedia.org/wiki/Multivariate_normal_distribution
-            dummy_gaussian.Sigma.m00 = 100;
-            dummy_gaussian.Sigma.m01 = 30;
-            dummy_gaussian.Sigma.m10 = 30;
-            dummy_gaussian.Sigma.m11 = 50;
-            return dummy_gaussian;
+            return dummy_gaussian_list;
         }
 
         public List<Gaussian_2D> Fit8Gaussians()
