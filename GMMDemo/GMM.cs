@@ -14,6 +14,77 @@ namespace GMMDemo
         public List<Vector2> pts = null;
         public List<Gaussian_2D> sample_gaussian_list = null;
 
+        
+
+        public List<Vector2> GenerateRandomPoints(int num_of_points, int xmax, int ymax) //x and y range from 0
+        {
+            if (pts == null)
+            {
+                pts = new List<Vector2>();
+
+            }
+            Random rand = new Random();
+            for (int i = 0; i < num_of_points; ++i)
+            {
+                pts.Add(new Vector2(rand.Next(0, xmax), rand.Next(0, ymax)));
+            }
+
+            return pts;
+        }
+
+        public List<Vector2> GenerateGaussianPoints(int num_of_points, int num_gaussians)
+        {
+            int ptsPerGaussian = (int)Math.Round((double)num_of_points / num_gaussians);
+            if(pts == null)
+            {
+                pts = new List<Vector2>();
+
+            }
+            if(sample_gaussian_list == null)
+            {
+                sample_gaussian_list = new List<Gaussian_2D>();
+
+            }
+            Random rand = new Random();
+            for(int loop = 0; loop < num_gaussians; loop++)
+            {
+                Gaussian_2D sample_gaussian = new Gaussian_2D(rand);
+                sample_gaussian_list.Add(sample_gaussian);
+
+                sample_gaussian.Sigma.UpdateEigens();
+                double angle;
+
+                if (sample_gaussian.Sigma.eigenvalue_0 > sample_gaussian.Sigma.eigenvalue_1)
+                {
+                    angle = Math.Atan2(sample_gaussian.Sigma.eigenvector_0.y, sample_gaussian.Sigma.eigenvector_0.x);
+                }
+                else
+                {
+                    angle = Math.Atan2(sample_gaussian.Sigma.eigenvector_1.y, sample_gaussian.Sigma.eigenvector_1.x);
+                }
+
+                double u1, u2;
+                int x_old, y_old;
+                int x, y;
+
+                for (int i = 0; i < ptsPerGaussian; i++)
+                {
+                    do
+                    {
+                        u1 = rand.NextDouble();
+                        u2 = rand.NextDouble();
+                    } while (u1 == 0 && u2 == 0);
+                    x_old = (int)Math.Round(Math.Sqrt(sample_gaussian.Sigma.m00) * Math.Sqrt(-2 * Math.Log(u2)) * Math.Cos(2 * Math.PI * u1));
+                    y_old = (int)Math.Round(Math.Sqrt(sample_gaussian.Sigma.m11) * Math.Sqrt(-2 * Math.Log(u2)) * Math.Sin(2 * Math.PI * u1));
+                    x = (int)Math.Round(x_old * Math.Cos(angle) - y_old * Math.Sin(angle) + sample_gaussian.miu.x);
+                    y = (int)Math.Round(x_old * Math.Sin(angle) + y_old * Math.Cos(angle) + sample_gaussian.miu.y);
+                    pts.Add(new Vector2(x, y));
+                }
+            }
+            
+            return pts;
+        }
+
         public List<List<double>> EStep(List<Gaussian_2D> gaussian_list, List<double> class_prior)
         {
             int num_gaussians = gaussian_list.Count;
@@ -28,8 +99,8 @@ namespace GMMDemo
                 List<double> pdf = new List<double>();//init pdfs of gaussian j
                 for (int i = 0; i < pts.Count; ++i)
                 {
-                    pdf.Add(class_prior[j] * MatrixMath.MultivariateNormalPDF(pts[i], 
-                                                                            gaussian_list[j].miu, 
+                    pdf.Add(class_prior[j] * MatrixMath.MultivariateNormalPDF(pts[i],
+                                                                            gaussian_list[j].miu,
                                                                             gaussian_list[j].Sigma));
                 }
                 pdfs.Add(pdf);
@@ -91,64 +162,6 @@ namespace GMMDemo
 
             return (gaussian_list, class_prior);
         }
-
-        public List<Vector2> GenerateRandomPoints(int num_of_points, int xmax, int ymax) //x and y range from 0
-        {
-            pts = new List<Vector2>();
-            Random rand = new Random();
-            for (int i = 0; i < num_of_points; ++i)
-            {
-                pts.Add(new Vector2(rand.Next(0, xmax), rand.Next(0, ymax)));
-            }
-
-            return pts;
-        }
-
-        public List<Vector2> GenerateGaussianPoints(int num_of_points, int num_gaussians)
-        {
-            int ptsPerGaussian = (int)Math.Round((double)num_of_points / num_gaussians);
-            pts = new List<Vector2>();
-            sample_gaussian_list = new List<Gaussian_2D>();
-            Random rand = new Random();
-            for(int loop = 0; loop < num_gaussians; loop++)
-            {
-                Gaussian_2D sample_gaussian = new Gaussian_2D(rand);
-                sample_gaussian_list.Add(sample_gaussian);
-
-                sample_gaussian.Sigma.UpdateEigens();
-                double angle;
-
-                if (sample_gaussian.Sigma.eigenvalue_0 > sample_gaussian.Sigma.eigenvalue_1)
-                {
-                    angle = Math.Atan2(sample_gaussian.Sigma.eigenvector_0.y, sample_gaussian.Sigma.eigenvector_0.x);
-                }
-                else
-                {
-                    angle = Math.Atan2(sample_gaussian.Sigma.eigenvector_1.y, sample_gaussian.Sigma.eigenvector_1.x);
-                }
-
-                double u1, u2;
-                int x_old, y_old;
-                int x, y;
-
-                for (int i = 0; i < ptsPerGaussian; i++)
-                {
-                    do
-                    {
-                        u1 = rand.NextDouble();
-                        u2 = rand.NextDouble();
-                    } while (u1 == 0 && u2 == 0);
-                    x_old = (int)Math.Round(Math.Sqrt(sample_gaussian.Sigma.m00) * Math.Sqrt(-2 * Math.Log(u2)) * Math.Cos(2 * Math.PI * u1));
-                    y_old = (int)Math.Round(Math.Sqrt(sample_gaussian.Sigma.m11) * Math.Sqrt(-2 * Math.Log(u2)) * Math.Sin(2 * Math.PI * u1));
-                    x = (int)Math.Round(x_old * Math.Cos(angle) - y_old * Math.Sin(angle) + sample_gaussian.miu.x);
-                    y = (int)Math.Round(x_old * Math.Sin(angle) + y_old * Math.Cos(angle) + sample_gaussian.miu.y);
-                    pts.Add(new Vector2(x, y));
-                }
-            }
-            
-            return pts;
-        }
-
         public List<Gaussian_2D> FitGaussians(int num_gaussians)
         {
             int max_iter = 10;

@@ -96,8 +96,8 @@ namespace GMMDemo
         {
             //init with random value
             miu = new Vector2(rand.Next(100, 300), rand.Next(100, 300));
-            Sigma = new Matrix22(rand.Next(100, 300), rand.Next(-50, 50), 
-                                rand.Next(-50, 50), rand.Next(100, 300));
+            Sigma = new Matrix22(rand.Next(1000, 3000), rand.Next(-50, 50), 
+                                rand.Next(-50, 50), rand.Next(1000, 3000));
         }
     }
 
