@@ -104,8 +104,8 @@ namespace GMMDemo
             else
             {
                 miu = new Vector2(rand.Next(10, 1000), rand.Next(10, 400));
-                Sigma = new Matrix22(rand.Next(1000, 1100), rand.Next(-200, 300),
-                                rand.Next(-200, 300), rand.Next(1000, 1100));
+                Sigma = new Matrix22(rand.Next(100, 300), rand.Next(-200, 300),
+                                rand.Next(-200, 300), rand.Next(100, 300));
             }
         }
     }

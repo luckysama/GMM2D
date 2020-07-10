@@ -16,7 +16,11 @@ namespace GMMDemo
 
         public List<Vector2> GenerateRandomPoints(int num_of_points, int xmax, int ymax) //x and y range from 0
         {
-            pts = new List<Vector2>();
+            if (pts == null)
+            {
+                pts = new List<Vector2>();
+            }
+
             Random rand = new Random();
             for (int i = 0; i < num_of_points; ++i)
             {
@@ -28,9 +32,17 @@ namespace GMMDemo
 
         public List<Vector2> GenerateGaussianPoints(int num_of_points, int num_gaussians)
         {
+            if (pts == null)
+            {
+                pts = new List<Vector2>();
+            }
+            if (sample_gaussian_list == null)
+            {
+                sample_gaussian_list = new List<Gaussian_2D>();
+            }
+
             int ptsPerGaussian = (int)Math.Round((double)num_of_points / num_gaussians);
-            pts = new List<Vector2>();
-            sample_gaussian_list = new List<Gaussian_2D>();
+
             Random rand = new Random();
             for(int loop = 0; loop < num_gaussians; loop++)
             {
@@ -155,7 +167,7 @@ namespace GMMDemo
 
         public List<Gaussian_2D> FitGaussians(int num_gaussians)
         {
-            int max_iter = 10;
+            int max_iter = 20;
             Random rand = new Random();
 
             //init gaussians and class prior (weight)
