@@ -43,11 +43,17 @@ namespace GMMDemo
             num_of_samples = (int)SampleNumber.Value;
             num_of_fits = (int)FitNumber.Value;
             num_of_layers = (int)LayerNumber.Value;
+            
+        }
+        private void ResetSimulationMemory()
+        {
             gmm.pts = null;
             gmm.sample_gaussian_list = null;
             drawingGaussians = null;
             drawingPts = null;
+            this.Refresh();
         }
+
         private void regenerateRandomDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
             List<Vector2> geometry_pts = gmm.GenerateRandomPoints(num_of_points, groupbox_canvas.Width, groupbox_canvas.Height);
@@ -244,6 +250,11 @@ namespace GMMDemo
         {
             UpdateConfigurationUnputs();
             this.Refresh();
+        }
+
+        private void rESETMEMORYToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ResetSimulationMemory();
         }
     }
 }
