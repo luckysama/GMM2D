@@ -21,17 +21,33 @@ namespace GMMDemo
             label_status.Text = "Welcome to GMM demo!"; // use this control to display a line of text.
         }
 
-        List<Point> drawingPts;
-        List<Gaussian_2D> drawingGaussians;
+        List<Point> drawingPts = null;
+        List<Gaussian_2D> drawingGaussians = null;
 
         Color pt_drawing_color = Color.Red; //ToDo: use color to express GMM group memebership of points
         Color ellipse_drawing_color = Color.Blue;
         Color miu_color = Color.Green;
 
-        int num_of_points = 80;//todo: have an interface to adjust how many points we place?
+        int num_of_points;
+        int num_of_samples;
+        int num_of_fits;
+        int num_of_layers;
+   
+        
 
         GMM gmm;
 
+        private void UpdateConfigurationUnputs()
+        {
+            num_of_points = (int)PointNumber.Value;
+            num_of_samples = (int)SampleNumber.Value;
+            num_of_fits = (int)FitNumber.Value;
+            num_of_layers = (int)LayerNumber.Value;
+            gmm.pts = null;
+            gmm.sample_gaussian_list = null;
+            drawingGaussians = null;
+            drawingPts = null;
+        }
         private void regenerateRandomDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
             List<Vector2> geometry_pts = gmm.GenerateRandomPoints(num_of_points, groupbox_canvas.Width, groupbox_canvas.Height);
@@ -47,9 +63,7 @@ namespace GMMDemo
 
         private void fit4ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            drawingGaussians = gmm.Fit4Gaussians();
-            label_status.Text = "Fit 4 Gaussians (flat). " + DateTime.Now;
-            this.Refresh();
+            
         }
 
         private void fit8ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -145,7 +159,9 @@ namespace GMMDemo
         
         private void fitGMMsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            drawingGaussians = gmm.FitGaussians(num_of_fits);
+            label_status.Text = "Fit " + num_of_fits + " Gaussians (flat). " + DateTime.Now;
+            this.Refresh();
         }
 
         private void dataToolStripMenuItem_Click(object sender, EventArgs e)
@@ -155,12 +171,7 @@ namespace GMMDemo
 
         private void generateDummyGaussianDataToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-
-        }
-
-        private void mixtureToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            List<Vector2> geometry_pts = gmm.GenerateDummyGaussianPoints(num_of_points, groupbox_canvas.Width, groupbox_canvas.Height);
+            List<Vector2> geometry_pts = gmm.GenerateGaussianPoints(num_of_points, num_of_samples);
             drawingPts = new List<Point>();
             for (int i = 0; i < geometry_pts.Count; ++i)
             {
@@ -168,18 +179,18 @@ namespace GMMDemo
                 {
                     drawingPts.Add(new Point((int)geometry_pts[i].x, (int)geometry_pts[i].y));
                 }
-          
+
             }
             label_status.Text = "Generated " + num_of_points + " new points at " + DateTime.Now;
             this.Refresh();
         }
 
-        private void mixtureToolStripMenuItem1_Click(object sender, EventArgs e)
+        private void mixtureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            
         }
 
-        private void groupbox_canvas_Enter(object sender, EventArgs e)
+        private void mixtureToolStripMenuItem1_Click(object sender, EventArgs e)
         {
 
         }
@@ -188,6 +199,50 @@ namespace GMMDemo
         {
             drawingGaussians = gmm.DrawDummyGaussian();
             label_status.Text = "Fit Dummy Gaussian (flat). " + DateTime.Now;
+            this.Refresh();
+        }
+
+        private void groupbox_canvas_Enter_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label_status_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void PointNumber_ValueChanged(object sender, EventArgs e)
+        {
+            UpdateConfigurationUnputs();
+            this.Refresh();
+        }
+
+        private void SampleNumber_ValueChanged(object sender, EventArgs e)
+        {
+            UpdateConfigurationUnputs();
+            this.Refresh();
+        }
+
+        private void FitNumber_ValueChanged(object sender, EventArgs e)
+        {
+            UpdateConfigurationUnputs();
+            this.Refresh();
+        }
+
+        private void LayerNumber_ValueChanged(object sender, EventArgs e)
+        {
+            UpdateConfigurationUnputs();
             this.Refresh();
         }
     }

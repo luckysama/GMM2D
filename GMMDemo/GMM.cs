@@ -11,8 +11,8 @@ namespace GMMDemo
 {
         public class GMM
     {
-        public List<Vector2> pts;
-        public List<Gaussian_2D> dummy_gaussian_list;
+        public List<Vector2> pts = null;
+        public List<Gaussian_2D> sample_gaussian_list = null;
 
         public List<List<double>> EStep(List<Gaussian_2D> gaussian_list, List<double> class_prior)
         {
@@ -104,84 +104,86 @@ namespace GMMDemo
             return pts;
         }
 
-        public List<Vector2> GenerateDummyGaussianPoints(int num_of_points, int xmax, int ymax) //x and y range from 0
+        public List<Vector2> GenerateGaussianPoints(int num_of_points, int num_gaussians)
         {
+            int ptsPerGaussian = (int)Math.Round((double)num_of_points / num_gaussians);
             pts = new List<Vector2>();
-            dummy_gaussian_list = new List<Gaussian_2D>();
+            sample_gaussian_list = new List<Gaussian_2D>();
             Random rand = new Random();
-            Gaussian_2D dummy_gaussian = new Gaussian_2D(rand);
-            dummy_gaussian_list.Add(dummy_gaussian);
+            for(int loop = 0; loop < num_gaussians; loop++)
+            {
+                Gaussian_2D sample_gaussian = new Gaussian_2D(rand);
+                sample_gaussian_list.Add(sample_gaussian);
 
-            dummy_gaussian.Sigma.UpdateEigens();
-            double angle;
-            Console.WriteLine("Eigenvalues");
-            Console.WriteLine(dummy_gaussian.Sigma.eigenvalue_0);
-            Console.WriteLine(dummy_gaussian.Sigma.eigenvalue_1);
-            if (dummy_gaussian.Sigma.eigenvalue_0 > dummy_gaussian.Sigma.eigenvalue_1)
-            {
-                angle = Math.Atan2(dummy_gaussian.Sigma.eigenvector_0.y, dummy_gaussian.Sigma.eigenvector_0.x);
-            }
-            else
-            {
-                angle = Math.Atan2(dummy_gaussian.Sigma.eigenvector_1.y, dummy_gaussian.Sigma.eigenvector_1.x);
-            }
-          
-            Console.WriteLine("Sample angle");
-            Console.WriteLine(angle * 180 / Math.PI);
-            double u1, u2;
-            int x_old, y_old;
-            int x, y;
+                sample_gaussian.Sigma.UpdateEigens();
+                double angle;
 
-            for (int i = 0; i < num_of_points; i++)
-            {
-                do
+                if (sample_gaussian.Sigma.eigenvalue_0 > sample_gaussian.Sigma.eigenvalue_1)
                 {
-                    u1 = rand.NextDouble();
-                    u2 = rand.NextDouble();
-                } while (u1 == 0 && u2 == 0);
-                x_old = (int)Math.Round(Math.Sqrt(dummy_gaussian.Sigma.m00) * Math.Sqrt(-2 * Math.Log(u2)) * Math.Cos(2 * Math.PI * u1));
-                y_old = (int)Math.Round(Math.Sqrt(dummy_gaussian.Sigma.m11) * Math.Sqrt(-2 * Math.Log(u2)) * Math.Sin(2 * Math.PI * u1));
-                x = (int)Math.Round(x_old * Math.Cos(angle) - y_old * Math.Sin(angle) + dummy_gaussian.miu.x);
-                y = (int)Math.Round(x_old * Math.Sin(angle) + y_old * Math.Cos(angle) + dummy_gaussian.miu.y);
-                pts.Add(new Vector2(x, y));
+                    angle = Math.Atan2(sample_gaussian.Sigma.eigenvector_0.y, sample_gaussian.Sigma.eigenvector_0.x);
+                }
+                else
+                {
+                    angle = Math.Atan2(sample_gaussian.Sigma.eigenvector_1.y, sample_gaussian.Sigma.eigenvector_1.x);
+                }
+
+                double u1, u2;
+                int x_old, y_old;
+                int x, y;
+
+                for (int i = 0; i < ptsPerGaussian; i++)
+                {
+                    do
+                    {
+                        u1 = rand.NextDouble();
+                        u2 = rand.NextDouble();
+                    } while (u1 == 0 && u2 == 0);
+                    x_old = (int)Math.Round(Math.Sqrt(sample_gaussian.Sigma.m00) * Math.Sqrt(-2 * Math.Log(u2)) * Math.Cos(2 * Math.PI * u1));
+                    y_old = (int)Math.Round(Math.Sqrt(sample_gaussian.Sigma.m11) * Math.Sqrt(-2 * Math.Log(u2)) * Math.Sin(2 * Math.PI * u1));
+                    x = (int)Math.Round(x_old * Math.Cos(angle) - y_old * Math.Sin(angle) + sample_gaussian.miu.x);
+                    y = (int)Math.Round(x_old * Math.Sin(angle) + y_old * Math.Cos(angle) + sample_gaussian.miu.y);
+                    pts.Add(new Vector2(x, y));
+                }
             }
+            
             return pts;
         }
 
-        public List<Gaussian_2D> Fit4Gaussians()
+        public List<Gaussian_2D> FitGaussians(int num_gaussians)
         {
-            int num_gaussians = 1;
             int max_iter = 10;
             Random rand = new Random();
 
             //init gaussians and class prior (weight)
             List<Gaussian_2D> gaussian_list = new List<Gaussian_2D>();
-            List<double> class_prior = new List<double>();
-            for (int i = 0; i < num_gaussians; i++)
+
+            if (pts != null)
             {
-                gaussian_list.Add(new Gaussian_2D(rand));
-                class_prior.Add(1 / (double)(num_gaussians));
+                List<double> class_prior = new List<double>();
+                for (int i = 0; i < num_gaussians; i++)
+                {
+                    gaussian_list.Add(new Gaussian_2D(rand));
+                    class_prior.Add(1 / (double)(num_gaussians));
+                }
+                //init P(gaussian=j | point=i)
+                List<List<double>> W = new List<List<double>>();
+
+                //EM algo
+                int iter = 0;
+                do
+                {
+                    W = EStep(gaussian_list, class_prior);
+                    (gaussian_list, class_prior) = MStep(W);
+                    iter++;
+                    //TODO: loglikelihood
+                } while (iter < max_iter);
             }
-
-            //init P(gaussian=j | point=i)
-            List<List<double>> W = new List<List<double>>();
-
-            //EM algo
-            int iter = 0;
-            do
-            {
-                W = EStep(gaussian_list, class_prior);
-                (gaussian_list, class_prior) = MStep(W);
-                iter++;
-                //TODO: loglikelihood
-            } while (iter < max_iter);
-
             return gaussian_list;
         }
 
         public List<Gaussian_2D> DrawDummyGaussian()
         {
-            return dummy_gaussian_list;
+            return sample_gaussian_list;
         }
 
         public List<Gaussian_2D> Fit8Gaussians()
