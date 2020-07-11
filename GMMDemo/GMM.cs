@@ -11,8 +11,27 @@ namespace GMMDemo
 {
         public class GMM
     {
+        public Random rand = new Random();
+
         public List<Vector2> pts = null;
         public List<Gaussian_2D> sample_gaussian_list = null;
+        List<Gaussian_2D> gaussian_list = new List<Gaussian_2D>();
+        List<double> class_prior = new List<double>();
+
+        /// <summary>
+        /// Randomly initialize class_prior and gaussian_list
+        /// </summary>
+        /// <param name="num_gaussians"></param>
+        public void Init(int num_gaussians)
+        {
+            class_prior.Clear();
+            gaussian_list.Clear();
+            for (int i = 0; i < num_gaussians; i++)
+            {
+                gaussian_list.Add(new Gaussian_2D(rand, true));
+                class_prior.Add(1 / (double)(num_gaussians));
+            }
+        }
 
         public List<Vector2> GenerateRandomPoints(int num_of_points, int xmax, int ymax) //x and y range from 0
         {
@@ -21,7 +40,6 @@ namespace GMMDemo
                 pts = new List<Vector2>();
             }
 
-            Random rand = new Random();
             for (int i = 0; i < num_of_points; ++i)
             {
                 pts.Add(new Vector2(rand.Next(0, xmax), rand.Next(0, ymax)));
@@ -43,7 +61,6 @@ namespace GMMDemo
 
             int ptsPerGaussian = (int)Math.Round((double)num_of_points / num_gaussians);
 
-            Random rand = new Random();
             for(int loop = 0; loop < num_gaussians; loop++)
             {
                 Gaussian_2D sample_gaussian = new Gaussian_2D(rand);
@@ -83,7 +100,12 @@ namespace GMMDemo
             return pts;
         }
 
-        public List<List<double>> EStep(List<Gaussian_2D> gaussian_list, List<double> class_prior)
+        /// <summary>
+        /// Input: gaussian_list, class_prior
+        /// Output: Probablities that each point belongs to each gaussian
+        /// </summary>
+        /// <returns></returns>
+        public (List<List<double>> pdfs, double loglikelihood) EStep()
         {
             int num_gaussians = gaussian_list.Count;
 
@@ -108,7 +130,8 @@ namespace GMMDemo
                 pdfs.Add(pdf);
             }
 
-            //TODO List.Sum()
+            //loglikelihood: EM recursion sentinel
+            List<double> logs = new List<double>();
             for (int i = 0; i < pts.Count; ++i)
             {
                 //calculate denominator: sum(pdfs, axis = 1)
@@ -117,26 +140,32 @@ namespace GMMDemo
                 {
                     sum += pdfs[j][i];
                 }
+
                 //calculate W (inplace)
                 for (int j = 0; j < num_gaussians; ++j)
                 {
                     pdfs[j][i] /= sum;
                 }
+                logs.Add(Math.Log(sum));
             }
-
-            return pdfs;
+            return (pdfs, logs.Average());
         }
 
-        public (List<Gaussian_2D> gaussian_list, List<double> class_prior) MStep(List<List<double>> W)
+        /// <summary>
+        /// Input: W from E-Step
+        /// Output: update gaussian_list and class_prior
+        /// </summary>
+        /// <param name="W"></param>
+        public void MStep(List<List<double>> W)
         {
-            List<Gaussian_2D> gaussian_list = new List<Gaussian_2D>();
-            List<double> class_prior = new List<double>();
+            class_prior.Clear();
+            gaussian_list.Clear();
 
             for (int j = 0; j < W.Count; j++)
             {
                 double sum = 0;
                 Gaussian_2D gau = new Gaussian_2D();
-                //double gau.miu.x = Convert.ToDouble(gau.miu.x);
+
                 //calculate class prior and mean
                 for (int i = 0; i < W[0].Count; i++)
                 {
@@ -161,38 +190,57 @@ namespace GMMDemo
 
                 gaussian_list.Add(gau);
             }
-
-            return (gaussian_list, class_prior);
         }
 
+        /// <summary>
+        /// Input: number of the predicted gaussians
+        /// Output: gaussian_list
+        /// </summary>
+        /// <param name="num_gaussians"></param>
+        /// <returns></returns>
         public List<Gaussian_2D> FitGaussians(int num_gaussians)
         {
-            int max_iter = 20;
-            Random rand = new Random();
+            int max_iter = 100;
+            double loglikelihook_new = 0;
+            double loglikelihook_old = 0;
+            double min_log_diff = 1E-9;
+            double log_diff = 0;
 
-            //init gaussians and class prior (weight)
-            List<Gaussian_2D> gaussian_list = new List<Gaussian_2D>();
+            //init P(gaussian=j | point=i)
+            List<List<double>> W = new List<List<double>>();
 
             if (pts != null)
             {
-                List<double> class_prior = new List<double>();
-                for (int i = 0; i < num_gaussians; i++)
-                {
-                    gaussian_list.Add(new Gaussian_2D(rand, true));
-                    class_prior.Add(1 / (double)(num_gaussians));
-                }
-                //init P(gaussian=j | point=i)
-                List<List<double>> W = new List<List<double>>();
-
+                Init(num_gaussians);
                 //EM algo
                 int iter = 0;
                 do
                 {
-                    W = EStep(gaussian_list, class_prior);
-                    (gaussian_list, class_prior) = MStep(W);
+                    (W, loglikelihook_new) = EStep();
+                    log_diff = Math.Abs(loglikelihook_old - loglikelihook_new);
+                    loglikelihook_old = loglikelihook_new;
+
+                    MStep(W);
+
                     iter++;
-                    //TODO: loglikelihood
-                } while (iter < max_iter);
+                    for (int i = 0; i < num_gaussians; i++)
+                    {
+                        //Reinitialize current gaussian if the predicted covariance matrix is 
+                        //not positive-definite, or not a number, or reachs maximum interations.
+                        //Increase robustness.
+                        float pred_gaussian_det = MatrixMath.Det(gaussian_list[i].Sigma);
+                        if (pred_gaussian_det <= 0 || 
+                            double.IsNaN(gaussian_list[i].Sigma.m00) || double.IsNaN(gaussian_list[i].Sigma.m01) ||
+                             double.IsNaN(gaussian_list[i].Sigma.m10) || double.IsNaN(gaussian_list[i].Sigma.m11))
+                        {
+                            Console.WriteLine("Bad initialization: regenerating...");
+                            gaussian_list.RemoveAt(i);
+                            gaussian_list.Add(new Gaussian_2D(rand, true));
+                            iter = 0;
+                        }
+                    }
+                    
+                } while ( log_diff >= min_log_diff && iter <= max_iter);
             }
             return gaussian_list;
         }
