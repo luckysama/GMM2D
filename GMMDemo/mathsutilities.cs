@@ -92,20 +92,27 @@ namespace GMMDemo
             miu = new Vector2(0, 0);
             Sigma = new Matrix22(0, 0, 0, 0);
         }
+
+        /// <summary>
+        /// Generate a random gaussian.
+        /// </summary>
+        /// <param name="rand"></param> Random operator
+        /// <param name="init"></param> If true, initialize gaussians for prediction;
+        ///                             If false, for input data
         public Gaussian_2D(Random rand, bool init=false)
         {
             //init with random value
+
+            miu = new Vector2(rand.Next(100, 900), rand.Next(50, 400));
             if (!init)
             {
-                miu = new Vector2(rand.Next(10, 1000), rand.Next(10, 400));
-                Sigma = new Matrix22(rand.Next(100, 300), rand.Next(-200, 300),
-                                rand.Next(-200, 300), rand.Next(100, 300));
+                Sigma = new Matrix22(rand.Next(500, 1000), rand.Next(-20, 20),
+                                rand.Next(-20, 20), rand.Next(500, 1000));
             }
             else
             {
-                miu = new Vector2(rand.Next(10, 1000), rand.Next(10, 400));
-                Sigma = new Matrix22(rand.Next(100, 300), rand.Next(-200, 300),
-                                rand.Next(-200, 300), rand.Next(100, 300));
+                Sigma = new Matrix22(rand.Next(2000, 3000), rand.Next(10, 20),
+                                rand.Next(10, 20), rand.Next(2000, 3000));
             }
         }
     }
@@ -149,6 +156,15 @@ namespace GMMDemo
             return null;
         }
 
+        /// <summary>
+        /// Calculate multivariate normal probablity density function. 
+        /// Hardcoded for Vector2 and Matrix22 datatype.
+        /// Use double precision to increase robustness.
+        /// </summary>
+        /// <param name="pt"></param>
+        /// <param name="miu"></param>
+        /// <param name="covariance"></param>
+        /// <returns></returns>
         public static double MultivariateNormalPDF(Vector2 pt, Vector2 miu, Matrix22 covariance)
         {
             Vector2 x_minus_miu = Minus(pt, miu);
