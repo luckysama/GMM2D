@@ -108,7 +108,6 @@ namespace GMMDemo
         /// <returns></returns>
         public (List<List<double>> pdfs, double loglikelihood) EStep()
         {
-            Console.WriteLine(num_levels);
             int num_gaussians = gaussian_list.Count;
 
             //pdfs: probability density function. 
@@ -150,9 +149,6 @@ namespace GMMDemo
                 }
                 logs.Add(Math.Log(sum));
             }
-
-            PointRegistration(pdfs);
-
             return (pdfs, logs.Average());
         }
 
@@ -198,12 +194,28 @@ namespace GMMDemo
         }
 
         /// <summary>
-        /// Associate each point with a gaussian
+        /// Associate each point with a gaussian at each level
         /// </summary>
         /// <param name="pdfs"></param>
-        public void PointRegistration(List<List<double>> pdfs)
+        public void PointRegistration(List<List<double>> W)
         {
+            for (int i = 0; i < pts.Count; i++)
+            {
 
+                double max = -1;
+                int max_idx = 0;
+                for (int j = 0; j < gaussian_list.Count; j++)
+                {
+                    if (W[j][i] > max)
+                    {
+                        max_idx = j;
+                        max = W[j][i];
+                    }
+                }
+                pts[i].gaussian_idx.Add(max_idx);
+
+                Console.WriteLine(pts[i].gaussian_idx[0]);
+            }
         }
 
         /// <summary>
@@ -212,8 +224,9 @@ namespace GMMDemo
         /// </summary>
         /// <param name="num_gaussians"></param>
         /// <returns></returns>
-        public List<Gaussian_2D> FitGaussians(int num_gaussians, int num_levels)
+        public (List<Gaussian_2D>, List<Vector2>) FitGaussians(int num_gaussians, int levels)
         {
+            num_levels = levels;
             int max_iter = 100;
             double loglikelihook_new = 0;
             double loglikelihook_old = 0;
@@ -238,6 +251,9 @@ namespace GMMDemo
                         log_diff = Math.Abs(loglikelihook_old - loglikelihook_new);
                         loglikelihook_old = loglikelihook_new;
 
+                        //M-Step
+                        MStep(W);
+
                         iter++;
                         for (int i = 0; i < num_gaussians; i++)
                         {
@@ -255,15 +271,14 @@ namespace GMMDemo
                                 iter = 0;
                             }
                         }
-
-                        //M-Step
-                        MStep(W);
-
                     } while (log_diff >= min_log_diff && iter <= max_iter);
+
+                    (W, loglikelihook_new) = EStep();
+                    PointRegistration(W);
                 }
                     
             }
-            return gaussian_list;
+            return (gaussian_list, pts);
         }
 
         public List<Gaussian_2D> DrawDummyGaussian()

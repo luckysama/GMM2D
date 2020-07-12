@@ -68,7 +68,15 @@ namespace GMMDemo
 
         private void fitGMMsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            drawingGaussians = gmm.FitGaussians(num_of_fits, num_of_levels);
+            List<Vector2> geometry_pts = null;
+            (drawingGaussians, geometry_pts) = gmm.FitGaussians(num_of_fits, num_of_levels);
+
+            drawingPts = new List<Point>();
+            for (int i = 0; i < geometry_pts.Count; ++i)
+            {
+                drawingPts.Add(new Point((int)geometry_pts[i].x, (int)geometry_pts[i].y));
+            }
+
             label_status.Text = "Fit " + num_of_fits + " Gaussians (flat). " + DateTime.Now;
             this.Refresh();
         }
