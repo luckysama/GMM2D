@@ -31,7 +31,7 @@ namespace GMMDemo
         int num_of_points;
         int num_of_samples;
         int num_of_fits;
-        int num_of_layers;
+        int num_of_levels;
    
         
 
@@ -42,7 +42,7 @@ namespace GMMDemo
             num_of_points = (int)PointNumber.Value;
             num_of_samples = (int)SampleNumber.Value;
             num_of_fits = (int)FitNumber.Value;
-            num_of_layers = (int)LayerNumber.Value;
+            num_of_levels = (int)LayerNumber.Value;
             
         }
         private void ResetSimulationMemory()
@@ -66,18 +66,55 @@ namespace GMMDemo
             this.Refresh();
         }
 
-
-        private void fit4ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void fitGMMsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
-        }
+            List<Vector2> geometry_pts = null;
+            (drawingGaussians, geometry_pts) = gmm.FitGaussians(num_of_fits, num_of_levels);
 
-        private void fit8ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            drawingGaussians = gmm.Fit8Gaussians();
-            label_status.Text = "Fit 8 Gaussians (flat). " + DateTime.Now;
+            drawingPts = new List<Point>();
+            for (int i = 0; i < geometry_pts.Count; ++i)
+            {
+                drawingPts.Add(new Point((int)geometry_pts[i].x, (int)geometry_pts[i].y));
+            }
+
+            label_status.Text = "Fit " + num_of_fits + " Gaussians (flat). " + DateTime.Now;
             this.Refresh();
         }
+
+        private void generateDummyGaussianDataToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            List<Vector2> geometry_pts = gmm.GenerateGaussianPoints(num_of_points, num_of_samples);
+            drawingPts = new List<Point>();
+            for (int i = 0; i < geometry_pts.Count; ++i)
+            {
+                if (geometry_pts[i].x >= 0 && geometry_pts[i].x <= groupbox_canvas.Width && geometry_pts[i].y >= 0 && geometry_pts[i].y <= groupbox_canvas.Height)
+                {
+                    drawingPts.Add(new Point((int)geometry_pts[i].x, (int)geometry_pts[i].y));
+                }
+
+            }
+            label_status.Text = "Generated " + num_of_points + " new points at " + DateTime.Now;
+            this.Refresh();
+        }
+
+        private void drawDummyGaussianToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            drawingGaussians = gmm.DrawDummyGaussian();
+            label_status.Text = "Fit Dummy Gaussian (flat). " + DateTime.Now;
+            this.Refresh();
+        }
+
+        //private void fit4ToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+
+        //}
+
+        //private void fit8ToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    drawingGaussians = gmm.Fit8Gaussians();
+        //    label_status.Text = "Fit 8 Gaussians (flat). " + DateTime.Now;
+        //    this.Refresh();
+        //}
 
         private void fitHGMsToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -162,71 +199,6 @@ namespace GMMDemo
                                             axis_y));
             g.ResetTransform();
         }
-        
-        private void fitGMMsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            drawingGaussians = gmm.FitGaussians(num_of_fits);
-            label_status.Text = "Fit " + num_of_fits + " Gaussians (flat). " + DateTime.Now;
-            this.Refresh();
-        }
-
-        private void dataToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void generateDummyGaussianDataToolStripMenuItem_Click_1(object sender, EventArgs e)
-        {
-            List<Vector2> geometry_pts = gmm.GenerateGaussianPoints(num_of_points, num_of_samples);
-            drawingPts = new List<Point>();
-            for (int i = 0; i < geometry_pts.Count; ++i)
-            {
-                if (geometry_pts[i].x >= 0 && geometry_pts[i].x <= groupbox_canvas.Width && geometry_pts[i].y >= 0 && geometry_pts[i].y <= groupbox_canvas.Height)
-                {
-                    drawingPts.Add(new Point((int)geometry_pts[i].x, (int)geometry_pts[i].y));
-                }
-
-            }
-            label_status.Text = "Generated " + num_of_points + " new points at " + DateTime.Now;
-            this.Refresh();
-        }
-
-        private void mixtureToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            
-        }
-
-        private void mixtureToolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void drawDummyGaussianToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            drawingGaussians = gmm.DrawDummyGaussian();
-            label_status.Text = "Fit Dummy Gaussian (flat). " + DateTime.Now;
-            this.Refresh();
-        }
-
-        private void groupbox_canvas_Enter_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label_status_Click(object sender, EventArgs e)
-        {
-
-        }
 
         private void PointNumber_ValueChanged(object sender, EventArgs e)
         {
@@ -256,5 +228,41 @@ namespace GMMDemo
         {
             ResetSimulationMemory();
         }
+
+        private void dataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void mixtureToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void mixtureToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void groupbox_canvas_Enter_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label_status_Click(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }

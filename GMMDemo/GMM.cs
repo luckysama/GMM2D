@@ -17,6 +17,7 @@ namespace GMMDemo
         public List<Gaussian_2D> sample_gaussian_list = null;
         List<Gaussian_2D> gaussian_list = new List<Gaussian_2D>();
         List<double> class_prior = new List<double>();
+        int num_levels = 1;
 
         /// <summary>
         /// Randomly initialize class_prior and gaussian_list
@@ -193,13 +194,39 @@ namespace GMMDemo
         }
 
         /// <summary>
+        /// Associate each point with a gaussian at each level
+        /// </summary>
+        /// <param name="pdfs"></param>
+        public void PointRegistration(List<List<double>> W)
+        {
+            for (int i = 0; i < pts.Count; i++)
+            {
+
+                double max = -1;
+                int max_idx = 0;
+                for (int j = 0; j < gaussian_list.Count; j++)
+                {
+                    if (W[j][i] > max)
+                    {
+                        max_idx = j;
+                        max = W[j][i];
+                    }
+                }
+                pts[i].gaussian_idx.Add(max_idx);
+
+                Console.WriteLine(pts[i].gaussian_idx[0]);
+            }
+        }
+
+        /// <summary>
         /// Input: number of the predicted gaussians
         /// Output: gaussian_list
         /// </summary>
         /// <param name="num_gaussians"></param>
         /// <returns></returns>
-        public List<Gaussian_2D> FitGaussians(int num_gaussians)
+        public (List<Gaussian_2D>, List<Vector2>) FitGaussians(int num_gaussians, int levels)
         {
+            num_levels = levels;
             int max_iter = 100;
             double loglikelihook_new = 0;
             double loglikelihook_old = 0;
@@ -214,35 +241,44 @@ namespace GMMDemo
                 Init(num_gaussians);
                 //EM algo
                 int iter = 0;
-                do
+                for (int l = 0; l < num_levels; l++)
                 {
-                    (W, loglikelihook_new) = EStep();
-                    log_diff = Math.Abs(loglikelihook_old - loglikelihook_new);
-                    loglikelihook_old = loglikelihook_new;
-
-                    MStep(W);
-
-                    iter++;
-                    for (int i = 0; i < num_gaussians; i++)
+                    do
                     {
-                        //Reinitialize current gaussian if the predicted covariance matrix is 
-                        //not positive-definite, or not a number, or reachs maximum interations.
-                        //Increase robustness.
-                        float pred_gaussian_det = MatrixMath.Det(gaussian_list[i].Sigma);
-                        if (pred_gaussian_det <= 0 || 
-                            double.IsNaN(gaussian_list[i].Sigma.m00) || double.IsNaN(gaussian_list[i].Sigma.m01) ||
-                             double.IsNaN(gaussian_list[i].Sigma.m10) || double.IsNaN(gaussian_list[i].Sigma.m11))
+                        //E-Step
+                        (W, loglikelihook_new) = EStep();
+
+                        log_diff = Math.Abs(loglikelihook_old - loglikelihook_new);
+                        loglikelihook_old = loglikelihook_new;
+
+                        //M-Step
+                        MStep(W);
+
+                        iter++;
+                        for (int i = 0; i < num_gaussians; i++)
                         {
-                            Console.WriteLine("Bad initialization: regenerating...");
-                            gaussian_list.RemoveAt(i);
-                            gaussian_list.Add(new Gaussian_2D(rand, true));
-                            iter = 0;
+                            //Naive solution for numerical stability:
+                            //Reinitialize current gaussian if the predicted covariance matrix is 
+                            //not positive-definite, or not a number, or reachs maximum interations.
+                            float pred_gaussian_det = MatrixMath.Det(gaussian_list[i].Sigma);
+                            if (pred_gaussian_det <= 0 ||
+                                double.IsNaN(gaussian_list[i].Sigma.m00) || double.IsNaN(gaussian_list[i].Sigma.m01) ||
+                                 double.IsNaN(gaussian_list[i].Sigma.m10) || double.IsNaN(gaussian_list[i].Sigma.m11))
+                            {
+                                Console.WriteLine("Bad initialization: regenerating...");
+                                gaussian_list.RemoveAt(i);
+                                gaussian_list.Add(new Gaussian_2D(rand, true));
+                                iter = 0;
+                            }
                         }
-                    }
+                    } while (log_diff >= min_log_diff && iter <= max_iter);
+
+                    (W, loglikelihook_new) = EStep();
+                    PointRegistration(W);
+                }
                     
-                } while ( log_diff >= min_log_diff && iter <= max_iter);
             }
-            return gaussian_list;
+            return (gaussian_list, pts);
         }
 
         public List<Gaussian_2D> DrawDummyGaussian()
@@ -250,10 +286,10 @@ namespace GMMDemo
             return sample_gaussian_list;
         }
 
-        public List<Gaussian_2D> Fit8Gaussians()
-        {
-            return null;
-        }
+        //public List<Gaussian_2D> Fit8Gaussians()
+        //{
+        //    return null;
+        //}
 
 
         public List<Gaussian_2D> FitHierarchyGaussians()

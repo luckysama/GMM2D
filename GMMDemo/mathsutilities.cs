@@ -10,6 +10,7 @@ namespace GMMDemo
    public class Vector2
     {
         public float x, y;
+        public List<int> gaussian_idx = new List<int>();// Associate each point with a gaussian at each level
         public Vector2()
         {
             x = y = 0;
