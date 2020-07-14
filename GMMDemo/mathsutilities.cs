@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 
 namespace GMMDemo
 {
@@ -210,6 +211,32 @@ namespace GMMDemo
             double denom = 2 * Math.PI * Math.Sqrt(Det(covariance));
 
             return numerator / denom;
+        }
+    }
+
+    public class ColorList
+    {
+        private int currentColorIndex;
+        public List<Color> colors = new List<Color>();
+        public ColorList()
+        {
+            currentColorIndex = colors.Count - 1;
+            colors.Add(Color.Blue);
+            colors.Add(Color.Green);
+            colors.Add(Color.Yellow);
+            colors.Add(Color.Orange);
+            colors.Add(Color.Red);
+
+        }
+
+        public Color NextColor()
+        {
+            currentColorIndex++;
+            if (currentColorIndex >= colors.Count)
+            {
+                currentColorIndex = 0;
+            }
+            return colors[currentColorIndex];
         }
     }
 }

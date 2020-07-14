@@ -391,7 +391,7 @@ namespace GMMDemo
                         parent_idx[i] = current_idx[i];
                     }
                 }
-                ClusterDrop(class_prior_thresh);
+                //ClusterDrop(class_prior_thresh);
             }
             Console.WriteLine("Done!");
             return (gaussian_list, pts);
