@@ -21,20 +21,17 @@ namespace GMMDemo
             label_status.Text = "Welcome to GMM demo!"; // use this control to display a line of text.
         }
 
-        List<Point> drawingPts = null;
+        List<Vector2> drawingPts = null;
         List<Gaussian_2D> drawingGaussians = null;
 
-        Color pt_drawing_color = Color.Red; //ToDo: use color to express GMM group memebership of points
-        Color ellipse_drawing_color = Color.Blue;
-        Color miu_color = Color.Green;
-
+        Color pt_drawing_color = Color.Black; //ToDo: use color to express GMM group memebership of points
+        
         int num_of_points;
         int num_of_samples;
         int num_of_fits;
         int num_of_levels;
+        int viewed_layer;
    
-        
-
         GMM gmm;
 
         private void UpdateConfigurationUnputs()
@@ -43,56 +40,41 @@ namespace GMMDemo
             num_of_samples = (int)SampleNumber.Value;
             num_of_fits = (int)FitNumber.Value;
             num_of_levels = (int)LayerNumber.Value;
+            viewed_layer = (int)ViewedLayerNumber.Value;
             
         }
+
+        private void UpdateConfigurationHandler(object sender, EventArgs e)
+        {
+            UpdateConfigurationUnputs();
+        }
+
         private void ResetSimulationMemory()
         {
             gmm.pts = null;
             gmm.sample_gaussian_list = null;
             drawingGaussians = null;
             drawingPts = null;
-            this.Refresh();
+            label_status.Text = "Memory cleared at " + DateTime.Now;
         }
 
         private void regenerateRandomDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<Vector2> geometry_pts = gmm.GenerateRandomPoints(num_of_points, groupbox_canvas.Width, groupbox_canvas.Height);
-            drawingPts = new List<Point>();
-            for (int i = 0; i < geometry_pts.Count; ++ i)
-            {
-                drawingPts.Add(new Point((int)geometry_pts[i].x, (int)geometry_pts[i].y));
-            }
+            drawingPts = gmm.GenerateRandomPoints(num_of_points, groupbox_canvas.Width, groupbox_canvas.Height);
             label_status.Text = "Generated " + num_of_points + " new points at " + DateTime.Now;
             this.Refresh();
         }
 
         private void fitGMMsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            List<Vector2> geometry_pts = null;
-            (drawingGaussians, geometry_pts) = gmm.FitGaussians(num_of_fits, num_of_levels);
-
-            drawingPts = new List<Point>();
-            for (int i = 0; i < geometry_pts.Count; ++i)
-            {
-                drawingPts.Add(new Point((int)geometry_pts[i].x, (int)geometry_pts[i].y));
-            }
-
+            (drawingGaussians, drawingPts) = gmm.FitGaussians(num_of_fits, num_of_levels);
             label_status.Text = "Fit " + num_of_fits + " Gaussians (flat). " + DateTime.Now;
             this.Refresh();
         }
 
         private void generateDummyGaussianDataToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            List<Vector2> geometry_pts = gmm.GenerateGaussianPoints(num_of_points, num_of_samples);
-            drawingPts = new List<Point>();
-            for (int i = 0; i < geometry_pts.Count; ++i)
-            {
-                if (geometry_pts[i].x >= 0 && geometry_pts[i].x <= groupbox_canvas.Width && geometry_pts[i].y >= 0 && geometry_pts[i].y <= groupbox_canvas.Height)
-                {
-                    drawingPts.Add(new Point((int)geometry_pts[i].x, (int)geometry_pts[i].y));
-                }
-
-            }
+            drawingPts = gmm.GenerateGaussianPoints(num_of_points, num_of_samples);
             label_status.Text = "Generated " + num_of_points + " new points at " + DateTime.Now;
             this.Refresh();
         }
@@ -104,43 +86,82 @@ namespace GMMDemo
             this.Refresh();
         }
 
-        //private void fit4ToolStripMenuItem_Click(object sender, EventArgs e)
-        //{
-
-        //}
-
-        //private void fit8ToolStripMenuItem_Click(object sender, EventArgs e)
-        //{
-        //    drawingGaussians = gmm.Fit8Gaussians();
-        //    label_status.Text = "Fit 8 Gaussians (flat). " + DateTime.Now;
-        //    this.Refresh();
-        //}
-
-        private void fitHGMsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            drawingGaussians = gmm.FitHierarchyGaussians();
-            label_status.Text = "Fit HGM . " + DateTime.Now;
-            this.Refresh();
-        }
-
         private void groupbox_canvans_Paint(object sender, PaintEventArgs e)
         {
+            Random random_color = new Random();
+            ColorList ellipse_colors = new ColorList();
+            Color ellipse_color = ellipse_colors.NextColor();
+            List<Color> point_colors = new List<Color>();
+            int point_color_index;
+
             Graphics g = e.Graphics;
 
             if (drawingPts != null)
             {
-                SolidBrush brush = new SolidBrush(pt_drawing_color);
-                foreach (Point pt in drawingPts)
+                SolidBrush defaultBrush = new SolidBrush(pt_drawing_color);
+                
+                if (viewed_layer <= drawingPts[0].gaussian_idx.Count)
                 {
-                    g.FillRectangle(brush, pt.X-1, pt.Y-1, 3, 3); //a 9 pixel dot
+                    for(int parent_count = 0; parent_count < (int)Math.Pow(num_of_fits, viewed_layer); parent_count++)
+                    {
+                        point_colors.Add(Color.FromArgb(random_color.Next(200, 256), random_color.Next(190), random_color.Next(190)));
+                    }
+
+                    int cumulative = 0;
+                    if (viewed_layer > 1)
+                    {
+                        for (int layer = 1; layer < viewed_layer; layer++)
+                        {
+                            cumulative += (int)Math.Pow(num_of_fits, layer);
+                        }
+                    }
+                    else cumulative = 1;
+
+                    foreach (Vector2 pt in drawingPts)
+                    {
+                        if (viewed_layer == 1)
+                        {
+                            point_color_index = pt.gaussian_idx[0];
+                        }
+                        else
+                        {
+                            point_color_index = pt.gaussian_idx[viewed_layer-1] - cumulative;
+                        }
+                        //if (viewed_layer == 2 && pt.gaussian_idx[viewed_layer - 1] < num_of_fits)
+                        //{
+                        //    Vector2 point = pt;
+                        //}
+                        SolidBrush brush = new SolidBrush(point_colors[point_color_index]);
+                        g.FillRectangle(brush, pt.x - 1, pt.y - 1, 3, 3); //a 9 pixel dot
+                    }
                 }
+                else
+                {
+                    foreach (Vector2 pt in drawingPts)
+                    {
+                        g.FillRectangle(defaultBrush, pt.x - 1, pt.y - 1, 3, 3); //a 9 pixel dot
+                    }
+                }
+                
             }
             if (drawingGaussians != null)
             {
-                Pen ellipse_pen = new Pen(ellipse_drawing_color, 2);
+                Pen ellipse_pen = new Pen(ellipse_color, 2);
+                int gaussian_count = 0;
+                int layer_count = 1;
+                int cumulative_limit = num_of_fits;
                 foreach (Gaussian_2D gaussian in drawingGaussians)
                 {
+                    if (gaussian_count >= cumulative_limit)
+                    {
+                        layer_count++;
+                        ellipse_color = ellipse_colors.NextColor();
+                        ellipse_pen = new Pen(ellipse_color, 2);
+                        cumulative_limit += (int)Math.Pow(num_of_fits, layer_count);
+                        
+                    }
                     Draw3SigmaEllipse(g, gaussian, ellipse_pen);
+                    gaussian_count++;
                 }
             }
         }
@@ -190,46 +211,13 @@ namespace GMMDemo
             g.ResetTransform();
         }
 
-        private void PointNumber_ValueChanged(object sender, EventArgs e)
-        {
-            UpdateConfigurationUnputs();
-            this.Refresh();
-        }
-
-        private void SampleNumber_ValueChanged(object sender, EventArgs e)
-        {
-            UpdateConfigurationUnputs();
-            this.Refresh();
-        }
-
-        private void FitNumber_ValueChanged(object sender, EventArgs e)
-        {
-            UpdateConfigurationUnputs();
-            this.Refresh();
-        }
-
-        private void LayerNumber_ValueChanged(object sender, EventArgs e)
-        {
-            UpdateConfigurationUnputs();
-            this.Refresh();
-        }
-
         private void rESETMEMORYToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ResetSimulationMemory();
+            this.Refresh();
         }
 
         private void dataToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void mixtureToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            
-        }
-
-        private void mixtureToolStripMenuItem1_Click(object sender, EventArgs e)
         {
 
         }
@@ -239,20 +227,11 @@ namespace GMMDemo
 
         }
 
-        private void label1_Click(object sender, EventArgs e)
+        private void viewedLevelHandler(object sender, EventArgs e)
         {
-
+            UpdateConfigurationUnputs();
+            this.Refresh();
         }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label_status_Click(object sender, EventArgs e)
-        {
-
-        }
-
     }
 }
+
