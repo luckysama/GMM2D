@@ -31,6 +31,7 @@ namespace GMMDemo
         int num_of_fits;
         int num_of_levels;
         int viewed_layer;
+        bool fit_ran = false;
    
         GMM gmm;
 
@@ -61,6 +62,7 @@ namespace GMMDemo
         private void regenerateRandomDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
             drawingPts = gmm.GenerateRandomPoints(num_of_points, groupbox_canvas.Width, groupbox_canvas.Height);
+            fit_ran = false;
             label_status.Text = "Generated " + num_of_points + " new points at " + DateTime.Now;
             this.Refresh();
         }
@@ -68,6 +70,7 @@ namespace GMMDemo
         private void fitGMMsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             (drawingGaussians, drawingPts) = gmm.FitGaussians(num_of_fits, num_of_levels);
+            fit_ran = true;
             label_status.Text = "Fit " + num_of_fits + " Gaussians (flat). " + DateTime.Now;
             this.Refresh();
         }
@@ -75,6 +78,7 @@ namespace GMMDemo
         private void generateDummyGaussianDataToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
             drawingPts = gmm.GenerateGaussianPoints(num_of_points, num_of_samples);
+            fit_ran = false;
             label_status.Text = "Generated " + num_of_points + " new points at " + DateTime.Now;
             this.Refresh();
         }
@@ -100,7 +104,7 @@ namespace GMMDemo
             {
                 SolidBrush defaultBrush = new SolidBrush(pt_drawing_color);
                 
-                if (viewed_layer <= drawingPts[0].gaussian_idx.Count)
+                if (viewed_layer <= drawingPts[0].gaussian_idx.Count && fit_ran)
                 {
                     for(int parent_count = 0; parent_count < (int)Math.Pow(num_of_fits, viewed_layer); parent_count++)
                     {
