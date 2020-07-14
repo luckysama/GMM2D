@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
+using System.Threading;
+using System.Runtime.CompilerServices;
 
 namespace GMMDemo
 {
@@ -26,6 +28,7 @@ namespace GMMDemo
 
         Color pt_drawing_color = Color.Red; //ToDo: use color to express GMM group memebership of points
         Color ellipse_drawing_color = Color.Blue;
+        Random random_color = new Random();
         Color miu_color = Color.Green;
 
         int num_of_points;
@@ -126,6 +129,7 @@ namespace GMMDemo
         private void groupbox_canvans_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
+            int count = 0;
 
             if (drawingPts != null)
             {
@@ -137,9 +141,10 @@ namespace GMMDemo
             }
             if (drawingGaussians != null)
             {
-                Pen ellipse_pen = new Pen(ellipse_drawing_color, 2);
+                //Pen ellipse_pen = new Pen(ellipse_drawing_color, 2);
                 foreach (Gaussian_2D gaussian in drawingGaussians)
                 {
+                    Pen ellipse_pen = new Pen(ellipse_drawing_color, 2);
                     Draw3SigmaEllipse(g, gaussian, ellipse_pen);
                 }
             }
@@ -153,50 +158,40 @@ namespace GMMDemo
         void Draw3SigmaEllipse(Graphics g, Gaussian_2D gaussian, Pen pen)
         {
             gaussian.Sigma.UpdateEigens();
-            float axis_x = 0;
-            float axis_y = 0;
-            if (gaussian.Sigma.m00 > gaussian.Sigma.m11)
+            float major_axis, minor_axis;
+            
+            if (gaussian.Sigma.eigenvalue_0 > gaussian.Sigma.eigenvalue_1)
             {
-                if (gaussian.Sigma.eigenvalue_0 >= 0)
-                {
-                    axis_x = (float)(2 * Math.Sqrt(5.991f * gaussian.Sigma.eigenvalue_0));
-                }
-                if (gaussian.Sigma.eigenvalue_1 >= 0)
-                {
-                    axis_y = (float)(2 * Math.Sqrt(5.991f * gaussian.Sigma.eigenvalue_1));
-                }
+                major_axis = (float)(2 * Math.Sqrt(5.991f * gaussian.Sigma.eigenvalue_0));
+                minor_axis = (float)(2 * Math.Sqrt(5.991f * gaussian.Sigma.eigenvalue_1));
             }
             else
             {
-                if (gaussian.Sigma.eigenvalue_0 >= 0)
-                {
-                    axis_y = (float)(2 * Math.Sqrt(5.991f * gaussian.Sigma.eigenvalue_0));
-                }
-                if (gaussian.Sigma.eigenvalue_1 >= 0)
-                {
-                    axis_x = (float)(2 * Math.Sqrt(5.991f * gaussian.Sigma.eigenvalue_1));
-                }
+                major_axis = (float)(2 * Math.Sqrt(5.991f * gaussian.Sigma.eigenvalue_1));
+                minor_axis = (float)(2 * Math.Sqrt(5.991f * gaussian.Sigma.eigenvalue_0));
             }
-            
+
+            float x_axis, y_axis;
             double angle;
-            if (gaussian.Sigma.eigenvalue_0 > gaussian.Sigma.eigenvalue_1) 
+            if (gaussian.Sigma.m00 > gaussian.Sigma.m11)
             {
+                x_axis = major_axis;
+                y_axis = minor_axis;
                 angle = Math.Atan2(gaussian.Sigma.eigenvector_0.y, gaussian.Sigma.eigenvector_0.x);
             }
             else
             {
+                x_axis = minor_axis;
+                y_axis = major_axis;
                 angle = Math.Atan2(gaussian.Sigma.eigenvector_1.y, gaussian.Sigma.eigenvector_1.x);
             }
-            Console.WriteLine("Ellipse angle");
-            Console.WriteLine(angle * 180 / Math.PI);
-            //angle = 0;
 
             g.TranslateTransform(gaussian.miu.x, gaussian.miu.y);
             g.RotateTransform((float)(angle * 180 / Math.PI)); //Rad to Deg
-            g.DrawEllipse(pen, new RectangleF(-(int)Math.Round(axis_x / 2),
-                                            -(int)Math.Round(axis_y / 2),
-                                            axis_x,
-                                            axis_y));
+            g.DrawEllipse(pen, new RectangleF(-(int)Math.Round(x_axis / 2),
+                                            -(int)Math.Round(y_axis / 2),
+                                            x_axis,
+                                            y_axis));
             g.ResetTransform();
         }
 

@@ -69,8 +69,7 @@ namespace GMMDemo
 
                 sample_gaussian.Sigma.UpdateEigens();
                 double angle;
-
-                if (sample_gaussian.Sigma.eigenvalue_0 > sample_gaussian.Sigma.eigenvalue_1)
+                if (sample_gaussian.Sigma.m00 > sample_gaussian.Sigma.m11)
                 {
                     angle = Math.Atan2(sample_gaussian.Sigma.eigenvector_0.y, sample_gaussian.Sigma.eigenvector_0.x);
                 }
