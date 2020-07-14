@@ -30,8 +30,9 @@ namespace GMMDemo
         int num_of_samples;
         int num_of_fits;
         int num_of_levels;
-        int viewed_layer;
+        int viewed_level;
         bool fit_ran = false;
+        bool use_random_colors;
    
         GMM gmm;
 
@@ -41,8 +42,9 @@ namespace GMMDemo
             num_of_samples = (int)SampleNumber.Value;
             num_of_fits = (int)FitNumber.Value;
             num_of_levels = (int)LayerNumber.Value;
-            viewed_layer = (int)ViewedLayerNumber.Value;
-            
+            viewed_level = (int)ViewedLayerNumber.Value;
+            use_random_colors = (bool)useRandomColors.Checked;
+            fit_ran = false;
         }
 
         private void UpdateConfigurationHandler(object sender, EventArgs e)
@@ -94,6 +96,7 @@ namespace GMMDemo
         {
             Random random_color = new Random();
             ColorList ellipse_colors = new ColorList();
+            ColorList fixed_ellipse_colors = new ColorList();
             Color ellipse_color = ellipse_colors.NextColor();
             List<Color> point_colors = new List<Color>();
             int point_color_index;
@@ -104,37 +107,41 @@ namespace GMMDemo
             {
                 SolidBrush defaultBrush = new SolidBrush(pt_drawing_color);
                 
-                if (viewed_layer <= drawingPts[0].gaussian_idx.Count && fit_ran)
+                if (viewed_level <= drawingPts[0].gaussian_idx.Count && fit_ran)
                 {
-                    for(int parent_count = 0; parent_count < (int)Math.Pow(num_of_fits, viewed_layer); parent_count++)
+                    for(int parent_count = 0; parent_count < (int)Math.Pow(num_of_fits, viewed_level); parent_count++)
                     {
-                        point_colors.Add(Color.FromArgb(random_color.Next(200, 256), random_color.Next(190), random_color.Next(190)));
+                        if (use_random_colors)
+                        {
+                            point_colors.Add(Color.FromArgb(random_color.Next(256), random_color.Next(256), random_color.Next(256)));
+                        }
+                        else
+                        {
+                            point_colors.Add(fixed_ellipse_colors.NextColor());
+                        }
                     }
 
                     int cumulative = 0;
-                    if (viewed_layer > 1)
+                    if (viewed_level > 1)
                     {
-                        for (int layer = 1; layer < viewed_layer; layer++)
+                        for (int layer = 1; layer < viewed_level; layer++)
                         {
                             cumulative += (int)Math.Pow(num_of_fits, layer);
                         }
                     }
-                    else cumulative = 1;
+                    else cumulative = 0;
 
                     foreach (Vector2 pt in drawingPts)
                     {
-                        if (viewed_layer == 1)
+                        if (viewed_level == 1)
                         {
                             point_color_index = pt.gaussian_idx[0];
                         }
                         else
                         {
-                            point_color_index = pt.gaussian_idx[viewed_layer-1] - cumulative;
+                            int check = pt.gaussian_idx[0];
+                            point_color_index = pt.gaussian_idx[viewed_level-1] - cumulative;
                         }
-                        //if (viewed_layer == 2 && pt.gaussian_idx[viewed_layer - 1] < num_of_fits)
-                        //{
-                        //    Vector2 point = pt;
-                        //}
                         SolidBrush brush = new SolidBrush(point_colors[point_color_index]);
                         g.FillRectangle(brush, pt.x - 1, pt.y - 1, 3, 3); //a 9 pixel dot
                     }
@@ -233,7 +240,18 @@ namespace GMMDemo
 
         private void viewedLevelHandler(object sender, EventArgs e)
         {
-            UpdateConfigurationUnputs();
+            viewed_level = (int)ViewedLayerNumber.Value;
+            this.Refresh();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.Refresh();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            use_random_colors = (bool)useRandomColors.Checked;
             this.Refresh();
         }
     }

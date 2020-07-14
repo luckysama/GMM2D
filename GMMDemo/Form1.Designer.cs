@@ -50,6 +50,8 @@
             this.GaussianSamples = new System.Windows.Forms.Label();
             this.generatedPoints = new System.Windows.Forms.Label();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.button1 = new System.Windows.Forms.Button();
+            this.useRandomColors = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.groupbox_canvas.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ViewedLayerNumber)).BeginInit();
@@ -129,6 +131,8 @@
             // 
             // groupbox_canvas
             // 
+            this.groupbox_canvas.Controls.Add(this.useRandomColors);
+            this.groupbox_canvas.Controls.Add(this.button1);
             this.groupbox_canvas.Controls.Add(this.ViewedLayerNumber);
             this.groupbox_canvas.Controls.Add(this.label_status);
             this.groupbox_canvas.Controls.Add(this.ViewedLayer);
@@ -177,7 +181,7 @@
             this.ViewedLayer.Name = "ViewedLayer";
             this.ViewedLayer.Size = new System.Drawing.Size(70, 13);
             this.ViewedLayer.TabIndex = 10;
-            this.ViewedLayer.Text = "Current Layer";
+            this.ViewedLayer.Text = "Current Level";
             // 
             // label5
             // 
@@ -271,7 +275,7 @@
             this.HierarchicalLayers.Name = "HierarchicalLayers";
             this.HierarchicalLayers.Size = new System.Drawing.Size(88, 13);
             this.HierarchicalLayers.TabIndex = 3;
-            this.HierarchicalLayers.Text = "Hierchical Layers";
+            this.HierarchicalLayers.Text = "Hierchical Levels";
             // 
             // GaussiansPerLevel
             // 
@@ -305,6 +309,27 @@
             this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(861, 424);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 12;
+            this.button1.Text = "Refresh";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // useRandomColors
+            // 
+            this.useRandomColors.AutoSize = true;
+            this.useRandomColors.Location = new System.Drawing.Point(746, 557);
+            this.useRandomColors.Name = "useRandomColors";
+            this.useRandomColors.Size = new System.Drawing.Size(98, 17);
+            this.useRandomColors.TabIndex = 13;
+            this.useRandomColors.Text = "Random Colors";
+            this.useRandomColors.UseVisualStyleBackColor = true;
+            this.useRandomColors.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // GMMDemoWnd
             // 
@@ -353,6 +378,8 @@
         private System.Windows.Forms.ToolStripMenuItem rESETMEMORYToolStripMenuItem;
         private System.Windows.Forms.NumericUpDown ViewedLayerNumber;
         private System.Windows.Forms.Label ViewedLayer;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.CheckBox useRandomColors;
     }
 }
 
