@@ -34,10 +34,8 @@ namespace GMMDemo
         public Matrix22(float m00_init, float m01_init, float m10_init, float m11_init)
         {
             //matrix with init value
-
             m00 = m00_init;
             m10 = m01 = m01_init;
-            //m10 = m10_init;
             m11 = m11_init;
         }
 
@@ -97,23 +95,50 @@ namespace GMMDemo
         /// <summary>
         /// Generate a random gaussian.
         /// </summary>
-        /// <param name="rand"></param> Random operator
-        /// <param name="init"></param> If true, initialize gaussians for prediction;
-        ///                             If false, for input data
-        public Gaussian_2D(Random rand, bool init=false)
+        /// <param name="rand">
+        /// Random operator
+        /// </param> 
+        /// <param name="corner">
+        /// Which corner to initialize
+        /// </param> 
+        /// <param name="init">
+        /// If true, initialize gaussians for prediction;
+        /// If false, for input data
+        /// </param>
+        public Gaussian_2D(Random rand, int corner = 0, bool init=false)
         {
-            //init with random value
-
-            miu = new Vector2(rand.Next(100, 900), rand.Next(50, 400));
-            if (!init)
+            //init input datapoints with random value
+            if (!init && corner == 0)
             {
-                Sigma = new Matrix22(rand.Next(500, 1000), rand.Next(-20, 20),
-                                rand.Next(-20, 20), rand.Next(500, 1000));
+                miu = new Vector2(rand.Next(100, 900), rand.Next(50, 400));
+                Sigma = new Matrix22(rand.Next(100, 900), rand.Next(-100, 100),
+                                rand.Next(-100, 100), rand.Next(100, 900));
             }
+            //init new gaussians at one of the four corners
             else
             {
-                Sigma = new Matrix22(rand.Next(2000, 3000), rand.Next(10, 20),
-                                rand.Next(10, 20), rand.Next(2000, 3000));
+                switch (corner)
+                {
+                    case 1:
+                        miu = new Vector2(10, 10);
+                        break;
+
+                    case 2:
+                        miu = new Vector2(1000, 500);
+                        break;
+
+                    case 3:
+                        miu = new Vector2(10, 500);
+                        break;
+
+                    case 4:
+                        miu = new Vector2(1000, 10);
+                        break;
+
+                }
+                //init covariance
+                Sigma = new Matrix22(rand.Next(1000, 2000), rand.Next(-100, 100),
+                                rand.Next(-100, 100), rand.Next(1000, 2000));
             }
         }
     }

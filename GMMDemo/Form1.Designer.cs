@@ -37,6 +37,7 @@
             this.drawDummyGaussianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fitGMMsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fitHGMsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.rESETMEMORYToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupbox_canvas = new System.Windows.Forms.GroupBox();
             this.label5 = new System.Windows.Forms.Label();
             this.PointNumber = new System.Windows.Forms.NumericUpDown();
@@ -48,7 +49,6 @@
             this.GaussianSamples = new System.Windows.Forms.Label();
             this.generatedPoints = new System.Windows.Forms.Label();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.rESETMEMORYToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.groupbox_canvas.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PointNumber)).BeginInit();
@@ -130,6 +130,13 @@
             this.fitHGMsToolStripMenuItem.Text = "Fit HGMMs";
             this.fitHGMsToolStripMenuItem.Click += new System.EventHandler(this.fitHGMsToolStripMenuItem_Click);
             // 
+            // rESETMEMORYToolStripMenuItem
+            // 
+            this.rESETMEMORYToolStripMenuItem.Name = "rESETMEMORYToolStripMenuItem";
+            this.rESETMEMORYToolStripMenuItem.Size = new System.Drawing.Size(422, 40);
+            this.rESETMEMORYToolStripMenuItem.Text = "RESET MEMORY";
+            this.rESETMEMORYToolStripMenuItem.Click += new System.EventHandler(this.rESETMEMORYToolStripMenuItem_Click);
+            // 
             // groupbox_canvas
             // 
             this.groupbox_canvas.Controls.Add(this.label5);
@@ -181,7 +188,7 @@
             this.PointNumber.Size = new System.Drawing.Size(149, 31);
             this.PointNumber.TabIndex = 8;
             this.PointNumber.Value = new decimal(new int[] {
-            1000,
+            3000,
             0,
             0,
             0});
@@ -196,7 +203,7 @@
             this.LayerNumber.Size = new System.Drawing.Size(149, 31);
             this.LayerNumber.TabIndex = 7;
             this.LayerNumber.Value = new decimal(new int[] {
-            1,
+            2,
             0,
             0,
             0});
@@ -211,7 +218,7 @@
             this.SampleNumber.Size = new System.Drawing.Size(149, 31);
             this.SampleNumber.TabIndex = 6;
             this.SampleNumber.Value = new decimal(new int[] {
-            4,
+            20,
             0,
             0,
             0});
@@ -280,13 +287,6 @@
             this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
-            // 
-            // rESETMEMORYToolStripMenuItem
-            // 
-            this.rESETMEMORYToolStripMenuItem.Name = "rESETMEMORYToolStripMenuItem";
-            this.rESETMEMORYToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
-            this.rESETMEMORYToolStripMenuItem.Text = "RESET MEMORY";
-            this.rESETMEMORYToolStripMenuItem.Click += new System.EventHandler(this.rESETMEMORYToolStripMenuItem_Click);
             // 
             // GMMDemoWnd
             // 
