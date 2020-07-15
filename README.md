@@ -28,8 +28,15 @@ Instead of using the matrix computation library - Math.NET, we defined new matri
 ### HGMM
 To generalize flat GMM to a hierarchical structure, we partition the predicted Gaussians recursively based on the Maximum Likelihood estimates of subsurface expectation. The resulting hierarchical structure resembles an ordered full binary tree, but with arbitrary number of children for each node.
 
-![HGMM tree structure](Images/HGMM_tree.png)
-
 We simply encode the above tree structure in a large flat 1d array, which can be queried with simple indexing functions. Below is an HGMM prediction example, see **DEMO Usage** to understand what the different colors stand for.
 
 ![HGMM prediction  example](Images/HGMM.png)
+
+### Functionalities
+* Tikhonov regularization: Tikhonov regularization is done on the covariances to prevent numerical instability.
+* Cluster drop: Dropping clusters with insufficient support (low class prior) to controls the degree of geometric complexity.
+* Stopping condition: When maximum iteration is reached or the loglikelihood estimate stops changing.
+
+### Future Improvements
+* Use soft partition instead of hard partition as described in the paper, Section 3.4.
+* Parallel construction: compute M-step in parallel with E-step, as described in Section 3.5.
