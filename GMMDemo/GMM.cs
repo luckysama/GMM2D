@@ -203,7 +203,7 @@ namespace GMMDemo
                 if (class_prior[i] < class_prior_thresh)
                 {
                     Console.WriteLine("Dropping gaussian {0} with class_prior {1}", i, class_prior[i]);
-                    gaussian_list.RemoveAt(i);
+                    gaussian_list[i].dropped = true;
                 }
             }
         }
@@ -357,6 +357,18 @@ namespace GMMDemo
             gaussian_list = new List<Gaussian_2D>();
             class_prior = new List<double>();
             T = new List<List<double>>();
+
+            if(pts != null)
+            {   
+                if(pts[0].gaussian_idx.Count > 0)
+                {
+                    foreach (Vector2 pt in pts)
+                    {
+                        pt.gaussian_idx.Clear();
+                    }
+                }
+                
+            }
 
             Console.WriteLine("Calculating...");
             if (pts != null)

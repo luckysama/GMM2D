@@ -36,8 +36,11 @@
             this.generateDummyGaussianDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.drawDummyGaussianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fitGMMsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.rESETMEMORYToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupbox_canvas = new System.Windows.Forms.GroupBox();
+            this.dropGaussians = new System.Windows.Forms.CheckBox();
+            this.button2 = new System.Windows.Forms.Button();
+            this.useRandomColors = new System.Windows.Forms.CheckBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.ViewedLayerNumber = new System.Windows.Forms.NumericUpDown();
             this.ViewedLayer = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -50,8 +53,6 @@
             this.GaussianSamples = new System.Windows.Forms.Label();
             this.generatedPoints = new System.Windows.Forms.Label();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.button1 = new System.Windows.Forms.Button();
-            this.useRandomColors = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.groupbox_canvas.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ViewedLayerNumber)).BeginInit();
@@ -86,12 +87,11 @@
             this.dataToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.regenerateRandomDataToolStripMenuItem,
             this.generateDummyGaussianDataToolStripMenuItem,
-            this.drawDummyGaussianToolStripMenuItem,
             this.fitGMMsToolStripMenuItem,
-            this.rESETMEMORYToolStripMenuItem});
+            this.drawDummyGaussianToolStripMenuItem});
             this.dataToolStripMenuItem.Name = "dataToolStripMenuItem";
-            this.dataToolStripMenuItem.Size = new System.Drawing.Size(79, 20);
-            this.dataToolStripMenuItem.Text = "Data Points";
+            this.dataToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
+            this.dataToolStripMenuItem.Text = "Menu";
             this.dataToolStripMenuItem.Click += new System.EventHandler(this.dataToolStripMenuItem_Click);
             // 
             // regenerateRandomDataToolStripMenuItem
@@ -122,15 +122,10 @@
             this.fitGMMsToolStripMenuItem.Text = "Fit GMMs";
             this.fitGMMsToolStripMenuItem.Click += new System.EventHandler(this.fitGMMsToolStripMenuItem_Click);
             // 
-            // rESETMEMORYToolStripMenuItem
-            // 
-            this.rESETMEMORYToolStripMenuItem.Name = "rESETMEMORYToolStripMenuItem";
-            this.rESETMEMORYToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
-            this.rESETMEMORYToolStripMenuItem.Text = "RESET MEMORY";
-            this.rESETMEMORYToolStripMenuItem.Click += new System.EventHandler(this.rESETMEMORYToolStripMenuItem_Click);
-            // 
             // groupbox_canvas
             // 
+            this.groupbox_canvas.Controls.Add(this.dropGaussians);
+            this.groupbox_canvas.Controls.Add(this.button2);
             this.groupbox_canvas.Controls.Add(this.useRandomColors);
             this.groupbox_canvas.Controls.Add(this.button1);
             this.groupbox_canvas.Controls.Add(this.ViewedLayerNumber);
@@ -148,12 +143,54 @@
             this.groupbox_canvas.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupbox_canvas.Location = new System.Drawing.Point(0, 0);
             this.groupbox_canvas.Name = "groupbox_canvas";
-            this.groupbox_canvas.Size = new System.Drawing.Size(1033, 576);
+            this.groupbox_canvas.Size = new System.Drawing.Size(1033, 578);
             this.groupbox_canvas.TabIndex = 2;
             this.groupbox_canvas.TabStop = false;
             this.groupbox_canvas.Text = "Data Plot";
             this.groupbox_canvas.Paint += new System.Windows.Forms.PaintEventHandler(this.groupbox_canvans_Paint);
             this.groupbox_canvas.Enter += new System.EventHandler(this.groupbox_canvas_Enter_1);
+            // 
+            // dropGaussians
+            // 
+            this.dropGaussians.AutoSize = true;
+            this.dropGaussians.Location = new System.Drawing.Point(746, 532);
+            this.dropGaussians.Name = "dropGaussians";
+            this.dropGaussians.Size = new System.Drawing.Size(101, 17);
+            this.dropGaussians.TabIndex = 15;
+            this.dropGaussians.Text = "Drop Gaussians";
+            this.dropGaussians.UseVisualStyleBackColor = true;
+            this.dropGaussians.CheckedChanged += new System.EventHandler(this.dropGaussians_CheckedChanged);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(593, 547);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(147, 27);
+            this.button2.TabIndex = 14;
+            this.button2.Text = "RESET MEMORY";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.rESETMEMORYToolStripMenuItem_Click);
+            // 
+            // useRandomColors
+            // 
+            this.useRandomColors.AutoSize = true;
+            this.useRandomColors.Location = new System.Drawing.Point(746, 557);
+            this.useRandomColors.Name = "useRandomColors";
+            this.useRandomColors.Size = new System.Drawing.Size(98, 17);
+            this.useRandomColors.TabIndex = 13;
+            this.useRandomColors.Text = "Random Colors";
+            this.useRandomColors.UseVisualStyleBackColor = true;
+            this.useRandomColors.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(861, 424);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 12;
+            this.button1.Text = "Refresh";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // ViewedLayerNumber
             // 
@@ -310,32 +347,11 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(861, 424);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 12;
-            this.button1.Text = "Refresh";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // useRandomColors
-            // 
-            this.useRandomColors.AutoSize = true;
-            this.useRandomColors.Location = new System.Drawing.Point(746, 557);
-            this.useRandomColors.Name = "useRandomColors";
-            this.useRandomColors.Size = new System.Drawing.Size(98, 17);
-            this.useRandomColors.TabIndex = 13;
-            this.useRandomColors.Text = "Random Colors";
-            this.useRandomColors.UseVisualStyleBackColor = true;
-            this.useRandomColors.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
-            // 
             // GMMDemoWnd
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1033, 576);
+            this.ClientSize = new System.Drawing.Size(1033, 578);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.groupbox_canvas);
             this.MainMenuStrip = this.menuStrip1;
@@ -375,11 +391,12 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.NumericUpDown PointNumber;
-        private System.Windows.Forms.ToolStripMenuItem rESETMEMORYToolStripMenuItem;
         private System.Windows.Forms.NumericUpDown ViewedLayerNumber;
         private System.Windows.Forms.Label ViewedLayer;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.CheckBox useRandomColors;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.CheckBox dropGaussians;
     }
 }
 

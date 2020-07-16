@@ -24,7 +24,8 @@ namespace GMMDemo
         List<Vector2> drawingPts = null;
         List<Gaussian_2D> drawingGaussians = null;
 
-        Color pt_drawing_color = Color.Black; //ToDo: use color to express GMM group memebership of points
+        Color pt_drawing_color = Color.Red;
+        Color ground_truth_color = Color.Blue;
         
         int num_of_points;
         int num_of_samples;
@@ -33,6 +34,7 @@ namespace GMMDemo
         int viewed_level;
         bool fit_ran = false;
         bool use_random_colors;
+        bool drop_gaussians;
    
         GMM gmm;
 
@@ -44,6 +46,7 @@ namespace GMMDemo
             num_of_levels = (int)LayerNumber.Value;
             viewed_level = (int)ViewedLayerNumber.Value;
             use_random_colors = (bool)useRandomColors.Checked;
+            drop_gaussians = (bool)dropGaussians.Checked;
             fit_ran = false;
         }
 
@@ -65,15 +68,20 @@ namespace GMMDemo
         {
             drawingPts = gmm.GenerateRandomPoints(num_of_points, groupbox_canvas.Width, groupbox_canvas.Height);
             fit_ran = false;
-            label_status.Text = "Generated " + num_of_points + " new points at " + DateTime.Now;
+            label_status.Text = "Generated " + num_of_points + " new random points at " + DateTime.Now;
             this.Refresh();
         }
 
         private void fitGMMsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            label_status.Text = "Calculating... ";
+            this.Refresh();
+            DateTime time_start = DateTime.Now;
             (drawingGaussians, drawingPts) = gmm.FitGaussians(num_of_fits, num_of_levels);
+            DateTime time_end = DateTime.Now;
+
             fit_ran = true;
-            label_status.Text = "Fit " + num_of_fits + " Gaussians (flat). " + DateTime.Now;
+            label_status.Text = "Done in " + time_end.Subtract(time_start).TotalSeconds.ToString() + " seconds at " + DateTime.Now;
             this.Refresh();
         }
 
@@ -81,14 +89,14 @@ namespace GMMDemo
         {
             drawingPts = gmm.GenerateGaussianPoints(num_of_points, num_of_samples);
             fit_ran = false;
-            label_status.Text = "Generated " + num_of_points + " new points at " + DateTime.Now;
+            label_status.Text = "Generated " + num_of_points + " new gaussian points at " + DateTime.Now;
             this.Refresh();
         }
 
         private void drawDummyGaussianToolStripMenuItem_Click(object sender, EventArgs e)
         {
             drawingGaussians = gmm.DrawDummyGaussian();
-            label_status.Text = "Fit Dummy Gaussian (flat). " + DateTime.Now;
+            label_status.Text = "Displaying ground truth at " + DateTime.Now;
             this.Refresh();
         }
 
@@ -157,26 +165,48 @@ namespace GMMDemo
             }
             if (drawingGaussians != null)
             {
-                Pen ellipse_pen = new Pen(ellipse_color, 2);
-                int gaussian_count = 0;
-                int layer_count = 1;
-                int cumulative_limit = num_of_fits;
-                foreach (Gaussian_2D gaussian in drawingGaussians)
+                if (!fit_ran)
                 {
-                    if (gaussian_count >= cumulative_limit)
+                    Pen ground_truth_pen = new Pen(ground_truth_color, 2);
+                    foreach (Gaussian_2D gaussian in drawingGaussians)
                     {
-                        layer_count++;
-                        ellipse_color = ellipse_colors.NextColor();
-                        ellipse_pen = new Pen(ellipse_color, 2);
-                        cumulative_limit += (int)Math.Pow(num_of_fits, layer_count);
-                        
+                            Draw3SigmaEllipse(g, gaussian, ground_truth_pen);
                     }
-                    Draw3SigmaEllipse(g, gaussian, ellipse_pen);
-                    gaussian_count++;
                 }
+                else
+                {
+                    Pen ellipse_pen = new Pen(ellipse_color, 2);
+                    int gaussian_count = 0;
+                    int layer_count = 1;
+                    int cumulative_limit = num_of_fits;
+                    foreach (Gaussian_2D gaussian in drawingGaussians)
+                    {
+                        if (gaussian_count >= cumulative_limit)
+                        {
+                            layer_count++;
+                            ellipse_color = ellipse_colors.NextColor();
+                            ellipse_pen = new Pen(ellipse_color, 2);
+                            cumulative_limit += (int)Math.Pow(num_of_fits, layer_count);
+                        }
+                       
+                        if (gaussian.dropped && drop_gaussians)
+                        {
+                            gaussian_count++;
+                            continue;
+                        }
+                        if(Double.IsNaN(gaussian.miu.x))
+                        {
+                            label_status.Text = "One or more algorithms failed to fit. Add more points to or reduce the number of fits";
+                            
+                        }
+                        Draw3SigmaEllipse(g, gaussian, ellipse_pen);
+
+                        gaussian_count++;
+                    }
+                }
+                
             }
         }
-
 
         /// How to draw the 3-sigma error ellipse of a given 2D Gaussian?
         /// https://math.stackexchange.com/questions/395698/fast-way-to-calculate-eigen-of-2x2-matrix-using-a-formula
@@ -252,6 +282,12 @@ namespace GMMDemo
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             use_random_colors = (bool)useRandomColors.Checked;
+            this.Refresh();
+        }
+
+        private void dropGaussians_CheckedChanged(object sender, EventArgs e)
+        {
+            drop_gaussians = (bool)dropGaussians.Checked;
             this.Refresh();
         }
     }

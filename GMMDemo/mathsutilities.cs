@@ -86,6 +86,8 @@ namespace GMMDemo
     {
         public Vector2 miu; //mean
         public Matrix22 Sigma; //variance
+
+        public bool dropped = false;
         public Gaussian_2D()
         {
             //init with zeros
@@ -223,9 +225,9 @@ namespace GMMDemo
             currentColorIndex = colors.Count - 1;
             colors.Add(Color.Blue);
             colors.Add(Color.Green);
-            colors.Add(Color.Yellow);
-            colors.Add(Color.Orange);
             colors.Add(Color.Red);
+            colors.Add(Color.Orange);
+            colors.Add(Color.Yellow);
 
         }
 
