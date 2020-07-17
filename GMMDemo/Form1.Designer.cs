@@ -119,7 +119,7 @@
             // 
             this.fitGMMsToolStripMenuItem.Name = "fitGMMsToolStripMenuItem";
             this.fitGMMsToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
-            this.fitGMMsToolStripMenuItem.Text = "Fit GMMs";
+            this.fitGMMsToolStripMenuItem.Text = "Fit HGMM";
             this.fitGMMsToolStripMenuItem.Click += new System.EventHandler(this.fitGMMsToolStripMenuItem_Click);
             // 
             // groupbox_canvas
@@ -223,7 +223,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(949, 424);
+            this.label5.Location = new System.Drawing.Point(958, 424);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(69, 13);
             this.label5.TabIndex = 9;
@@ -308,11 +308,11 @@
             // HierarchicalLayers
             // 
             this.HierarchicalLayers.AutoSize = true;
-            this.HierarchicalLayers.Location = new System.Drawing.Point(858, 533);
+            this.HierarchicalLayers.Location = new System.Drawing.Point(849, 533);
             this.HierarchicalLayers.Name = "HierarchicalLayers";
-            this.HierarchicalLayers.Size = new System.Drawing.Size(88, 13);
+            this.HierarchicalLayers.Size = new System.Drawing.Size(97, 13);
             this.HierarchicalLayers.TabIndex = 3;
-            this.HierarchicalLayers.Text = "Hierchical Levels";
+            this.HierarchicalLayers.Text = "Hierarchical Levels";
             // 
             // GaussiansPerLevel
             // 
@@ -326,20 +326,20 @@
             // GaussianSamples
             // 
             this.GaussianSamples.AutoSize = true;
-            this.GaussianSamples.Location = new System.Drawing.Point(852, 480);
+            this.GaussianSamples.Location = new System.Drawing.Point(849, 480);
             this.GaussianSamples.Name = "GaussianSamples";
-            this.GaussianSamples.Size = new System.Drawing.Size(94, 13);
+            this.GaussianSamples.Size = new System.Drawing.Size(97, 13);
             this.GaussianSamples.TabIndex = 1;
-            this.GaussianSamples.Text = "Gaussian Samples";
+            this.GaussianSamples.Text = "Sample Gaussians ";
             // 
             // generatedPoints
             // 
             this.generatedPoints.AutoSize = true;
             this.generatedPoints.Location = new System.Drawing.Point(854, 459);
             this.generatedPoints.Name = "generatedPoints";
-            this.generatedPoints.Size = new System.Drawing.Size(92, 13);
+            this.generatedPoints.Size = new System.Drawing.Size(89, 13);
             this.generatedPoints.TabIndex = 0;
-            this.generatedPoints.Text = "Generated  Points";
+            this.generatedPoints.Text = "Generated Points";
             // 
             // contextMenuStrip1
             // 

@@ -66,6 +66,7 @@ namespace GMMDemo
 
         private void regenerateRandomDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            drawingGaussians = null;
             drawingPts = gmm.GenerateRandomPoints(num_of_points, groupbox_canvas.Width, groupbox_canvas.Height);
             fit_ran = false;
             label_status.Text = "Generated " + num_of_points + " new random points at " + DateTime.Now;
@@ -75,6 +76,7 @@ namespace GMMDemo
         private void fitGMMsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             label_status.Text = "Calculating... ";
+            drawingGaussians = null;
             this.Refresh();
             DateTime time_start = DateTime.Now;
             (drawingGaussians, drawingPts) = gmm.FitGaussians(num_of_fits, num_of_levels);
@@ -87,6 +89,7 @@ namespace GMMDemo
 
         private void generateDummyGaussianDataToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
+            drawingGaussians = null;
             drawingPts = gmm.GenerateGaussianPoints(num_of_points, num_of_samples);
             fit_ran = false;
             label_status.Text = "Generated " + num_of_points + " new gaussian points at " + DateTime.Now;
@@ -194,13 +197,7 @@ namespace GMMDemo
                             gaussian_count++;
                             continue;
                         }
-                        if(Double.IsNaN(gaussian.miu.x))
-                        {
-                            label_status.Text = "One or more algorithms failed to fit. Add more points to or reduce the number of fits";
-                            
-                        }
                         Draw3SigmaEllipse(g, gaussian, ellipse_pen);
-
                         gaussian_count++;
                     }
                 }
@@ -242,7 +239,11 @@ namespace GMMDemo
                 y_axis = major_axis;
                 angle = Math.Atan2(gaussian.Sigma.eigenvector_1.y, gaussian.Sigma.eigenvector_1.x);
             }
-
+            if (Double.IsNaN(angle))
+            {
+                label_status.Text = "One or more gaussians failed to fit. Modify your input parameters.";
+                return;
+            }
             g.TranslateTransform(gaussian.miu.x, gaussian.miu.y);
             g.RotateTransform((float)(angle * 180 / Math.PI)); //Rad to Deg
             g.DrawEllipse(pen, new RectangleF(-(int)Math.Round(x_axis / 2),
