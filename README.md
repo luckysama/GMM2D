@@ -8,6 +8,18 @@ Visual Studio 2019 Community and .net 4.7.2
 ## Implementation Details
 We rigorously followed the implementation details in the [paper](https://www.cv-foundation.org/openaccess/content_cvpr_2016/html/Eckart_Accelerated_Generative_Models_CVPR_2016_paper.html) using hard partition and non-parallel construction. The development process is two-fold: we started with a flat, one level implementation, then we added a hierarchical architecture that recursively generates predictions as a multi-level gaussian tree.
 
+### Initialization
+New Gaussians are normally initialized around the canvas boundary. **Mean** is iteratively chosen from 8 positions: 
+```
+(100, 100), (800, 400), (100, 400), (800, 100), (450, 100), (450, 400), (100, 250), (800, 250)
+``` 
+**Covariance** is initialized as follows:
+```
+m00 = 800
+m01 = m10 = rand.Next(-100, 100)
+m11 = 800
+```
+
 ### Flat GMM
 GMM is a generative learning algorithm that predicts a mixture of Gaussians to approximate the ground truth distribution. No classification label is required as input, therefore it belongs to the unsupervised learning category.
 
