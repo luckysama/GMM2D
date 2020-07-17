@@ -1,19 +1,8 @@
 # GMM2D
 This repo contains the 2D implementation of Hierarchical Gaussian Mixture Model (HGMM) (see [paper](https://www.cv-foundation.org/openaccess/content_cvpr_2016/html/Eckart_Accelerated_Generative_Models_CVPR_2016_paper.html))
 
-
-## Requirement
-Visual Studio 2019 Community and .net 4.7.2 
-
-## DEMO Usage
-Form menu navigation. 
-image: Form screenshot
-
-### Generate Random Data
-What this button does
-image: screenshot of the generated points
-
-### So on....
+## Requirements
+Visual Studio 2019 Community and .net 4.7.2
 
 ## Implementation Details
 We rigorously followed the implementation details in the [paper](https://www.cv-foundation.org/openaccess/content_cvpr_2016/html/Eckart_Accelerated_Generative_Models_CVPR_2016_paper.html) using hard partition and non-parallel construction. The development process is two-fold: we started with a flat, one level implementation, then we added a hierarchical architecture that recursively generates predictions as a multi-level gaussian tree.
@@ -38,3 +27,56 @@ We simply encode the above tree structure in a large flat 1d array, which can be
 ### Future Improvements
 * Use soft partition instead of hard partition as described in the paper, Section 3.4.
 * Parallel construction: compute M-step in parallel with E-step, as described in Section 3.5.
+
+## DEMO Usage
+To better demonstrate the HGMM algorithm, we created a GUI for inputting parameters and visualizing the HGMM fit at each level of the hierarchy. Upon launch, a single page application will appear as seen below.      
+
+![blank application window](Images/blank_window.png)
+
+The application contains the following features which handle all operations for generating a HGMM.
+
+### Status Label
+The status label, located at the bottom left of the application, displays important information regarding HGMM algorithm execution and other processes the user initiates.
+
+### Configuration Settings
+![configuration](Images/configuration.png)
+This section of the application handles all input settings for fitting a HGMM. While default values have been selected, it is advisable to input your own values. Please note while setting any numerical input value, either the up/down arrow must be used, or enter must be pressed after inputting a value.
+
+* Generated Points: The number of points that will be generated in each batch of random uniform of gaussian points. Note that the total number of points in the dataset can be increased by generating multiple matches of points, with a varying number of points possible in each batch. 
+* Sample Gaussians: Selects the number of gaussian distributions in a flat GMM to sample generated points from if using the menu option "Gaussian Gaussian Data". When generating multiple batches of gaussian data, this number can change as desired. 
+* Gaussians Per level: Determines how many Gaussians are to be fit at each level of the HGMM. For large numbers of gaussians, ensure both random and gaussian data is present for fit, as sparsity in the data may cause issues. Additionally, changing this parameter after a fit will require a new few to be ran before viwing other hierarchical layers.
+* Hierarchical Levels: Selects how many levels in the HGMM will be fit. Changing this value will require a new fit to be generated to view other hierarchical layers.
+* Current Level: Selects which level the current points color labels correspond to when assigning each point to a gaussian in the HGMM. This value may be changed on the fly once a fit is generated.
+* Drop Gaussians: If selected, predicted gaussians with a small class prior will be hidden in the visualization. However, their corresponding point color labels at a specific level will be shown.
+* Random Colors: If selected, random colors will be shown for point color labelling. 
+* Refresh: This button simply refreshes the canvas on which the visualization is drawn. It is typically used if the "Random Colors" checkbox is selected. 
+* RESET MEMORY: Deletes all generated points and gaussians from the application. Configuration settings will persist.
+
+### Menu
+![menu](Images/menu.png)
+The menu contains options for creating random uniform data, random gaussian data, showing the distributions from which this data was sampled, and running a HGMM fit. It contains the following options:
+
+* Generate Random Data: Generates points across the screen according to a uniform distribution. The number of points is specified by the "Generated Points" configuration setting. This option can be pressed multiple times to generates multiple batches of points.
+![random_data](Images/random_data.png)
+* Generate Gaussian Data: Generates points from multiple gaussian distributions. The mean vector and covariance matrix of these gaussians are random within reasonable limits. The number of points generated is also specificed by the "Generated Points" configuration setting, and the number of gaussian distributions from which these points are generated is determined by the "Sample Gaussians" configuration setting. Multiple batches of points can be generated as well.
+![gaussian_data](Images/gaussian_data.png)
+* Fit HGMM: Fits a HGMM to the displayed data points based on current configuration settings. If one hierarchical level is chosen, the implementation will effectively be a flat GMM. 
+![fit_3_flat](Images/fit_3_flat.png)
+
+### Common Application Workflow
+1. Input numerical configuration settings.
+2. Generate one or more batches of points using either "Generate Random Data" or "Generate Gaussian Data".
+3. Select "Fit HGMM" to generate visualization. The status at the bottom left will indicate if an error has occurred, or completed calculation time.
+4. (Optional) Compare fitted HGMM to ground truth of only gaussian random data if fitting a single level HGMM.
+5. Change "Current Level" to see how points have been grouped at each level of the HGMM.
+6. Either generate more points and a new fit, or reset the visualization to start from scratch.
+
+### Common Errors
+* Current Level out-of-bounds: If a level is selected that does not exist in the generated HGMM fit, all points will turn back to red. Simply select a valid level to fix this.
+![level_error](Images/level_error.png)
+* HGMM fit-specific parameters are changed before viewing levels: If this is done, it will invalidate the current fit, as indicated by ellipses turning blue and points turning red upon refresh. A new fit must be generated at this point.
+![input_error](Images/oopsie_daisy_inputs_broke.png)
+* Label status "One or more gaussians failed to fit...": Caused by a NaN error in HGMM algorithm due to too many gaussians trying to be fit into sparse data. Consider generating more points or reducing either the number of levels or gaussians per level. However, many valid gaussians will be generated.
+![fit_error](Images/fit_error.png)
+* Label status "Calculating..." and application frozen while trying to fit HGMM: Our implementation is single thread, single core. This can lead to long runtimes, exponentially so with more layers. Be considerate of your CPU!
+![cpu_torture](Images/cpu_torture.png)
