@@ -50,8 +50,9 @@ namespace GMMDemo
             {
                 //Each gaussian is randomly initialized at four corners
                 Gaussian_2D gau = new Gaussian_2D(rand, (i % 4) + 1, true);
-                gau.Sigma.m00 /= level + 1;
-                gau.Sigma.m11 /= level + 1;
+                //TODO: initialize gaussians at smaller scale for deeper levels, only within the parent domain
+                //gau.Sigma.m00 /= level + 1;
+                //gau.Sigma.m11 /= level + 1;
                 gaussian_list.Add(gau);
                 //All gaussians at each level are initialized with equal class prior
                 class_prior.Add(1 / (double)(num_gaussian));
