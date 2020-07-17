@@ -23,14 +23,12 @@ GMM is a generative learning algorithm that predicts a mixture of Gaussians to a
 
 Instead of using the matrix computation library - Math.NET, we defined new matrix datatypes and mathematical functions from the ground up. For the algorithm details, please refer to the [paper](https://www.cv-foundation.org/openaccess/content_cvpr_2016/html/Eckart_Accelerated_Generative_Models_CVPR_2016_paper.html) and [CS229 lecture notes](http://cs229.stanford.edu/notes/cs229-notes7b.pdf). 
 
-![GMM example for 2D data](Images/GMM.png)
-
 ### HGMM
 To generalize flat GMM to a hierarchical structure, we partition the predicted Gaussians recursively based on the Maximum Likelihood estimates of subsurface expectation. The resulting hierarchical structure resembles an ordered full binary tree, but with arbitrary number of children for each node.
 
-We simply encode the above tree structure in a large flat 1d array, which can be queried with simple indexing functions. Below is an HGMM prediction example, see **DEMO Usage** to understand what the different colors stand for.
+We simply encode the above tree structure in a large flat 1d array, which can be queried with simple indexing functions. Below is an 2 level HGMM tree with its predictions side-by-side, see **DEMO Usage** to understand what the different colors stand for.
 
-![HGMM prediction  example](Images/HGMM.png)
+![HGMM prediction example](Images/HGMM_tree.png)
 
 ### Functionalities
 * Tikhonov regularization: Tikhonov regularization is done on the covariances to prevent numerical instability.
