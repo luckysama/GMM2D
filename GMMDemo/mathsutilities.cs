@@ -123,25 +123,25 @@ namespace GMMDemo
                 switch (corner)
                 {
                     case 1:
-                        miu = new Vector2(10, 10);
+                        miu = new Vector2(100, 100);
                         break;
 
                     case 2:
-                        miu = new Vector2(1000, 500);
+                        miu = new Vector2(800, 400);
                         break;
 
                     case 3:
-                        miu = new Vector2(10, 500);
+                        miu = new Vector2(100, 400);
                         break;
 
                     case 4:
-                        miu = new Vector2(1000, 10);
+                        miu = new Vector2(800, 100);
                         break;
 
                 }
                 //init covariance
-                Sigma = new Matrix22(rand.Next(1000, 2000), rand.Next(-100, 100),
-                                rand.Next(-100, 100), rand.Next(1000, 2000));
+                Sigma = new Matrix22(800, rand.Next(-100, 100),
+                                rand.Next(-100, 100), 800);
             }
         }
     }
