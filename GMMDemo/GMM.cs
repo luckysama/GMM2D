@@ -49,7 +49,7 @@ namespace GMMDemo
             for (int i = 0; i < num_level_gaussians; i++)
             {
                 //Each gaussian is randomly initialized at four corners
-                Gaussian_2D gau = new Gaussian_2D(rand, (i % 4) + 1, true);
+                Gaussian_2D gau = new Gaussian_2D(rand, (i % 8) + 1, true);
 
                 //TODO: initialize gaussians at smaller scale for deeper levels, only within the parent domain
                 //gau.Sigma.m00 /= level + 1;

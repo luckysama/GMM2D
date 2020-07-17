@@ -137,6 +137,21 @@ namespace GMMDemo
                     case 4:
                         miu = new Vector2(800, 100);
                         break;
+                    case 5:
+                        miu = new Vector2(450, 100);
+                        break;
+
+                    case 6:
+                        miu = new Vector2(450, 400);
+                        break;
+
+                    case 7:
+                        miu = new Vector2(100, 250);
+                        break;
+
+                    case 8:
+                        miu = new Vector2(800, 250);
+                        break;
 
                 }
                 //init covariance
