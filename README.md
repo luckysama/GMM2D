@@ -47,7 +47,7 @@ The status label, located at the bottom left of the application, displays import
 This section of the application handles all input settings for fitting a HGMM. While default values have been selected, it is advisable to input your own values. Please note while setting any numerical input value, either the up/down arrow must be used, or enter must be pressed after inputting a value.
 
 * `Generated Points`: The number of points that will be generated in each batch of random uniform of gaussian points. Note that the total number of points in the dataset can be increased by generating multiple matches of points, with a varying number of points possible in each batch. 
-* `Sample Gaussians`: Selects the number of Gaussian distributions in a flat GMM to sample generated points from if using the menu option "Gaussian Gaussian Data". When generating multiple batches of gaussian data, this number can change as desired. 
+* `Sample Gaussians`: Selects the number of Gaussian distributions in a flat GMM to sample generated points from if using the menu option `Gaussian Gaussian Data`. When generating multiple batches of gaussian data, this number can change as desired. 
 * `Gaussians Per level`: Determines how many Gaussians are to be fit at each level of the HGMM. For large numbers of Gaussians, ensure both random and gaussian data is present for fit, as sparsity in the data may cause issues. Additionally, changing this parameter after a fit will require a new few to be ran before viewing other hierarchical layers.
 * `Hierarchical Levels`: Selects how many levels in the HGMM will be fit. Changing this value will require a new fit to be generated to view other hierarchical layers. We recommend using at most three levels to avoid numerical instability. 
 * `Current Level`: Selects which level the current points color labels correspond to when assigning each point to a gaussian in the HGMM. This value may be changed on the fly once a fit is generated.
@@ -56,7 +56,7 @@ This section of the application handles all input settings for fitting a HGMM. W
 
 * `Drop Gaussians`: If selected, predicted Gaussians with a small class prior will be hidden in the visualization. However, their corresponding point color labels at a specific level will be shown.
 * `Random Colors`: If selected, random colors will be shown for point color labelling. 
-* `Refresh`: This button simply refreshes the canvas on which the visualization is drawn. It is typically used if the "Random Colors" checkbox is selected. 
+* `Refresh`: This button simply refreshes the canvas on which the visualization is drawn. It is typically used if the `Random Colors` checkbox is selected. 
 * `RESET MEMORY`: Deletes all generated points and Gaussians from the application. Configuration settings will persist.
 
 ### Menu
@@ -64,11 +64,11 @@ This section of the application handles all input settings for fitting a HGMM. W
 ![menu](Images/menu.png)
 
 The menu contains options for creating random uniform data, random Gaussian data, showing the distributions from which this data was sampled, and running a HGMM fit. It contains the following options:
-* `Generate Random Data`: Generates points across the screen according to a uniform distribution. The number of points is specified by the "Generated Points" configuration setting. This option can be pressed multiple times to generates multiple batches of points.
+* `Generate Random Data`: Generates points across the screen according to a uniform distribution. The number of points is specified by the `Generated Points` configuration setting. This option can be pressed multiple times to generates multiple batches of points.
 
 ![random_data](Images/random_data.png)
 
-* `Generate Gaussian Data`: Generates points from multiple gaussian distributions. The mean vector and covariance matrix of these Gaussians are random within reasonable limits. The number of points generated is also specified by the "Generated Points" configuration setting, and the number of Gaussian distributions from which these points are generated is determined by the "Sample Gaussians" configuration setting. Multiple batches of points can be generated as well.
+* `Generate Gaussian Data`: Generates points from multiple gaussian distributions. The mean vector and covariance matrix of these Gaussians are random within reasonable limits. The number of points generated is also specified by the `Generated Points` configuration setting, and the number of Gaussian distributions from which these points are generated is determined by the `Sample Gaussians` configuration setting. Multiple batches of points can be generated as well.
 
 ![gaussian_data](Images/gaussian_data.png)
 
@@ -78,11 +78,11 @@ The menu contains options for creating random uniform data, random Gaussian data
 
 ### Common Application Workflow
 1. Input numerical configuration settings.
-2. Generate one or more batches of points using either "Generate Random Data" or "Generate Gaussian Data".
-3. Select "Fit HGMM" to generate visualization. The status at the bottom left will indicate if an error has occurred, or completed calculation time.
+2. Generate one or more batches of points using either `Generate Random Data` or `Generate Gaussian Data`.
+3. Select `Fit HGMM` to generate visualization. The status at the bottom left will indicate if an error has occurred, or completed calculation time.
 4. (Optional) Compare fitted HGMM to ground truth of only gaussian random data if fitting a single level HGMM.
-5. Change "Current Level" to see how points have been grouped at each level of the HGMM.
-6. Select "Drop Gaussians" or "Random Colors" and "Refresh" to better see which gaussian points belong to.
+5. Change `Current Level` to see how points have been grouped at each level of the HGMM.
+6. Select `Drop Gaussians` or `Random Colors` and `Refresh` to better see which gaussian points belong to.
 6. Either generate more points and a new fit, or reset the visualization to start from scratch.
 
 ### Common Errors
