@@ -79,6 +79,31 @@ namespace GMMDemo
             return pts;
         }
 
+        public List<Vector2> GenerateLidarPoints(int xmax, int ymax, out List<Polygon> polygonshapes)
+        {
+            simplelidar lidar = new simplelidar();
+            List<Polygon> shapes = new List<Polygon>();
+
+            //TODO: We need a better way to create shapes.....
+            Polygon square = new Polygon();
+            square.vertices.Add(new PointF(100, 100));
+            square.vertices.Add(new PointF(200, 100));
+            square.vertices.Add(new PointF(200, 200));
+            square.vertices.Add(new PointF(100, 200));
+            shapes.Add(square);
+
+            Polygon triangle = new Polygon();
+            triangle.vertices.Add(new PointF(500, 100));
+            triangle.vertices.Add(new PointF(650, 100));
+            triangle.vertices.Add(new PointF(550, 200));
+            shapes.Add(triangle);
+
+            lidar.polygons_list = shapes;
+            pts = lidar.ScanFrom(new Vector2(xmax / 2, ymax / 2));
+            polygonshapes = shapes;
+            return pts;
+        }
+
         public List<Vector2> GenerateGaussianPoints(int num_of_points, int num_gaussians)
         {
             if (pts == null)

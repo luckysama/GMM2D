@@ -17,10 +17,45 @@ namespace GMMDemo
             x = y = 0;
         }
 
+        public Vector2(PointF ptf_pt)
+        {
+            x = ptf_pt.X;
+            y = ptf_pt.Y;
+        }
+
         public Vector2(float x_init, float y_init)
         {
             x = x_init;
             y = y_init;
+        }
+
+        public Vector2(Vector2 rhs)
+        {
+            x = rhs.x;
+            y = rhs.y;
+        }
+
+        public float distancesquare(Vector2 rhs)
+        {
+            float dist = 0;
+            dist += (rhs.x - this.x) * (rhs.x - this.x);
+            dist += (rhs.y - this.y) * (rhs.y - this.y);
+            return dist;
+        }
+
+        public float Cross2d(Vector2 rhs)
+        {
+            return this.x * rhs.y - this.y * rhs.x;
+        }
+
+        public Vector2 Minus(Vector2 rhs)
+        {
+            return new Vector2(this.x - rhs.x, this.y - rhs.y);
+        }
+
+        public Vector2 Add(Vector2 rhs)
+        {
+            return new Vector2(this.x + rhs.x, this.y + rhs.y);
         }
     }
 

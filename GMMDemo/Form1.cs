@@ -23,10 +23,16 @@ namespace GMMDemo
 
         List<Vector2> drawingPts = null;
         List<Gaussian_2D> drawingGaussians = null;
+        List<Polygon> drawingPolygons = null;
 
         Color pt_drawing_color = Color.Red;
         Color ground_truth_color = Color.Blue;
-        
+        Color polygon_color = Color.LightBlue;
+
+
+        int drawing_size_x = 2;
+        int drawing_size_y = 2;
+
         int num_of_points;
         int num_of_samples;
         int num_of_fits;
@@ -67,6 +73,7 @@ namespace GMMDemo
         private void regenerateRandomDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
             drawingGaussians = null;
+            drawingPolygons = null;
             drawingPts = gmm.GenerateRandomPoints(num_of_points, groupbox_canvas.Width, groupbox_canvas.Height);
             fit_ran = false;
             label_status.Text = "Generated " + num_of_points + " new random points at " + DateTime.Now;
@@ -90,9 +97,19 @@ namespace GMMDemo
         private void generateDummyGaussianDataToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
             drawingGaussians = null;
+            drawingPolygons = null;
             drawingPts = gmm.GenerateGaussianPoints(num_of_points, num_of_samples);
             fit_ran = false;
             label_status.Text = "Generated " + num_of_points + " new gaussian points at " + DateTime.Now;
+            this.Refresh();
+        }
+
+        private void generateLiDARDataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            drawingGaussians = null;
+            drawingPts = gmm.GenerateLidarPoints(drawing_size_x, drawing_size_y, out drawingPolygons);
+            fit_ran = false;
+            label_status.Text = "Generated simulated 2D lidar data";
             this.Refresh();
         }
 
@@ -112,9 +129,22 @@ namespace GMMDemo
             List<Color> point_colors = new List<Color>();
             int point_color_index;
 
+            drawing_size_x = e.ClipRectangle.Width;
+            drawing_size_y = e.ClipRectangle.Height;
+
             Graphics g = e.Graphics;
 
-            if (drawingPts != null)
+            //draw the polygon first, which will be the background of everything else
+            if (drawingPolygons != null)
+            {
+                SolidBrush polygonbrush = new SolidBrush(polygon_color);
+                foreach (Polygon poly in drawingPolygons)
+                {
+                    g.FillPolygon(polygonbrush, poly.pts);
+                }
+            }
+
+            if (drawingPts != null && drawingPts.Count > 0)
             {
                 SolidBrush defaultBrush = new SolidBrush(pt_drawing_color);
                 
@@ -291,6 +321,7 @@ namespace GMMDemo
             drop_gaussians = (bool)dropGaussians.Checked;
             this.Refresh();
         }
+
     }
 }
 
