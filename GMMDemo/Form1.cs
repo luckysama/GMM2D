@@ -145,7 +145,7 @@ namespace GMMDemo
 
             //draw the polygon first, which will be the background of everything else
             if (drawingPolygons != null)
-            {
+            {                
                 SolidBrush polygonbrush = new SolidBrush(polygon_color);
                 foreach (Polygon poly in drawingPolygons)
                 {

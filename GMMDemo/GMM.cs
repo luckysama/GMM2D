@@ -79,11 +79,17 @@ namespace GMMDemo
             return pts;
         }
 
-        public List<Vector2> GenerateLidarPoints(int xmax, int ymax, out List<Polygon> polygonshapes, out Vector2 scan_position)
+        public List<Vector2> GenerateLidarPoints(int xmax, int ymax, out List<Polygon> drawing_polygons, out Vector2 scan_position)
         {
             simplelidar lidar = new simplelidar();
             List<Polygon> shapes = new List<Polygon>();
-            
+            //Shape 0 - the room...
+            Polygon outer_bound = new Polygon();
+            outer_bound.vertices.Add(new PointF(5, 5));
+            outer_bound.vertices.Add(new PointF(xmax - 5, 5));
+            outer_bound.vertices.Add(new PointF(xmax - 5, ymax - 5));
+            outer_bound.vertices.Add(new PointF(5, ymax - 5));
+            shapes.Add(outer_bound);
             //TODO: We need a better way to create shapes.....
             Polygon square = new Polygon();
             square.vertices.Add(new PointF(100, 100));
@@ -107,7 +113,12 @@ namespace GMMDemo
             scan_position = new Vector2(xmax / 2, ymax / 2);
             lidar.polygons_list = shapes;
             pts = lidar.ScanFrom(scan_position);
-            polygonshapes = shapes;
+
+            //draw everything but not the room, e.g. the outer_bound
+            drawing_polygons = new List<Polygon>();            
+            drawing_polygons.Add(square);
+            drawing_polygons.Add(star);
+            drawing_polygons.Add(triangle);
             return pts;
         }
 
