@@ -22,12 +22,14 @@ namespace GMMDemo
         }
 
         List<Vector2> drawingPts = null;
+        List<Vector2> drawingLargeCircles = null;
         List<Gaussian_2D> drawingGaussians = null;
         List<Polygon> drawingPolygons = null;
 
         Color pt_drawing_color = Color.Red;
         Color ground_truth_color = Color.Blue;
         Color polygon_color = Color.LightBlue;
+        Color circle_color = Color.Purple;
 
 
         int drawing_size_x = 2;
@@ -61,19 +63,24 @@ namespace GMMDemo
             UpdateConfigurationUnputs();
         }
 
+        private void ClearDrawingData()
+        {
+            drawingGaussians = null;
+            drawingPolygons = null;
+            drawingPts = null;
+            drawingLargeCircles = null;
+        }
         private void ResetSimulationMemory()
         {
             gmm.pts = null;
             gmm.sample_gaussian_list = null;
-            drawingGaussians = null;
-            drawingPts = null;
+            ClearDrawingData();
             label_status.Text = "Memory cleared at " + DateTime.Now;
         }
 
         private void regenerateRandomDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            drawingGaussians = null;
-            drawingPolygons = null;
+            ClearDrawingData();
             drawingPts = gmm.GenerateRandomPoints(num_of_points, groupbox_canvas.Width, groupbox_canvas.Height);
             fit_ran = false;
             label_status.Text = "Generated " + num_of_points + " new random points at " + DateTime.Now;
@@ -96,8 +103,7 @@ namespace GMMDemo
 
         private void generateDummyGaussianDataToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            drawingGaussians = null;
-            drawingPolygons = null;
+            ClearDrawingData();
             drawingPts = gmm.GenerateGaussianPoints(num_of_points, num_of_samples);
             fit_ran = false;
             label_status.Text = "Generated " + num_of_points + " new gaussian points at " + DateTime.Now;
@@ -106,8 +112,11 @@ namespace GMMDemo
 
         private void generateLiDARDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            drawingGaussians = null;
-            drawingPts = gmm.GenerateLidarPoints(drawing_size_x, drawing_size_y, out drawingPolygons);
+            ClearDrawingData();
+            Vector2 Scanner_Position;
+            drawingPts = gmm.GenerateLidarPoints(drawing_size_x, drawing_size_y, out drawingPolygons, out Scanner_Position);
+            drawingLargeCircles = new List<Vector2>();
+            drawingLargeCircles.Add(Scanner_Position);
             fit_ran = false;
             label_status.Text = "Generated simulated 2D lidar data";
             this.Refresh();
@@ -143,6 +152,15 @@ namespace GMMDemo
                     g.FillPolygon(polygonbrush, poly.pts);
                 }
             }
+            //draw the large circles
+            if (drawingLargeCircles != null)
+            {
+                SolidBrush circleBrush = new SolidBrush(circle_color);
+                foreach (Vector2 vec in drawingLargeCircles)
+                {
+                    g.FillEllipse(circleBrush, new Rectangle((int)(vec.x - 10), (int)(vec.y - 10), 20, 20));
+                }
+            }    
 
             if (drawingPts != null && drawingPts.Count > 0)
             {

@@ -26,7 +26,13 @@ namespace GMMDemo
         {
             vertices = new List<PointF>();
         }
-
+        public void AddPointFArray(PointF[] ptF)
+        {
+            for (int i = 0; i < ptF.Length; ++ i)
+            {
+                vertices.Add(ptF[i]);
+            }
+        }
         public PointF[] pts
         {
             get
@@ -97,8 +103,8 @@ namespace GMMDemo
                     closest_intersection.x += (float)(rand.NextDouble() * lidar_error);
                     closest_intersection.y += (float)(rand.NextDouble() * lidar_error);
                     scan_result.Add(new Vector2(closest_intersection));
-                    current_rad += rad_step;
                 }
+                current_rad += rad_step;
             }
             return scan_result;
         }
@@ -111,7 +117,7 @@ namespace GMMDemo
             Vector2 p = origin;
             Vector2 r = direction;
             Vector2 q = segment_start;
-            Vector2 s = segment_start.Minus(segment_end);
+            Vector2 s = segment_end.Minus(segment_start);
 
             float r_cross_s = r.Cross2d(s);
             if (r_cross_s == 0)

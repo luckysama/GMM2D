@@ -79,11 +79,11 @@ namespace GMMDemo
             return pts;
         }
 
-        public List<Vector2> GenerateLidarPoints(int xmax, int ymax, out List<Polygon> polygonshapes)
+        public List<Vector2> GenerateLidarPoints(int xmax, int ymax, out List<Polygon> polygonshapes, out Vector2 scan_position)
         {
             simplelidar lidar = new simplelidar();
             List<Polygon> shapes = new List<Polygon>();
-
+            
             //TODO: We need a better way to create shapes.....
             Polygon square = new Polygon();
             square.vertices.Add(new PointF(100, 100));
@@ -92,15 +92,46 @@ namespace GMMDemo
             square.vertices.Add(new PointF(100, 200));
             shapes.Add(square);
 
+            Rectangle star_bound = new Rectangle(300, 300, 200, 200);
+            int star_vertex_count = 6;
+            PointF[] star_vertices = StarPoints(star_vertex_count, star_bound);
+            Polygon star = new Polygon();
+            star.AddPointFArray(star_vertices);
+            shapes.Add(star);
+
             Polygon triangle = new Polygon();
             triangle.vertices.Add(new PointF(500, 100));
             triangle.vertices.Add(new PointF(650, 100));
             triangle.vertices.Add(new PointF(550, 200));
             shapes.Add(triangle);
-
+            scan_position = new Vector2(xmax / 2, ymax / 2);
             lidar.polygons_list = shapes;
-            pts = lidar.ScanFrom(new Vector2(xmax / 2, ymax / 2));
+            pts = lidar.ScanFrom(scan_position);
             polygonshapes = shapes;
+            return pts;
+        }
+
+        private PointF[] StarPoints(int num_points, Rectangle bounds)
+        {
+            // Make room for the points.
+            PointF[] pts = new PointF[num_points];
+
+            double rx = bounds.Width / 2;
+            double ry = bounds.Height / 2;
+            double cx = bounds.X + rx;
+            double cy = bounds.Y + ry;
+
+            // Start at the top.
+            double theta = -Math.PI / 2;
+            double dtheta = 2 * Math.PI / num_points;
+            for (int i = 0; i < num_points; i++)
+            {
+                pts[i] = new PointF(
+                    (float)(cx + rx * Math.Cos(theta)),
+                    (float)(cy + ry * Math.Sin(theta)));
+                theta += dtheta;
+            }
+
             return pts;
         }
 
