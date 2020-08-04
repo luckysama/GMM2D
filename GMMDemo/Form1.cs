@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -342,6 +343,44 @@ namespace GMMDemo
             this.Refresh();
         }
 
+        private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
+        {
+
+        }
+
+        private void load2DLIDARScanToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ClearDrawingData();
+            drawingPts = new List<Vector2>();
+            label_status.Text = "Loading 2D scan.";
+            this.Refresh();
+            // This method of getting to the scans directory might break in 
+            string cwd = Directory.GetCurrentDirectory();
+            string parentPath = Path.GetFullPath(Path.Combine(cwd, @"..\..\..\"));
+            string defaultImportPath = Path.Combine(parentPath, "2d_slices");
+            sliceImporter2D.InitialDirectory = defaultImportPath;
+            sliceImporter2D.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+
+            if (sliceImporter2D.ShowDialog() == DialogResult.OK)
+            {
+                //Get the path of specified file
+                var pointsFile = sliceImporter2D.FileName;
+
+                List<String> lines = File.ReadAllLines(pointsFile).ToList();
+                drawingPts = gmm.get2DScan(num_of_points, lines, groupbox_canvas.Width, groupbox_canvas.Height);
+                fit_ran = false;
+            }
+            if(drawingPts.Count < num_of_points)
+            {
+                label_status.Text = "Loaded original 2D Scan with " + drawingPts.Count + " points at " + DateTime.Now;
+            }
+            else
+            {
+                label_status.Text = "Loaded subsampled 2D Scan with " + num_of_points + " points at " + DateTime.Now;
+            }
+            
+            this.Refresh();
+        }
         private void kmeansInit_CheckedChanged(object sender, EventArgs e)
         {
             kmeans_init = (bool)KmeansInit.Checked;
