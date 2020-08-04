@@ -130,6 +130,14 @@ namespace GMMDemo
             Sigma = new Matrix22(0, 0, 0, 0);
         }
 
+        public Gaussian_2D(Random rand, Vector2 miu_init)
+        {
+            //init with zeros
+            miu = miu_init;
+            Sigma = new Matrix22(800, rand.Next(-100, 100),
+                                rand.Next(-100, 100), 800); ;
+        }
+
         /// <summary>
         /// Generate a random gaussian.
         /// </summary>
@@ -266,6 +274,26 @@ namespace GMMDemo
         }
     }
 
+    /// <summary>
+    /// Hardcoded matrix computations for multivariate normal PDF.
+    /// Input: Vector2 and Matrix22
+    /// </summary>
+    public class InitGMM
+    {
+        /// <summary>
+        /// Calculate multivariate normal probablity density function. 
+        /// Hardcoded for Vector2 and Matrix22 datatype.
+        /// Use double precision to increase robustness.
+        /// </summary>
+        /// <param name="pt"></param>
+        /// <param name="miu"></param>
+        /// <param name="covariance"></param>
+        /// <returns></returns>
+        public static List<Vector2> KMeans(List<Vector2> pt, int num_clusters)
+        {
+            return null;
+        }
+    }
     public class ColorList
     {
         private int currentColorIndex;
