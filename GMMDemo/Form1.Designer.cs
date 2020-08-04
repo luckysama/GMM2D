@@ -36,6 +36,8 @@
             this.generateDummyGaussianDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fitGMMsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.drawDummyGaussianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.generateLiDARDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.load2DLIDARScanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupbox_canvas = new System.Windows.Forms.GroupBox();
             this.dropGaussians = new System.Windows.Forms.CheckBox();
             this.button2 = new System.Windows.Forms.Button();
@@ -53,7 +55,7 @@
             this.GaussianSamples = new System.Windows.Forms.Label();
             this.generatedPoints = new System.Windows.Forms.Label();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.generateLiDARDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sliceImporter2D = new System.Windows.Forms.OpenFileDialog();
             this.menuStrip1.SuspendLayout();
             this.groupbox_canvas.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ViewedLayerNumber)).BeginInit();
@@ -90,7 +92,8 @@
             this.generateDummyGaussianDataToolStripMenuItem,
             this.fitGMMsToolStripMenuItem,
             this.drawDummyGaussianToolStripMenuItem,
-            this.generateLiDARDataToolStripMenuItem});
+            this.generateLiDARDataToolStripMenuItem,
+            this.load2DLIDARScanToolStripMenuItem});
             this.dataToolStripMenuItem.Name = "dataToolStripMenuItem";
             this.dataToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
             this.dataToolStripMenuItem.Text = "Menu";
@@ -123,6 +126,20 @@
             this.drawDummyGaussianToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
             this.drawDummyGaussianToolStripMenuItem.Text = "Draw Gaussian Ground Truth";
             this.drawDummyGaussianToolStripMenuItem.Click += new System.EventHandler(this.drawDummyGaussianToolStripMenuItem_Click);
+            // 
+            // generateLiDARDataToolStripMenuItem
+            // 
+            this.generateLiDARDataToolStripMenuItem.Name = "generateLiDARDataToolStripMenuItem";
+            this.generateLiDARDataToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.generateLiDARDataToolStripMenuItem.Text = "Generate Fake LiDAR Data";
+            this.generateLiDARDataToolStripMenuItem.Click += new System.EventHandler(this.generateLiDARDataToolStripMenuItem_Click);
+            // 
+            // load2DLIDARScanToolStripMenuItem
+            // 
+            this.load2DLIDARScanToolStripMenuItem.Name = "load2DLIDARScanToolStripMenuItem";
+            this.load2DLIDARScanToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.load2DLIDARScanToolStripMenuItem.Text = "Load 2D LIDAR Scan";
+            this.load2DLIDARScanToolStripMenuItem.Click += new System.EventHandler(this.load2DLIDARScanToolStripMenuItem_Click);
             // 
             // groupbox_canvas
             // 
@@ -349,12 +366,9 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
-            // generateLiDARDataToolStripMenuItem
+            // sliceImporter2D
             // 
-            this.generateLiDARDataToolStripMenuItem.Name = "generateLiDARDataToolStripMenuItem";
-            this.generateLiDARDataToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
-            this.generateLiDARDataToolStripMenuItem.Text = "Generate LiDAR Data";
-            this.generateLiDARDataToolStripMenuItem.Click += new System.EventHandler(this.generateLiDARDataToolStripMenuItem_Click);
+            this.sliceImporter2D.FileOk += new System.ComponentModel.CancelEventHandler(this.openFileDialog1_FileOk);
             // 
             // GMMDemoWnd
             // 
@@ -407,6 +421,8 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.CheckBox dropGaussians;
         private System.Windows.Forms.ToolStripMenuItem generateLiDARDataToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem load2DLIDARScanToolStripMenuItem;
+        private System.Windows.Forms.OpenFileDialog sliceImporter2D;
     }
 }
 

@@ -204,6 +204,56 @@ namespace GMMDemo
         /// Parent gaussian index
         /// </param>
         /// <returns></returns>
+
+
+        public List<Vector2> get2DScan(int num_of_points, List<String> lines, float canvasWidth, float CanvasHeight)
+        {
+            pts = new List<Vector2>();
+            // Highest values in list of x y coordinates of imported text file
+            float xMax = 0;
+            float yMax = 0;
+            foreach (string line in lines)
+            {
+                if (line == "")
+                {
+                    continue;
+                }
+                string[] coordinates = line.Split(' ');
+                float x = float.Parse(coordinates[0]);
+                if (x > xMax)
+                {
+                    xMax = x;
+                }
+
+                float y = float.Parse(coordinates[1]);
+                if (y > yMax)
+                {
+                    yMax = y;
+                }
+                pts.Add(new Vector2(x, y));
+            }
+            float xScale = canvasWidth / xMax;
+            float yScale = CanvasHeight / yMax;
+            foreach (Vector2 point in pts)
+            {
+                point.x = (int)Math.Round(point.x * xScale);
+                point.y = (int)Math.Round(point.y * yScale);
+            }
+            if (pts.Count > num_of_points)
+            {
+                Random deletePoint = new Random();
+                int index = 0;
+                int overflow = pts.Count - num_of_points;
+                for(int loop=0; loop<overflow; loop++)
+                {
+                    index = deletePoint.Next(pts.Count);
+                    pts.RemoveAt(index);
+                }
+            }
+            return pts;
+        }
+
+
         public List<int> GetChild(int parent)
         {
            //See paper section 4
