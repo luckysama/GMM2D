@@ -1,0 +1,1 @@
+The use of tools within 3d_2d_parser requires you to abide by the ScanNet TOS specified at http://kaldir.vc.in.tum.de/scannet/ScanNet_TOS.pdf
