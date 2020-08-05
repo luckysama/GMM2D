@@ -14,9 +14,13 @@ namespace GMMDemo
 {
     public partial class GMMDemoWnd : Form
     {
+       
         public GMMDemoWnd()
         {
             InitializeComponent();
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.WindowState = FormWindowState.Maximized;
             drawingPts = null;
             gmm = new GMM();
             label_status.Text = "Welcome to GMM demo!"; // use this control to display a line of text.
@@ -41,6 +45,8 @@ namespace GMMDemo
         int num_of_fits;
         int num_of_levels;
         int viewed_level;
+        bool show_points;
+        bool show_fits;
         bool fit_ran = false;
         bool use_random_colors;
         bool drop_gaussians;
@@ -58,6 +64,8 @@ namespace GMMDemo
             use_random_colors = (bool)useRandomColors.Checked;
             drop_gaussians = (bool)dropGaussians.Checked;
             kmeans_init = (bool)KmeansInit.Checked;
+            show_points = (bool)showPoints.Checked;
+            show_fits = (bool)showFits.Checked;
             fit_ran = false;
         }
 
@@ -165,7 +173,7 @@ namespace GMMDemo
                 }
             }    
 
-            if (drawingPts != null && drawingPts.Count > 0)
+            if (drawingPts != null && drawingPts.Count > 0 && show_points)
             {
                 SolidBrush defaultBrush = new SolidBrush(pt_drawing_color);
                 
@@ -217,7 +225,7 @@ namespace GMMDemo
                 }
                 
             }
-            if (drawingGaussians != null)
+            if (drawingGaussians != null && show_fits)
             {
                 if (!fit_ran)
                 {
@@ -372,11 +380,11 @@ namespace GMMDemo
             }
             if(drawingPts.Count < num_of_points)
             {
-                label_status.Text = "Loaded original 2D Scan with " + drawingPts.Count + " points at " + DateTime.Now;
+                label_status.Text = "Loaded original 2D Scan with " + drawingPts.Count + " available points after rescaling at" + DateTime.Now;
             }
             else
             {
-                label_status.Text = "Loaded subsampled 2D Scan with " + num_of_points + " points at " + DateTime.Now;
+                label_status.Text = "Loaded subsampled 2D Scan with " + num_of_points + " points after rescaling at " + DateTime.Now;
             }
             
             this.Refresh();
@@ -384,6 +392,18 @@ namespace GMMDemo
         private void kmeansInit_CheckedChanged(object sender, EventArgs e)
         {
             kmeans_init = (bool)KmeansInit.Checked;
+            this.Refresh();
+        }
+        
+        private void showPoints_CheckedChanged(object sender, EventArgs e)
+        {
+            show_points = (bool)showPoints.Checked;
+            this.Refresh();
+        }
+
+        private void showFits_CheckedChanged(object sender, EventArgs e)
+        {
+            show_fits = (bool)showFits.Checked;
             this.Refresh();
         }
     }

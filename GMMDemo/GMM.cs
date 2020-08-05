@@ -248,6 +248,7 @@ namespace GMMDemo
 
         public List<Vector2> get2DScan(int num_of_points, List<String> lines, float canvasWidth, float CanvasHeight)
         {
+            List<Vector2> scanned_pts = new List<Vector2>();
             pts = new List<Vector2>();
             // Highest values in list of x y coordinates of imported text file
             float xMax = 0;
@@ -270,21 +271,42 @@ namespace GMMDemo
                 {
                     yMax = y;
                 }
-                pts.Add(new Vector2(x, y));
+                scanned_pts.Add(new Vector2(x, y));
             }
+
             float xScale = canvasWidth / xMax;
             float yScale = CanvasHeight / yMax;
-            foreach (Vector2 point in pts)
+            foreach (Vector2 point in scanned_pts)
             {
+
                 point.x = (int)Math.Round(point.x * xScale);
                 point.y = (int)Math.Round(point.y * yScale);
+
             }
+
+            for (int raw=0; raw < scanned_pts.Count; raw++)
+            {
+                bool duplicate = false;
+                for(int compare=0; compare<raw; compare++)
+                {
+                    if((scanned_pts[raw].x == scanned_pts[compare].x) && (scanned_pts[raw].y == scanned_pts[compare].y))
+                    {
+                        duplicate = true;
+                        break;
+                    }
+                }
+                if (!duplicate)
+                {
+                    pts.Add(new Vector2(scanned_pts[raw].x, scanned_pts[raw].y));
+                }
+            }
+            
             if (pts.Count > num_of_points)
             {
                 Random deletePoint = new Random();
                 int index = 0;
                 int overflow = pts.Count - num_of_points;
-                for(int loop=0; loop<overflow; loop++)
+                for (int loop = 0; loop < overflow; loop++)
                 {
                     index = deletePoint.Next(pts.Count);
                     pts.RemoveAt(index);
@@ -292,7 +314,6 @@ namespace GMMDemo
             }
             return pts;
         }
-
 
         public List<int> GetChild(int parent)
         {
