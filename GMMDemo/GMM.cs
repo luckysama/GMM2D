@@ -45,26 +45,37 @@ namespace GMMDemo
         /// </param>
         public void InitLevel(int level, bool kmeans_init)
         {
+            InitGMM init_GMM = new InitGMM();
             IEnumerable<int> current_level_gaussians = GetLevel(level);
-            IEnumerable<int> parent_level_gaussians = Enumerable.Range(0, 0);
-            if (level != 0) parent_level_gaussians = GetLevel(level-1);
 
+            //TODO: initialize gaussians at smaller scale for deeper levels, only within the parent domain
+            //gau.Sigma.m00 /= level + 1;
+            //gau.Sigma.m11 /= level + 1;
             if (kmeans_init)
             {
                 List<Vector2> mius = new List<Vector2>();
-                foreach (int i in parent_level_gaussians)
+                if (level != 0)
                 {
-                    List<Vector2> parent_pts = new List<Vector2>();
-                    foreach (Vector2 pt in pts)
+                    IEnumerable<int> parent_level_gaussians = GetLevel(level - 1);
+                    foreach (int i in parent_level_gaussians)
                     {
-                        if (pt.gaussian_idx[level-1] == i)
+                        List<Vector2> parent_pts = new List<Vector2>();
+                        foreach (Vector2 pt in pts)
                         {
-                            parent_pts.Add(pt);
+                            if (pt.gaussian_idx[level - 1] == i)
+                            {
+                                parent_pts.Add(pt);
+                            }
                         }
+                        List<Vector2> mius_i = init_GMM.KMeans(parent_pts, num_gaussian);
+                        mius = mius.Concat(mius_i).ToList();
                     }
-                    List<Vector2> mius_i = InitGMM.KMeans(parent_pts, num_gaussian);
-                    mius = mius.Concat(mius_i).ToList();
                 }
+                else
+                {
+                    mius = init_GMM.KMeans(pts, num_gaussian);
+                }
+
                 foreach ( Vector2 miu in mius)
                 {
                     Gaussian_2D gau = new Gaussian_2D(rand, miu);
@@ -77,13 +88,11 @@ namespace GMMDemo
                 }
             }
             else
+            {
                 foreach (int i in current_level_gaussians)
                 {
                     //Each gaussian is randomly initialized at four corners
                     Gaussian_2D gau = new Gaussian_2D(rand, (i % 8) + 1, true);
-                    //TODO: initialize gaussians at smaller scale for deeper levels, only within the parent domain
-                    //gau.Sigma.m00 /= level + 1;
-                    //gau.Sigma.m11 /= level + 1;
 
                     gaussian_list.Add(gau);
                     //All gaussians at each level are initialized with equal class prior
@@ -92,6 +101,7 @@ namespace GMMDemo
                     //See paper section 3.5
                     T.Add(new List<double>(new double[] { 0, 0, 0, 0, 0, 0, 0 }));
                 }
+            }
         }
 
         public List<Vector2> GenerateRandomPoints(int num_of_points, int xmax, int ymax) //x and y range from 0
@@ -500,7 +510,7 @@ namespace GMMDemo
             num_levels = levels;
             num_gaussian = num_gaussians;
             int iter = 0;
-            int max_iter = 100;//maximum iterations
+            int max_iter = 80;//maximum iterations
             double log_diff_thresh = 1E-9;//loglikelihood difference threshold
             double class_prior_thresh = 0.01;//class prior threshold
             double log_diff = 0;

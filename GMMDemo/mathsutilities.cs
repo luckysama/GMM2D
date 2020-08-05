@@ -134,8 +134,8 @@ namespace GMMDemo
         {
             //init with zeros
             miu = miu_init;
-            Sigma = new Matrix22(800, rand.Next(-100, 100),
-                                rand.Next(-100, 100), 800); ;
+            Sigma = new Matrix22(800, rand.Next(-10, 10),
+                                rand.Next(-10, 10), 800); ;
         }
 
         /// <summary>
@@ -198,8 +198,8 @@ namespace GMMDemo
 
                 }
                 //init covariance
-                Sigma = new Matrix22(800, rand.Next(-100, 100),
-                                rand.Next(-100, 100), 800);
+                Sigma = new Matrix22(500, rand.Next(-10, 10),
+                                rand.Next(-10, 10), 500);
             }
         }
     }
@@ -280,18 +280,108 @@ namespace GMMDemo
     /// </summary>
     public class InitGMM
     {
-        /// <summary>
-        /// Calculate multivariate normal probablity density function. 
-        /// Hardcoded for Vector2 and Matrix22 datatype.
-        /// Use double precision to increase robustness.
-        /// </summary>
-        /// <param name="pt"></param>
-        /// <param name="miu"></param>
-        /// <param name="covariance"></param>
-        /// <returns></returns>
-        public static List<Vector2> KMeans(List<Vector2> pt, int num_clusters)
+        public List<Vector2> pts;
+        public int num_clusters;
+        Random rand = new Random();
+
+        public List<Vector2> RandomPoint(int num_clusters)
         {
-            return null;
+            return pts.OrderBy(x => rand.Next()).Take(num_clusters).ToList();
+        }
+
+        public List<int> ClosestCentroid(List<Vector2> init_means)
+        {
+            List<int> closest_centroid = new List<int>();
+            foreach (Vector2 pt in pts)
+            {
+                List<double> dist_list = new List<double>();
+                foreach (Vector2 centroid in init_means)
+                {
+                    dist_list.Add(Math.Pow(pt.x - centroid.x, 2) + Math.Pow(pt.y - centroid.y, 2));
+                }
+                closest_centroid.Add(dist_list.IndexOf(dist_list.Min()));
+            }
+            return closest_centroid;
+        }
+
+        public List<Vector2> ShiftCentroid(List<int> closest_centroid)
+        {
+            List<Vector2> centroid = new List<Vector2>(num_clusters);
+            List<int> point_per_cluster = new List<int>(num_clusters);
+            for ( int i = 0; i < num_clusters; i++)
+            {
+                centroid.Add(new Vector2());
+                point_per_cluster.Add(0);
+            }
+
+            for (int i = 0; i < pts.Count(); i++)
+            {
+                centroid[closest_centroid[i]].x += pts[i].x;
+                centroid[closest_centroid[i]].y += pts[i].y;
+                point_per_cluster[closest_centroid[i]] += 1;
+            }
+
+            for (int i = 0; i < num_clusters; i++)
+            {
+                centroid[i].x /= point_per_cluster[i];
+                centroid[i].y /= point_per_cluster[i];
+            }
+
+            return centroid;
+        }
+
+        public bool CloseCentroid(List<Vector2> old_centroid, List<Vector2> centroid)
+        {
+            double centroid_diff_thresh = 0.01;
+            double centroid_diff = 0;
+
+            for (int i = 0; i < num_clusters; i++)
+            {
+                centroid_diff += Math.Pow(old_centroid[i].x - centroid[i].x, 2) + Math.Pow(old_centroid[i].y - centroid[i].y, 2);
+            }
+
+            Console.WriteLine(centroid_diff);
+
+            if (centroid_diff < centroid_diff_thresh)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public List<Vector2> KMeans(List<Vector2> pts_init, int num_clusters_init)
+        {
+            pts = pts_init;
+            num_clusters = num_clusters_init;
+            int num_points = pts.Count();
+
+            if (num_points <= num_clusters)
+            {
+                for (int i = 0; i < num_clusters - num_points; i++)
+                {
+                    pts.Add(new Vector2((float)rand.NextDouble() + pts[0].x, (float)rand.NextDouble() + pts[0].y));
+                }
+                return pts;
+            }
+            else
+            {
+                int iter_counter = 0;
+                List<Vector2> init_centroid = RandomPoint(num_clusters);
+                List<int> closest_centroid = new List<int>();
+                List<Vector2> centroid = init_centroid;
+                List<Vector2> old_centroid = init_centroid;
+                do
+                {
+                    old_centroid = centroid;
+                    closest_centroid = ClosestCentroid(old_centroid);
+                    centroid = ShiftCentroid(closest_centroid);
+                    iter_counter++;
+                } while (!CloseCentroid(old_centroid, centroid) && iter_counter <= 50);
+                return centroid;
+            }
         }
     }
     public class ColorList
