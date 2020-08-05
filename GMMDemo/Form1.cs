@@ -44,7 +44,8 @@ namespace GMMDemo
         bool fit_ran = false;
         bool use_random_colors;
         bool drop_gaussians;
-   
+        bool kmeans_init;
+
         GMM gmm;
 
         private void UpdateConfigurationUnputs()
@@ -56,6 +57,7 @@ namespace GMMDemo
             viewed_level = (int)ViewedLayerNumber.Value;
             use_random_colors = (bool)useRandomColors.Checked;
             drop_gaussians = (bool)dropGaussians.Checked;
+            kmeans_init = (bool)KmeansInit.Checked;
             fit_ran = false;
         }
 
@@ -94,7 +96,7 @@ namespace GMMDemo
             drawingGaussians = null;
             this.Refresh();
             DateTime time_start = DateTime.Now;
-            (drawingGaussians, drawingPts) = gmm.FitGaussians(num_of_fits, num_of_levels);
+            (drawingGaussians, drawingPts) = gmm.FitGaussians(num_of_fits, num_of_levels, kmeans_init);
             DateTime time_end = DateTime.Now;
 
             fit_ran = true;
@@ -377,6 +379,11 @@ namespace GMMDemo
                 label_status.Text = "Loaded subsampled 2D Scan with " + num_of_points + " points at " + DateTime.Now;
             }
             
+            this.Refresh();
+        }
+        private void kmeansInit_CheckedChanged(object sender, EventArgs e)
+        {
+            kmeans_init = (bool)KmeansInit.Checked;
             this.Refresh();
         }
     }

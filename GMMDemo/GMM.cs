@@ -43,24 +43,64 @@ namespace GMMDemo
         /// <param name="level">
         /// Level index
         /// </param>
-        public void InitLevel(int level)
+        public void InitLevel(int level, bool kmeans_init)
         {
-            int num_level_gaussians = GetLevel(level).Count;
-            for (int i = 0; i < num_level_gaussians; i++)
+            InitGMM init_GMM = new InitGMM();
+            IEnumerable<int> current_level_gaussians = GetLevel(level);
+
+            //TODO: initialize gaussians at smaller scale for deeper levels, only within the parent domain
+            //gau.Sigma.m00 /= level + 1;
+            //gau.Sigma.m11 /= level + 1;
+            if (kmeans_init)
             {
-                //Each gaussian is randomly initialized at four corners
-                Gaussian_2D gau = new Gaussian_2D(rand, (i % 8) + 1, true);
+                List<Vector2> mius = new List<Vector2>();
+                if (level != 0)
+                {
+                    IEnumerable<int> parent_level_gaussians = GetLevel(level - 1);
+                    foreach (int i in parent_level_gaussians)
+                    {
+                        List<Vector2> parent_pts = new List<Vector2>();
+                        foreach (Vector2 pt in pts)
+                        {
+                            if (pt.gaussian_idx[level - 1] == i)
+                            {
+                                parent_pts.Add(pt);
+                            }
+                        }
+                        List<Vector2> mius_i = init_GMM.KMeans(parent_pts, num_gaussian);
+                        mius = mius.Concat(mius_i).ToList();
+                    }
+                }
+                else
+                {
+                    mius = init_GMM.KMeans(pts, num_gaussian);
+                }
 
-                //TODO: initialize gaussians at smaller scale for deeper levels, only within the parent domain
-                //gau.Sigma.m00 /= level + 1;
-                //gau.Sigma.m11 /= level + 1;
+                foreach ( Vector2 miu in mius)
+                {
+                    Gaussian_2D gau = new Gaussian_2D(rand, miu);
+                    gaussian_list.Add(gau);
+                    //All gaussians at each level are initialized with equal class prior
+                    class_prior.Add(1 / (double)(num_gaussian));
+                    //A list of constitute sufficient statistics for updating gaussian parameters in parallel.
+                    //See paper section 3.5
+                    T.Add(new List<double>(new double[] { 0, 0, 0, 0, 0, 0, 0 }));
+                }
+            }
+            else
+            {
+                foreach (int i in current_level_gaussians)
+                {
+                    //Each gaussian is randomly initialized at four corners
+                    Gaussian_2D gau = new Gaussian_2D(rand, (i % 8) + 1, true);
 
-                gaussian_list.Add(gau);
-                //All gaussians at each level are initialized with equal class prior
-                class_prior.Add(1 / (double)(num_gaussian));
-                //A list of constitute sufficient statistics for updating gaussian parameters in parallen.
-                //See paper section 3.5
-                T.Add(new List<double>(new double[] { 0, 0, 0, 0, 0, 0, 0 }));
+                    gaussian_list.Add(gau);
+                    //All gaussians at each level are initialized with equal class prior
+                    class_prior.Add(1 / (double)(num_gaussian));
+                    //A list of constitute sufficient statistics for updating gaussian parameters in parallen.
+                    //See paper section 3.5
+                    T.Add(new List<double>(new double[] { 0, 0, 0, 0, 0, 0, 0 }));
+                }
             }
         }
 
@@ -465,12 +505,12 @@ namespace GMMDemo
         /// </summary>
         /// <param name="num_gaussians"></param>
         /// <returns></returns>
-        public (List<Gaussian_2D>, List<Vector2>) FitGaussians(int num_gaussians, int levels)
+        public (List<Gaussian_2D>, List<Vector2>) FitGaussians(int num_gaussians, int levels, bool kmeans_init)
         {
             num_levels = levels;
             num_gaussian = num_gaussians;
             int iter = 0;
-            int max_iter = 100;//maximum iterations
+            int max_iter = 80;//maximum iterations
             double log_diff_thresh = 1E-9;//loglikelihood difference threshold
             double class_prior_thresh = 0.01;//class prior threshold
             double log_diff = 0;
@@ -501,7 +541,7 @@ namespace GMMDemo
                 //EM algo
                 for (int l = 0; l < num_levels; l++)
                 {
-                    InitLevel(l);
+                    InitLevel(l, kmeans_init);
                     do
                     {
                         //E-Step
