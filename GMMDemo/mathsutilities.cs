@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace GMMDemo
 {
@@ -121,7 +122,8 @@ namespace GMMDemo
     {
         public Vector2 miu; //mean
         public Matrix22 Sigma; //variance
-
+        public bool selected; //Flag if this gaussian is selected by the user
+        public bool placeholder; //Flag if gaussian is a placeholder or not
         public bool dropped = false;
         public Gaussian_2D()
         {
@@ -136,6 +138,8 @@ namespace GMMDemo
             miu = miu_init;
             Sigma = new Matrix22(800, rand.Next(-10, 10),
                                 rand.Next(-10, 10), 800); ;
+            selected = true;
+            placeholder = false;
         }
 
         /// <summary>
@@ -395,7 +399,6 @@ namespace GMMDemo
             colors.Add(Color.Green);
             colors.Add(Color.Red);
             colors.Add(Color.Orange);
-            colors.Add(Color.Yellow);
 
         }
 

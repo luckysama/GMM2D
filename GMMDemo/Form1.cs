@@ -35,6 +35,8 @@ namespace GMMDemo
         Color ground_truth_color = Color.Blue;
         Color polygon_color = Color.LightBlue;
         Color circle_color = Color.Purple;
+        Color unselected_gaussian = Color.Black;
+        Color selected_gaussian = Color.Yellow;
 
 
         int drawing_size_x = 2;
@@ -51,6 +53,11 @@ namespace GMMDemo
         bool use_random_colors;
         bool drop_gaussians;
         bool kmeans_init;
+
+        bool manual_mode = false;
+        bool selection_mode = false;
+        int manual_level = 0;
+        Vector2 mouse_position = new Vector2(0, 0);
 
         GMM gmm;
 
@@ -86,13 +93,17 @@ namespace GMMDemo
             gmm.pts = null;
             gmm.sample_gaussian_list = null;
             ClearDrawingData();
+
+            manual_mode = false;
+            manual_level = 0;
+            fitMode.Text = "Auto";
             label_status.Text = "Memory cleared at " + DateTime.Now;
         }
 
         private void regenerateRandomDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ClearDrawingData();
-            drawingPts = gmm.GenerateRandomPoints(num_of_points, groupbox_canvas.Width, groupbox_canvas.Height);
+            drawingPts = gmm.GenerateRandomPoints(num_of_points, drawingCanvas.Width, drawingCanvas.Height);
             fit_ran = false;
             label_status.Text = "Generated " + num_of_points + " new random points at " + DateTime.Now;
             this.Refresh();
@@ -140,7 +151,7 @@ namespace GMMDemo
             this.Refresh();
         }
 
-        private void groupbox_canvans_Paint(object sender, PaintEventArgs e)
+        private void drawingCanvasPaint(object sender, PaintEventArgs e)
         {
             Random random_color = new Random();
             ColorList ellipse_colors = new ColorList();
@@ -152,11 +163,11 @@ namespace GMMDemo
             drawing_size_x = e.ClipRectangle.Width;
             drawing_size_y = e.ClipRectangle.Height;
 
-            Graphics g = e.Graphics;
+            Graphics g = drawingCanvas.CreateGraphics();
 
             //draw the polygon first, which will be the background of everything else
             if (drawingPolygons != null)
-            {                
+            {
                 SolidBrush polygonbrush = new SolidBrush(polygon_color);
                 foreach (Polygon poly in drawingPolygons)
                 {
@@ -171,15 +182,16 @@ namespace GMMDemo
                 {
                     g.FillEllipse(circleBrush, new Rectangle((int)(vec.x - 10), (int)(vec.y - 10), 20, 20));
                 }
-            }    
+            }
 
             if (drawingPts != null && drawingPts.Count > 0 && show_points)
             {
                 SolidBrush defaultBrush = new SolidBrush(pt_drawing_color);
-                
+
                 if (viewed_level <= drawingPts[0].gaussian_idx.Count && fit_ran)
                 {
-                    for(int parent_count = 0; parent_count < (int)Math.Pow(num_of_fits, viewed_level); parent_count++)
+                    // Creating a list of colors based on the number of gaussians present in a level. Each gaussian holds a cluster of points with a different color.
+                    for (int parent_count = 0; parent_count < (int)Math.Pow(num_of_fits, viewed_level); parent_count++)
                     {
                         if (use_random_colors)
                         {
@@ -191,6 +203,7 @@ namespace GMMDemo
                         }
                     }
 
+                    // cumulative stores a value used in indexing the gaussian_idx list in order to determine what color a point should be
                     int cumulative = 0;
                     if (viewed_level > 1)
                     {
@@ -201,6 +214,7 @@ namespace GMMDemo
                     }
                     else cumulative = 0;
 
+                    // This method of point coloring assumes a balanced HGMM tree. 
                     foreach (Vector2 pt in drawingPts)
                     {
                         if (viewed_level == 1)
@@ -210,7 +224,7 @@ namespace GMMDemo
                         else
                         {
                             int check = pt.gaussian_idx[0];
-                            point_color_index = pt.gaussian_idx[viewed_level-1] - cumulative;
+                            point_color_index = pt.gaussian_idx[viewed_level - 1] - cumulative;
                         }
                         SolidBrush brush = new SolidBrush(point_colors[point_color_index]);
                         g.FillRectangle(brush, pt.x - 1, pt.y - 1, 3, 3); //a 9 pixel dot
@@ -223,16 +237,43 @@ namespace GMMDemo
                         g.FillRectangle(defaultBrush, pt.x - 1, pt.y - 1, 3, 3); //a 9 pixel dot
                     }
                 }
-                
+
             }
-            if (drawingGaussians != null && show_fits)
+
+            if (drawingGaussians != null && manual_mode)
+            {
+                Pen unselected = new Pen(unselected_gaussian, 2);
+                Pen selected = new Pen(selected_gaussian, 2);
+                foreach (Gaussian_2D gaussian in drawingGaussians)
+                {
+                    if (!gaussian.placeholder)
+                    {
+                        if (gaussian.selected && selection_mode)
+                        {
+                            Console.WriteLine("selected!");
+                            Draw3SigmaEllipse(g, gaussian, selected);
+                        }
+                        else
+                        {
+                            Draw3SigmaEllipse(g, gaussian, unselected);
+                        }
+
+                    }
+
+                }
+            }
+            if (drawingGaussians != null && show_fits && !manual_mode)
             {
                 if (!fit_ran)
                 {
                     Pen ground_truth_pen = new Pen(ground_truth_color, 2);
                     foreach (Gaussian_2D gaussian in drawingGaussians)
                     {
+                        if (!gaussian.placeholder)
+                        {
                             Draw3SigmaEllipse(g, gaussian, ground_truth_pen);
+                        }
+                       
                     }
                 }
                 else
@@ -250,20 +291,22 @@ namespace GMMDemo
                             ellipse_pen = new Pen(ellipse_color, 2);
                             cumulative_limit += (int)Math.Pow(num_of_fits, layer_count);
                         }
-                       
+
                         if (gaussian.dropped && drop_gaussians)
                         {
                             gaussian_count++;
                             continue;
                         }
-                        Draw3SigmaEllipse(g, gaussian, ellipse_pen);
+                        if (!gaussian.placeholder)
+                        {
+                            Draw3SigmaEllipse(g, gaussian, ellipse_pen);
+                        }
                         gaussian_count++;
                     }
                 }
-                
+
             }
         }
-
         /// How to draw the 3-sigma error ellipse of a given 2D Gaussian?
         /// https://math.stackexchange.com/questions/395698/fast-way-to-calculate-eigen-of-2x2-matrix-using-a-formula
         /// https://www.visiondummy.com/2014/04/draw-error-ellipse-representing-covariance-matrix/
@@ -311,7 +354,7 @@ namespace GMMDemo
                                             y_axis));
             g.ResetTransform();
         }
-
+       
         private void rESETMEMORYToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ResetSimulationMemory();
@@ -319,11 +362,6 @@ namespace GMMDemo
         }
 
         private void dataToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void groupbox_canvas_Enter_1(object sender, EventArgs e)
         {
 
         }
@@ -351,11 +389,6 @@ namespace GMMDemo
             this.Refresh();
         }
 
-        private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
-        {
-
-        }
-
         private void load2DLIDARScanToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ClearDrawingData();
@@ -375,7 +408,7 @@ namespace GMMDemo
                 var pointsFile = sliceImporter2D.FileName;
 
                 List<String> lines = File.ReadAllLines(pointsFile).ToList();
-                drawingPts = gmm.get2DScan(num_of_points, lines, groupbox_canvas.Width, groupbox_canvas.Height);
+                drawingPts = gmm.get2DScan(num_of_points, lines, drawingCanvas.Width, drawingCanvas.Height);
                 fit_ran = false;
             }
             if(drawingPts.Count < num_of_points)
@@ -405,6 +438,82 @@ namespace GMMDemo
         {
             show_fits = (bool)showFits.Checked;
             this.Refresh();
+        }
+
+        private void fitLevelToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            manual_mode = true;
+            selection_mode = false;
+            manual_level = 1;
+            fitMode.Text = "Manual level " + manual_level;
+
+            // This gaussian generation is simply for testing purposes, please generate gaussian using EM algorithm, and mark them as placeholder or not.
+            Random gauss_rand = new Random();
+            drawingGaussians = new List<Gaussian_2D>();
+            for (int loop=0; loop < num_of_fits; loop++)
+            {
+                Gaussian_2D gaussian = new Gaussian_2D(gauss_rand, new Vector2(gauss_rand.Next(0, drawingCanvas.Width), gauss_rand.Next(0, drawingCanvas.Height)));
+                drawingGaussians.Add(gaussian);
+            }
+
+            label_status.Text = "Manually fit a level at " + DateTime.Now;
+            this.Refresh();
+        }
+
+        private void selectGaussiansToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            selection_mode = true;
+            this.Refresh();
+        }
+
+        private void formClickDetect(object sender, MouseEventArgs e)
+        {
+            if (selection_mode && drawingGaussians != null)
+            {
+                //Get mouse position
+                mouse_position.x = e.Location.X;
+                mouse_position.y = e.Location.Y;
+
+                // Determine starting and ending index to query gaussians at current level
+                int start = 0;
+                if (manual_level > 1)
+                {
+                    for (int level = 1; level < manual_level; level++)
+                    {
+                        start += (int)Math.Pow(num_of_fits, level);
+                    }
+                }
+                else
+                {
+                    start = 0;
+                }
+                int end = start + (int)Math.Pow(num_of_fits, manual_level);
+
+                //Find non-placeholder gaussian with shortest mean distance to mouse.
+                float minDistance = 1000000000000000;
+                int select = 0;
+                for (int i=start; i<end; i++)
+                {
+                    if (!drawingGaussians[i].placeholder)
+                    {
+                        float distance = (float)Math.Sqrt(Math.Pow(drawingGaussians[i].miu.x - mouse_position.x, 2) + Math.Pow(drawingGaussians[i].miu.y - mouse_position.y, 2));
+                        if(distance < minDistance)
+                        {
+                            minDistance = distance;
+                            select = i;
+                        }
+                    }
+                }
+                if (drawingGaussians[select].selected)
+                {
+                    drawingGaussians[select].selected = false;
+                }
+                else
+                {
+                    drawingGaussians[select].selected = true;
+                }
+                this.Refresh();
+            }
         }
     }
 }
