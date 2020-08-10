@@ -45,21 +45,25 @@ namespace GMMDemo
         /// </param>
         public void InitLevel(int level, bool kmeans_init)
         {
-            InitGMM init_GMM = new InitGMM();
+            Console.WriteLine("level {0} begin ", level);
+
+            KMeans kMeans = new KMeans();
+            FuzzyCMeans fuzzyCMeans = new FuzzyCMeans();
             IEnumerable<int> current_level_gaussians = GetLevel(level);
 
             //TODO: initialize gaussians at smaller scale for deeper levels, only within the parent domain
             //gau.Sigma.m00 /= level + 1;
             //gau.Sigma.m11 /= level + 1;
-            if (kmeans_init)
+            if (kmeans_init) // kmeans_init || FCM_init
             {
-                List<Vector2> mius = new List<Vector2>();
+                List<Gaussian_2D> gau_list = new List<Gaussian_2D>();
                 if (level != 0)
                 {
                     IEnumerable<int> parent_level_gaussians = GetLevel(level - 1);
                     foreach (int i in parent_level_gaussians)
                     {
                         List<Vector2> parent_pts = new List<Vector2>();
+                        List<Gaussian_2D> gau_list_i = new List<Gaussian_2D>();
                         foreach (Vector2 pt in pts)
                         {
                             if (pt.gaussian_idx[level - 1] == i)
@@ -67,18 +71,43 @@ namespace GMMDemo
                                 parent_pts.Add(pt);
                             }
                         }
-                        List<Vector2> mius_i = init_GMM.KMeans(parent_pts, num_gaussian);
-                        mius = mius.Concat(mius_i).ToList();
+
+                        //if there are fewer points than num_gaussian in the parent gaussian, stop partition
+                        if (parent_pts.Count <= (num_gaussian + Math.Round(num_gaussian * 0.2)) || gaussian_list[i].partitioned == false)
+                        {
+                            Console.WriteLine("===========Stopping at gaussian {0}==============", i);
+                            gaussian_list[i].partitioned = false;
+                            for (int j = 0; j < num_gaussian; j++)
+                            {
+                                Gaussian_2D gau = new Gaussian_2D();
+                                gau.partitioned = false;
+                                gau.dropped = true;
+                                gau_list_i.Add(gau);
+                            }
+                            gau_list = gau_list.Concat(gau_list_i).ToList();
+                            continue;
+                        }
+
+                        //if (FCM_init)
+                        gau_list_i = fuzzyCMeans.FCM(parent_pts, num_gaussian);
+
+                        //else
+                        //gau_list_i = kMeans.KM(parent_pts, num_gaussian);
+                        gau_list = gau_list.Concat(gau_list_i).ToList();
+
                     }
                 }
                 else
                 {
-                    mius = init_GMM.KMeans(pts, num_gaussian);
+                    //if (FCM_init)
+                    gau_list = fuzzyCMeans.FCM(pts, num_gaussian);
+
+                    //else
+                    //gau_list = kMeans.KM(pts, num_gaussian);
                 }
 
-                foreach ( Vector2 miu in mius)
+                foreach ( Gaussian_2D gau in gau_list)
                 {
-                    Gaussian_2D gau = new Gaussian_2D(rand, miu);
                     gaussian_list.Add(gau);
                     //All gaussians at each level are initialized with equal class prior
                     class_prior.Add(1 / (double)(num_gaussian));
@@ -276,11 +305,10 @@ namespace GMMDemo
 
             float xScale = canvasWidth / xMax;
             float yScale = CanvasHeight / yMax;
-            foreach (Vector2 point in scanned_pts)
+            for (int i = 0; i< scanned_pts.Count; i++)
             {
-
-                point.x = (int)Math.Round(point.x * xScale);
-                point.y = (int)Math.Round(point.y * yScale);
+                scanned_pts[i].x = (int)Math.Round(scanned_pts[i].x * xScale);
+                scanned_pts[i].y = (int)Math.Round(scanned_pts[i].y * yScale);
 
             }
 
@@ -352,10 +380,19 @@ namespace GMMDemo
             {
                 List<double> pdf = new List<double>();
                 List<int> children = GetChild(parent_idx[i]);
+                MatrixMath matrixMath = new MatrixMath();
+
+                if (l != 0 && !gaussian_list[parent_idx[i]].partitioned)
+                {
+                    pts[i].gaussian_idx.Add(-1);
+                    pdf.Add(0);
+                    pdfs.Add(pdf);
+                    continue;
+                }
 
                 foreach (int j in children)
                 {
-                    pdf.Add(class_prior[j] * MatrixMath.MultivariateNormalPDF(pts[i],
+                    pdf.Add(class_prior[j] * matrixMath.MultivariateNormalPDF(pts[i],
                                                                             gaussian_list[j].miu,
                                                                             gaussian_list[j].Sigma));
                 }
@@ -380,16 +417,19 @@ namespace GMMDemo
         /// <param name="class_prior_thresh">
         /// Threshold for minimal class prior
         /// </param>
-        public void ClusterDrop(double class_prior_thresh)
+        public void ClusterDrop(int level)
         {
-            for (int i = class_prior.Count - 1; i >= 0; i--)
+            List<int> level_gaussian_idx = GetLevel(level);
+
+            //Pause EM, select gaussian
+
+            foreach (int idx in level_gaussian_idx)
             {
-                if (class_prior[i] < class_prior_thresh)
-                {
-                    Console.WriteLine("Dropping gaussian {0} with class_prior {1}", i, class_prior[i]);
-                    gaussian_list[i].dropped = true;
-                }
+                //if (gaussian.list[idx] not selected)
+                //  gaussian.list[idx].partitioned = false
+                //  Console.WriteLine("===========Stoping at gaussian {0}==============", i);
             }
+
         }
 
         /// <summary>
@@ -412,11 +452,18 @@ namespace GMMDemo
             {
                 List<double> pdf = new List<double>();//init pdfs of point i
                 List<int> children = GetChild(parent_idx[i]);
+                MatrixMath matrixMath = new MatrixMath();
 
+                if (l != 0 && !gaussian_list[parent_idx[i]].partitioned)
+                {
+                    pdf.Add(0);
+                    pdfs.Add(pdf);
+                    continue;
+                }
                 //numerator: P(point=i | gaussian=j) * P(gaussian=j)
                 foreach (int j in children)
                 {
-                    pdf.Add(class_prior[j] * MatrixMath.MultivariateNormalPDF(pts[i],
+                    pdf.Add(class_prior[j] * matrixMath.MultivariateNormalPDF(pts[i],
                                                                             gaussian_list[j].miu,
                                                                             gaussian_list[j].Sigma));
                 }
@@ -424,12 +471,10 @@ namespace GMMDemo
 
                 //denominator: sum(pdfs, axis = 1)
                 double sum = pdfs[i].Sum();
-
                 for ( int e = 0; e < pdf.Count; e++)
                 {
                     pdfs[i][e] /= sum;
                 }
-
                 //calculate T in parallel. See paper equation 5-7
                 foreach (int j in children)
                 {
@@ -437,19 +482,20 @@ namespace GMMDemo
                     T[j][1] += pdfs[i][j - children[0]] * pts[i].x;
                     T[j][2] += pdfs[i][j - children[0]] * pts[i].y;
                 }
-
                 //loglikelihood
                 logs.Add(Math.Log(sum));
-
                 //update the gaussian index that point i belong to at current level
                 current_idx[i] = children[pdfs[i].IndexOf(pdfs[i].Max())];
             }
 
             List<int> level_gaussians = GetLevel(l);
-            
             //Mean
             foreach (int j in level_gaussians)
             {
+                if (l != 0 && !gaussian_list[j].partitioned)
+                {
+                    continue;
+                }
                 T[j][1] /= T[j][0];
                 T[j][2] /= T[j][0];
             }
@@ -457,8 +503,12 @@ namespace GMMDemo
             //covariance
             for (int i = 0; i < pts.Count; ++i)
             {
-                List<int> children = GetChild(parent_idx[i]);
+                if (l != 0 && !gaussian_list[parent_idx[i]].partitioned)
+                {
+                    continue;
+                }
 
+                List<int> children = GetChild(parent_idx[i]);
                 foreach (int j in children)
                 {
                     T[j][3] += pdfs[i][j - children[0]] * Math.Pow(pts[i].x - T[j][1], 2);
@@ -466,7 +516,6 @@ namespace GMMDemo
                     T[j][6] += pdfs[i][j - children[0]] * Math.Pow(pts[i].y - T[j][2], 2);
                 }
             }
-
             return logs.Average();
         }
 
@@ -483,8 +532,12 @@ namespace GMMDemo
 
             foreach (int j in level_gaussians)
             {
-                int point_count = 0;
+                if (!gaussian_list[j].partitioned)
+                {
+                    continue;
+                }
 
+                int point_count = 0;
                 //count points in gaussian j
                 for ( int i = 0; i < pts.Count(); i++)
                 {
@@ -497,8 +550,10 @@ namespace GMMDemo
 
                 //Ensure at least one point
                 point_count++;
+
                 //class prior
                 class_prior[j] = T[j][0] / point_count;
+
                 //mean
                 gaussian_list[j].miu.x = (float)T[j][1];
                 gaussian_list[j].miu.y = (float)T[j][2];
@@ -517,7 +572,10 @@ namespace GMMDemo
                 {
                     T[j][i] = 0;
                 }
+
             }
+
+
         }
 
         /// <summary>
@@ -533,7 +591,6 @@ namespace GMMDemo
             int iter = 0;
             int max_iter = 80;//maximum iterations
             double log_diff_thresh = 1E-9;//loglikelihood difference threshold
-            double class_prior_thresh = 0.01;//class prior threshold
             double log_diff = 0;
             double loglikelihook_new = 0;
             double loglikelihook_old = 0;
@@ -546,39 +603,47 @@ namespace GMMDemo
             {   
                 if(pts[0].gaussian_idx.Count > 0)
                 {
-                    foreach (Vector2 pt in pts)
+                    for (int i = 0; i<pts.Count; i++)
                     {
-                        pt.gaussian_idx.Clear();
+                        pts[i].gaussian_idx.Clear();
                     }
                 }
-                
             }
 
             Console.WriteLine("Calculating...");
             if (pts != null)
             {
                 InitTree();
-
-                //EM algo
+                
                 for (int l = 0; l < num_levels; l++)
                 {
                     InitLevel(l, kmeans_init);
+                    //EM algo
                     do
                     {
+                        if (iter % 10 == 0)
+                        {
+                            Console.WriteLine("iter {0}  ", iter);
+                        }
+
                         //E-Step
                         loglikelihook_new = HEStep(l);
                         //Log difference
                         log_diff = Math.Abs(loglikelihook_old - loglikelihook_new);
-                        loglikelihook_old = loglikelihook_new;
+                        if (log_diff <= log_diff_thresh)
+                            break;
                         //M-Step
                         HMStep(l);
+
+                        loglikelihook_old = loglikelihook_new;
                         iter++;
-                    } while (log_diff >= log_diff_thresh && iter <= max_iter);
+                    } while (iter <= max_iter);
 
                     PointRegistration(l);
+                    ClusterDrop(l);//Drop clusters with insufficient support
 
                     iter = 0;//restart EM loop
-                    max_iter *= 5;//increase max interation for next level
+                    //max_iter *= 5;//increase max interation for next level
                     log_diff_thresh *= 100;//increase loglikelihood hold for next level
 
                     //Update parent list with current list => next level
@@ -586,10 +651,11 @@ namespace GMMDemo
                     {
                         parent_idx[i] = current_idx[i];
                     }
+                    Console.WriteLine("level {0} done ", l);
                 }
-                ClusterDrop(class_prior_thresh);
             }
             Console.WriteLine("Done!");
+
             return (gaussian_list, pts);
         }
 
