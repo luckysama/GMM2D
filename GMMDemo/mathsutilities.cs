@@ -349,7 +349,7 @@ namespace GMMDemo
                 centroid_diff += Math.Pow(old_centroid[i].x - centroid[i].x, 2) + Math.Pow(old_centroid[i].y - centroid[i].y, 2);
             }
 
-            Console.WriteLine(centroid_diff);
+            //Console.WriteLine(centroid_diff);
 
             if (centroid_diff < centroid_diff_thresh)
             {
@@ -432,11 +432,6 @@ namespace GMMDemo
                     sum += membership[i][j];
                 }
 
-                if (double.IsNaN(sum) || sum == 0.0)
-                {
-                    Console.WriteLine("===========Bad Sum=========");
-                }
-
                 for (int i = 0; i < pts.Count - 1; i++)
                 {
                     membership[i][j] /= sum;
@@ -501,7 +496,7 @@ namespace GMMDemo
                 centroid_diff += Math.Pow(old_centroid[i].x - centroid[i].x, 2) + Math.Pow(old_centroid[i].y - centroid[i].y, 2);
             }
 
-            Console.WriteLine(centroid_diff);
+            //Console.WriteLine(centroid_diff);
 
             if (centroid_diff < centroid_diff_thresh)
             {

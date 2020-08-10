@@ -103,13 +103,21 @@ namespace GMMDemo
             label_status.Text = "Calculating... ";
             drawingGaussians = null;
             this.Refresh();
-            DateTime time_start = DateTime.Now;
-            (drawingGaussians, drawingPts) = gmm.FitGaussians(num_of_fits, num_of_levels, kmeans_init);
-            DateTime time_end = DateTime.Now;
 
-            fit_ran = true;
-            label_status.Text = "Done in " + time_end.Subtract(time_start).TotalSeconds.ToString() + " seconds at " + DateTime.Now;
-            this.Refresh();
+            gmm.InitGMM();
+
+            for (int level = 0; level < num_of_levels; level++)
+            {
+                DateTime time_start = DateTime.Now;
+                (drawingGaussians, drawingPts) = gmm.FitGaussiansManual(num_of_fits, level, kmeans_init);
+                DateTime time_end = DateTime.Now;
+
+                label_status.Text = "Level " + level + " Done in " + time_end.Subtract(time_start).TotalSeconds.ToString() + " seconds at " + DateTime.Now;
+
+                fit_ran = true;
+                this.Refresh();
+
+            }
         }
 
         private void generateDummyGaussianDataToolStripMenuItem_Click_1(object sender, EventArgs e)
