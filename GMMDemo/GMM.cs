@@ -23,6 +23,37 @@ namespace GMMDemo
         public List<int> parent_idx = null;
         public int num_levels = 1;
 
+        public int iter = 0;
+        public int max_iter = 80;//maximum iterations
+        public double log_diff_thresh = 1E-9;//loglikelihood difference threshold
+
+        public void InitGMM()
+        {
+            gaussian_list = new List<Gaussian_2D>();
+            class_prior = new List<double>();
+            T = new List<List<double>>();
+            current_idx = new List<int>();
+            parent_idx = new List<int>();
+
+            for (int i = 0; i < pts.Count; i++)
+            {
+                current_idx.Add(-1);
+                parent_idx.Add(-1);
+            }
+
+            //Clear the gaussian property of all points
+            if (pts != null)
+            {
+                if (pts[0].gaussian_idx.Count > 0)
+                {
+                    for (int i = 0; i < pts.Count; i++)
+                    {
+                        pts[i].gaussian_idx.Clear();
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Initialize point - gaussian list of parent and child level
         /// </summary>
@@ -421,8 +452,6 @@ namespace GMMDemo
         {
             List<int> level_gaussian_idx = GetLevel(level);
 
-            //Pause EM, select gaussian
-
             foreach (int idx in level_gaussian_idx)
             {
                 //if (gaussian.list[idx] not selected)
@@ -655,6 +684,59 @@ namespace GMMDemo
                 }
             }
             Console.WriteLine("Done!");
+
+            return (gaussian_list, pts);
+        }
+        public (List<Gaussian_2D>, List<Vector2>) FitGaussiansManual(int num_gaussians, int level, bool kmeans_init)
+        {
+            num_gaussian = num_gaussians;
+            iter = 0;
+            double log_diff = 0;
+            double loglikelihook_new = 0;
+            double loglikelihook_old = 0;
+
+            if (pts == null)
+            {
+                return (null, null);
+            }
+
+            //EM algo
+            InitLevel(level, kmeans_init);
+
+            Console.WriteLine("Calculating...");
+            do
+            {
+                if (iter % 10 == 0)
+                {
+                    Console.WriteLine("iter {0}  ", iter);
+                }
+
+                //E-Step
+                loglikelihook_new = HEStep(level);
+                //Log difference
+                log_diff = Math.Abs(loglikelihook_old - loglikelihook_new);
+                if (log_diff <= log_diff_thresh)
+                    break;
+                //M-Step
+                HMStep(level);
+
+                loglikelihook_old = loglikelihook_new;
+                iter++;
+            } while (iter <= max_iter);
+
+            PointRegistration(level);
+            ClusterDrop(level);//Drop clusters with insufficient support
+
+            //max_iter *= 5;//increase max interation for next level
+            //log_diff_thresh *= 100;//increase loglikelihood hold for next level
+
+            //Update parent list with current list => next level
+            for (int i = 0; i < pts.Count; i++)
+            {
+                parent_idx[i] = current_idx[i];
+            }
+
+            Console.WriteLine("level {0} done ", level);
 
             return (gaussian_list, pts);
         }
