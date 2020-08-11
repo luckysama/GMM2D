@@ -38,7 +38,14 @@
             this.drawDummyGaussianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.generateLiDARDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.load2DLIDARScanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.manualFitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fitLevelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.selectGaussiansToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.finishToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupbox_canvas = new System.Windows.Forms.GroupBox();
+            this.drawingCanvas = new System.Windows.Forms.Panel();
+            this.fitMode = new System.Windows.Forms.Label();
+            this.fitLabel = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.showPoints = new System.Windows.Forms.CheckBox();
             this.showFits = new System.Windows.Forms.CheckBox();
@@ -84,7 +91,8 @@
             // 
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.dataToolStripMenuItem});
+            this.dataToolStripMenuItem,
+            this.manualFitToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1904, 24);
@@ -147,11 +155,44 @@
             this.load2DLIDARScanToolStripMenuItem.Text = "Load 2D LIDAR Scan";
             this.load2DLIDARScanToolStripMenuItem.Click += new System.EventHandler(this.load2DLIDARScanToolStripMenuItem_Click);
             // 
+            // manualFitToolStripMenuItem
+            // 
+            this.manualFitToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fitLevelToolStripMenuItem,
+            this.selectGaussiansToolStripMenuItem,
+            this.finishToolStripMenuItem});
+            this.manualFitToolStripMenuItem.Name = "manualFitToolStripMenuItem";
+            this.manualFitToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
+            this.manualFitToolStripMenuItem.Text = "Manual Fit";
+            // 
+            // fitLevelToolStripMenuItem
+            // 
+            this.fitLevelToolStripMenuItem.Name = "fitLevelToolStripMenuItem";
+            this.fitLevelToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.fitLevelToolStripMenuItem.Text = "Fit Level";
+            this.fitLevelToolStripMenuItem.Click += new System.EventHandler(this.fitLevelToolStripMenuItem_Click);
+            // 
+            // selectGaussiansToolStripMenuItem
+            // 
+            this.selectGaussiansToolStripMenuItem.Name = "selectGaussiansToolStripMenuItem";
+            this.selectGaussiansToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.selectGaussiansToolStripMenuItem.Text = "Select Gaussians";
+            this.selectGaussiansToolStripMenuItem.Click += new System.EventHandler(this.selectGaussiansToolStripMenuItem_Click);
+            // 
+            // finishToolStripMenuItem
+            // 
+            this.finishToolStripMenuItem.Name = "finishToolStripMenuItem";
+            this.finishToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.finishToolStripMenuItem.Text = "Finish";
+            // 
             // groupbox_canvas
             // 
             this.groupbox_canvas.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupbox_canvas.Controls.Add(this.drawingCanvas);
+            this.groupbox_canvas.Controls.Add(this.fitMode);
+            this.groupbox_canvas.Controls.Add(this.fitLabel);
             this.groupbox_canvas.Controls.Add(this.label_status);
             this.groupbox_canvas.Controls.Add(this.panel1);
             this.groupbox_canvas.Location = new System.Drawing.Point(0, 0);
@@ -160,8 +201,33 @@
             this.groupbox_canvas.TabIndex = 2;
             this.groupbox_canvas.TabStop = false;
             this.groupbox_canvas.Text = "Data Plot";
-            this.groupbox_canvas.Paint += new System.Windows.Forms.PaintEventHandler(this.groupbox_canvans_Paint);
-            this.groupbox_canvas.Enter += new System.EventHandler(this.groupbox_canvas_Enter_1);
+            // 
+            // drawingCanvas
+            // 
+            this.drawingCanvas.Location = new System.Drawing.Point(0, 27);
+            this.drawingCanvas.Name = "drawingCanvas";
+            this.drawingCanvas.Size = new System.Drawing.Size(1904, 828);
+            this.drawingCanvas.TabIndex = 20;
+            this.drawingCanvas.Paint += new System.Windows.Forms.PaintEventHandler(this.drawingCanvasPaint);
+            this.drawingCanvas.MouseClick += new System.Windows.Forms.MouseEventHandler(this.formClickDetect);
+            // 
+            // fitMode
+            // 
+            this.fitMode.AutoSize = true;
+            this.fitMode.Location = new System.Drawing.Point(60, 1001);
+            this.fitMode.Name = "fitMode";
+            this.fitMode.Size = new System.Drawing.Size(29, 13);
+            this.fitMode.TabIndex = 19;
+            this.fitMode.Text = "Auto";
+            // 
+            // fitLabel
+            // 
+            this.fitLabel.AutoSize = true;
+            this.fitLabel.Location = new System.Drawing.Point(6, 1001);
+            this.fitLabel.Name = "fitLabel";
+            this.fitLabel.Size = new System.Drawing.Size(48, 13);
+            this.fitLabel.TabIndex = 18;
+            this.fitLabel.Text = "Fit Mode";
             // 
             // panel1
             // 
@@ -425,10 +491,6 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
-            // sliceImporter2D
-            // 
-            this.sliceImporter2D.FileOk += new System.ComponentModel.CancelEventHandler(this.openFileDialog1_FileOk);
-            // 
             // GMMDemoWnd
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -492,6 +554,13 @@
         private System.Windows.Forms.Label GaussiansPerLevel;
         private System.Windows.Forms.Label GaussianSamples;
         private System.Windows.Forms.Label generatedPoints;
+        private System.Windows.Forms.ToolStripMenuItem manualFitToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fitLevelToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem selectGaussiansToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem finishToolStripMenuItem;
+        private System.Windows.Forms.Label fitMode;
+        private System.Windows.Forms.Label fitLabel;
+        private System.Windows.Forms.Panel drawingCanvas;
     }
 }
 

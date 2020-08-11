@@ -673,6 +673,7 @@ namespace GMMDemo
 
                     iter = 0;//restart EM loop
                     //max_iter *= 5;//increase max interation for next level
+
                     log_diff_thresh *= 100;//increase loglikelihood hold for next level
 
                     //Update parent list with current list => next level

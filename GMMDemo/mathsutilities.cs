@@ -122,6 +122,8 @@ namespace GMMDemo
     {
         public Vector2 miu; //mean
         public Matrix22 Sigma; //variance
+        public bool selected; //Flag if this gaussian is selected by the user
+        public bool placeholder; //Flag if gaussian is a placeholder or not
         public bool partitioned = true;
         public bool dropped = false;
 
@@ -136,8 +138,10 @@ namespace GMMDemo
         {
             //init with zeros
             miu = miu_init;
-            Sigma = new Matrix22(500, rand.Next(-10, 10),
-                                rand.Next(-10, 10), 500); ;
+            Sigma = new Matrix22(800, rand.Next(-10, 10),
+                                rand.Next(-10, 10), 800); ;
+            selected = true;
+            placeholder = false;
         }
 
         /// <summary>
@@ -551,7 +555,6 @@ namespace GMMDemo
             colors.Add(Color.Green);
             colors.Add(Color.Red);
             colors.Add(Color.Orange);
-            colors.Add(Color.Yellow);
 
         }
 
