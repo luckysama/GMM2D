@@ -48,7 +48,6 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.showPoints = new System.Windows.Forms.CheckBox();
             this.showFits = new System.Windows.Forms.CheckBox();
-            this.KmeansInit = new System.Windows.Forms.CheckBox();
             this.button2 = new System.Windows.Forms.Button();
             this.useRandomColors = new System.Windows.Forms.CheckBox();
             this.button1 = new System.Windows.Forms.Button();
@@ -66,6 +65,9 @@
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.sliceImporter2D = new System.Windows.Forms.OpenFileDialog();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+            this.SelectAllGaussiansButton = new System.Windows.Forms.ToolStripMenuItem();
+            this.InitializationSelectionBox = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.groupbox_canvas.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -157,6 +159,7 @@
             // 
             this.manualFitToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ManualFitButton,
+            this.SelectAllGaussiansButton,
             this.finalizeManualGMM});
             this.manualFitToolStripMenuItem.Name = "manualFitToolStripMenuItem";
             this.manualFitToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
@@ -222,9 +225,10 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.label1);
+            this.panel1.Controls.Add(this.InitializationSelectionBox);
             this.panel1.Controls.Add(this.showPoints);
             this.panel1.Controls.Add(this.showFits);
-            this.panel1.Controls.Add(this.KmeansInit);
             this.panel1.Controls.Add(this.button2);
             this.panel1.Controls.Add(this.useRandomColors);
             this.panel1.Controls.Add(this.button1);
@@ -249,7 +253,7 @@
             this.showPoints.AutoSize = true;
             this.showPoints.Checked = true;
             this.showPoints.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.showPoints.Location = new System.Drawing.Point(262, 52);
+            this.showPoints.Location = new System.Drawing.Point(220, 45);
             this.showPoints.Name = "showPoints";
             this.showPoints.Size = new System.Drawing.Size(85, 17);
             this.showPoints.TabIndex = 18;
@@ -262,7 +266,7 @@
             this.showFits.AutoSize = true;
             this.showFits.Checked = true;
             this.showFits.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.showFits.Location = new System.Drawing.Point(262, 75);
+            this.showFits.Location = new System.Drawing.Point(220, 71);
             this.showFits.Name = "showFits";
             this.showFits.Size = new System.Drawing.Size(72, 17);
             this.showFits.TabIndex = 17;
@@ -270,23 +274,9 @@
             this.showFits.UseVisualStyleBackColor = true;
             this.showFits.CheckedChanged += new System.EventHandler(this.showFits_CheckedChanged);
             // 
-            // KmeansInit
-            // 
-            this.KmeansInit.AutoSize = true;
-            this.KmeansInit.Checked = true;
-            this.KmeansInit.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.KmeansInit.Location = new System.Drawing.Point(262, 100);
-            this.KmeansInit.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
-            this.KmeansInit.Name = "KmeansInit";
-            this.KmeansInit.Size = new System.Drawing.Size(84, 17);
-            this.KmeansInit.TabIndex = 16;
-            this.KmeansInit.Text = "K-means Init";
-            this.KmeansInit.UseVisualStyleBackColor = true;
-            this.KmeansInit.CheckedChanged += new System.EventHandler(this.kmeansInit_CheckedChanged);
-            // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(109, 140);
+            this.button2.Location = new System.Drawing.Point(30, 144);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(147, 27);
             this.button2.TabIndex = 14;
@@ -297,7 +287,7 @@
             // useRandomColors
             // 
             this.useRandomColors.AutoSize = true;
-            this.useRandomColors.Location = new System.Drawing.Point(262, 150);
+            this.useRandomColors.Location = new System.Drawing.Point(220, 99);
             this.useRandomColors.Name = "useRandomColors";
             this.useRandomColors.Size = new System.Drawing.Size(98, 17);
             this.useRandomColors.TabIndex = 13;
@@ -470,6 +460,36 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
+            // SelectAllGaussiansButton
+            // 
+            this.SelectAllGaussiansButton.Name = "SelectAllGaussiansButton";
+            this.SelectAllGaussiansButton.Size = new System.Drawing.Size(180, 22);
+            this.SelectAllGaussiansButton.Text = "Select All Gaussians";
+            this.SelectAllGaussiansButton.Click += new System.EventHandler(this.SelectAllGaussiansButton_Click);
+            // 
+            // InitializationSelectionBox
+            // 
+            this.InitializationSelectionBox.FormattingEnabled = true;
+            this.InitializationSelectionBox.Items.AddRange(new object[] {
+            "K-Means",
+            "FCM",
+            "Random"});
+            this.InitializationSelectionBox.Location = new System.Drawing.Point(286, 122);
+            this.InitializationSelectionBox.Name = "InitializationSelectionBox";
+            this.InitializationSelectionBox.Size = new System.Drawing.Size(73, 21);
+            this.InitializationSelectionBox.TabIndex = 1;
+            this.InitializationSelectionBox.Text = "K-Means";
+            this.InitializationSelectionBox.SelectedIndexChanged += new System.EventHandler(this.InitializationSelectionBox_SelectedIndexChanged);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(217, 126);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(63, 13);
+            this.label1.TabIndex = 19;
+            this.label1.Text = "Init. Method";
+            // 
             // GMMDemoWnd
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -517,7 +537,6 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.CheckBox showPoints;
         private System.Windows.Forms.CheckBox showFits;
-        private System.Windows.Forms.CheckBox KmeansInit;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.CheckBox useRandomColors;
         private System.Windows.Forms.Button button1;
@@ -538,6 +557,9 @@
         private System.Windows.Forms.Label fitMode;
         private System.Windows.Forms.Label fitLabel;
         private System.Windows.Forms.Panel drawingCanvas;
+        private System.Windows.Forms.ToolStripMenuItem SelectAllGaussiansButton;
+        private System.Windows.Forms.ComboBox InitializationSelectionBox;
+        private System.Windows.Forms.Label label1;
     }
 }
 

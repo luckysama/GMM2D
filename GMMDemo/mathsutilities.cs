@@ -122,7 +122,7 @@ namespace GMMDemo
     {
         public Vector2 miu; //mean
         public Matrix22 Sigma; //variance
-        public bool selected = true; //Flag if this gaussian is selected by the user
+        public bool selected = false; //Flag if this gaussian is selected by the user
         public bool partition = true;
         public bool dropped = false;
 
