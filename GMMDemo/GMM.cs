@@ -60,7 +60,7 @@ namespace GMMDemo
         /// <param name="level">
         /// Level index
         /// </param>
-        public void InitLevel(int level, bool kmeans_init)
+        public void InitLevel(int level, int init_type)
         {
             Console.WriteLine("level {0} begin ", level);
 
@@ -71,7 +71,7 @@ namespace GMMDemo
             //TODO: initialize gaussians at smaller scale for deeper levels, only within the parent domain
             //gau.Sigma.m00 /= level + 1;
             //gau.Sigma.m11 /= level + 1;
-            if (kmeans_init) // kmeans_init || FCM_init
+            if (init_type == 0 || init_type == 1) // kmeans_init (0) || FCM_init (1) 
             {
                 List<Gaussian_2D> gau_list = new List<Gaussian_2D>();
                 if (level != 0)
@@ -105,22 +105,29 @@ namespace GMMDemo
                             continue;
                         }
 
-                        //if (FCM_init)
-                        gau_list_i = fuzzyCMeans.FCM(parent_pts, num_gaussian);
-
-                        //else
-                        //gau_list_i = kMeans.KM(parent_pts, num_gaussian);
+                        if (init_type == 1)
+                        {
+                            gau_list_i = fuzzyCMeans.FCM(parent_pts, num_gaussian);
+                        }
+                        else if (init_type == 0)
+                        {
+                            gau_list_i = kMeans.KM(parent_pts, num_gaussian);
+                        }
                         gau_list = gau_list.Concat(gau_list_i).ToList();
 
                     }
                 }
                 else
                 {
-                    //if (FCM_init)
-                    gau_list = fuzzyCMeans.FCM(pts, num_gaussian);
+                    if (init_type == 1)
+                    {
+                        gau_list = fuzzyCMeans.FCM(pts, num_gaussian);
+                    }
+                    else if(init_type == 0)
+                    {
+                        gau_list = kMeans.KM(pts, num_gaussian);
+                    }
 
-                    //else
-                    //gau_list = kMeans.KM(pts, num_gaussian);
                 }
 
                 foreach ( Gaussian_2D gau in gau_list)
@@ -133,7 +140,7 @@ namespace GMMDemo
                     T.Add(new List<double>(new double[] { 0, 0, 0, 0, 0, 0, 0 }));
                 }
             }
-            else
+            else if(init_type == 2)
             {
                 foreach (int i in current_level_gaussians)
                 {
@@ -587,7 +594,7 @@ namespace GMMDemo
         /// </summary>
         /// <param name="num_gaussians"></param>
         /// <returns></returns>
-        public (List<Gaussian_2D>, List<Vector2>) FitGaussians(int num_gaussians, int levels, bool kmeans_init)
+        public (List<Gaussian_2D>, List<Vector2>) FitGaussians(int num_gaussians, int levels, int init_type)
         {
             num_levels = levels;
             num_gaussian = num_gaussians;
@@ -605,7 +612,7 @@ namespace GMMDemo
             {
                 for (int l = 0; l < num_levels; l++)
                 {
-                    InitLevel(l, kmeans_init);
+                    InitLevel(l, init_type);
                     //EM algo
                     do
                     {
@@ -646,7 +653,7 @@ namespace GMMDemo
 
             return (gaussian_list, pts);
         }
-        public (List<Gaussian_2D>, List<Vector2>) FitGaussiansManual(int num_gaussians, int level, bool kmeans_init)
+        public (List<Gaussian_2D>, List<Vector2>) FitGaussiansManual(int num_gaussians, int level, int init_type)
         {
             num_gaussian = num_gaussians;
             iter = 0;
@@ -660,7 +667,7 @@ namespace GMMDemo
             }
 
             //EM algo
-            InitLevel(level, kmeans_init);
+            InitLevel(level, init_type);
 
             Console.WriteLine("Calculating...");
             do
