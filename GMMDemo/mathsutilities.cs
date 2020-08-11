@@ -122,7 +122,8 @@ namespace GMMDemo
     {
         public Vector2 miu; //mean
         public Matrix22 Sigma; //variance
-        public bool partitioned = true;
+        public bool selected = true; //Flag if this gaussian is selected by the user
+        public bool partition = true;
         public bool dropped = false;
 
         public Gaussian_2D()
@@ -136,8 +137,8 @@ namespace GMMDemo
         {
             //init with zeros
             miu = miu_init;
-            Sigma = new Matrix22(500, rand.Next(-10, 10),
-                                rand.Next(-10, 10), 500); ;
+            Sigma = new Matrix22(800, rand.Next(-10, 10),
+                                rand.Next(-10, 10), 800); ;
         }
 
         /// <summary>
@@ -540,18 +541,17 @@ namespace GMMDemo
             return gau_list;
         }
     }
-    public class ColorList
+    public class ColorSelector
     {
         private int currentColorIndex;
         public List<Color> colors = new List<Color>();
-        public ColorList()
+        public ColorSelector()
         {
             currentColorIndex = colors.Count - 1;
             colors.Add(Color.Blue);
             colors.Add(Color.Green);
             colors.Add(Color.Red);
             colors.Add(Color.Orange);
-            colors.Add(Color.Yellow);
 
         }
 

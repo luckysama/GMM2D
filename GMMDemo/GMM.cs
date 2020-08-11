@@ -32,19 +32,18 @@ namespace GMMDemo
             gaussian_list = new List<Gaussian_2D>();
             class_prior = new List<double>();
             T = new List<List<double>>();
-            current_idx = new List<int>();
-            parent_idx = new List<int>();
-            log_diff_thresh = 1E-9;
 
-            for (int i = 0; i < pts.Count; i++)
-            {
-                current_idx.Add(-1);
-                parent_idx.Add(-1);
-            }
-
-            //Clear the gaussian property of all points
             if (pts != null)
             {
+                current_idx = new List<int>();
+                parent_idx = new List<int>();
+                for (int i = 0; i < pts.Count; i++)
+                {
+                    current_idx.Add(-1);
+                    parent_idx.Add(-1);
+                }
+
+                //Clear the gaussian property of all points
                 if (pts[0].gaussian_idx.Count > 0)
                 {
                     for (int i = 0; i < pts.Count; i++)
@@ -52,20 +51,6 @@ namespace GMMDemo
                         pts[i].gaussian_idx.Clear();
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// Initialize point - gaussian list of parent and child level
-        /// </summary>
-        public void InitTree()
-        {
-            current_idx = new List<int>();
-            parent_idx = new List<int>();
-            for (int i = 0; i < pts.Count; i++)
-            {
-                current_idx.Add(-1);
-                parent_idx.Add(-1);
             }
         }
 
@@ -108,11 +93,11 @@ namespace GMMDemo
                         if (parent_pts.Count <= num_gaussian * 2 || gaussian_list[i].partitioned == false)
                         {
                             Console.WriteLine("===========Stopping at gaussian {0}==============", i);
-                            gaussian_list[i].partitioned = false;
+                            gaussian_list[i].partition = false;
                             for (int j = 0; j < num_gaussian; j++)
                             {
                                 Gaussian_2D gau = new Gaussian_2D();
-                                gau.partitioned = false;
+                                gau.partition = false;
                                 gau.dropped = true;
                                 gau_list_i.Add(gau);
                             }
@@ -414,7 +399,7 @@ namespace GMMDemo
                 List<int> children = GetChild(parent_idx[i]);
                 MatrixMath matrixMath = new MatrixMath();
 
-                if (l != 0 && !gaussian_list[parent_idx[i]].partitioned)
+                if (l != 0 && !gaussian_list[parent_idx[i]].partition)
                 {
                     pts[i].gaussian_idx.Add(-1);
                     pdf.Add(0);
@@ -465,7 +450,7 @@ namespace GMMDemo
                 List<int> children = GetChild(parent_idx[i]);
                 MatrixMath matrixMath = new MatrixMath();
 
-                if (l != 0 && !gaussian_list[parent_idx[i]].partitioned)
+                if (l != 0 && !gaussian_list[parent_idx[i]].partition)
                 {
                     pdf.Add(0);
                     pdfs.Add(pdf);
@@ -515,7 +500,7 @@ namespace GMMDemo
 
             foreach (int j in level_gaussians)
             {
-                if (!gaussian_list[j].partitioned)
+                if (!gaussian_list[j].partition)
                 {
                     continue;
                 }
@@ -577,26 +562,11 @@ namespace GMMDemo
             double loglikelihook_new = 0;
             double loglikelihook_old = 0;
 
-            gaussian_list = new List<Gaussian_2D>();
-            class_prior = new List<double>();
-            T = new List<List<double>>();
-
-            if(pts != null)
-            {   
-                if(pts[0].gaussian_idx.Count > 0)
-                {
-                    for (int i = 0; i<pts.Count; i++)
-                    {
-                        pts[i].gaussian_idx.Clear();
-                    }
-                }
-            }
+            this.InitGMM();
 
             Console.WriteLine("Calculating...");
             if (pts != null)
             {
-                InitTree();
-                
                 for (int l = 0; l < num_levels; l++)
                 {
                     InitLevel(l, kmeans_init);
@@ -625,6 +595,7 @@ namespace GMMDemo
 
                     iter = 0;//restart EM loop
                     //max_iter *= 5;//increase max interation for next level
+
                     log_diff_thresh *= 100;//increase loglikelihood hold for next level
 
                     //Update parent list with current list => next level

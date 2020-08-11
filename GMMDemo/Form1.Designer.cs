@@ -38,12 +38,17 @@
             this.drawDummyGaussianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.generateLiDARDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.load2DLIDARScanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.manualFitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ManualFitButton = new System.Windows.Forms.ToolStripMenuItem();
+            this.finalizeManualGMM = new System.Windows.Forms.ToolStripMenuItem();
             this.groupbox_canvas = new System.Windows.Forms.GroupBox();
+            this.drawingCanvas = new System.Windows.Forms.Panel();
+            this.fitMode = new System.Windows.Forms.Label();
+            this.fitLabel = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.showPoints = new System.Windows.Forms.CheckBox();
             this.showFits = new System.Windows.Forms.CheckBox();
             this.KmeansInit = new System.Windows.Forms.CheckBox();
-            this.dropGaussians = new System.Windows.Forms.CheckBox();
             this.button2 = new System.Windows.Forms.Button();
             this.useRandomColors = new System.Windows.Forms.CheckBox();
             this.button1 = new System.Windows.Forms.Button();
@@ -84,7 +89,8 @@
             // 
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.dataToolStripMenuItem});
+            this.dataToolStripMenuItem,
+            this.manualFitToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1904, 24);
@@ -147,11 +153,37 @@
             this.load2DLIDARScanToolStripMenuItem.Text = "Load 2D LIDAR Scan";
             this.load2DLIDARScanToolStripMenuItem.Click += new System.EventHandler(this.load2DLIDARScanToolStripMenuItem_Click);
             // 
+            // manualFitToolStripMenuItem
+            // 
+            this.manualFitToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ManualFitButton,
+            this.finalizeManualGMM});
+            this.manualFitToolStripMenuItem.Name = "manualFitToolStripMenuItem";
+            this.manualFitToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
+            this.manualFitToolStripMenuItem.Text = "Manual Fit";
+            // 
+            // ManualFitButton
+            // 
+            this.ManualFitButton.Name = "ManualFitButton";
+            this.ManualFitButton.Size = new System.Drawing.Size(180, 22);
+            this.ManualFitButton.Text = "Manually Fit Level";
+            this.ManualFitButton.Click += new System.EventHandler(this.manualFitButton_Click);
+            // 
+            // finalizeManualGMM
+            // 
+            this.finalizeManualGMM.Name = "finalizeManualGMM";
+            this.finalizeManualGMM.Size = new System.Drawing.Size(180, 22);
+            this.finalizeManualGMM.Text = "Finalize GMM";
+            this.finalizeManualGMM.Click += new System.EventHandler(this.finalizeManualGMM_Click);
+            // 
             // groupbox_canvas
             // 
             this.groupbox_canvas.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupbox_canvas.Controls.Add(this.drawingCanvas);
+            this.groupbox_canvas.Controls.Add(this.fitMode);
+            this.groupbox_canvas.Controls.Add(this.fitLabel);
             this.groupbox_canvas.Controls.Add(this.label_status);
             this.groupbox_canvas.Controls.Add(this.panel1);
             this.groupbox_canvas.Location = new System.Drawing.Point(0, 0);
@@ -160,15 +192,39 @@
             this.groupbox_canvas.TabIndex = 2;
             this.groupbox_canvas.TabStop = false;
             this.groupbox_canvas.Text = "Data Plot";
-            this.groupbox_canvas.Paint += new System.Windows.Forms.PaintEventHandler(this.groupbox_canvans_Paint);
-            this.groupbox_canvas.Enter += new System.EventHandler(this.groupbox_canvas_Enter_1);
+            // 
+            // drawingCanvas
+            // 
+            this.drawingCanvas.Location = new System.Drawing.Point(0, 27);
+            this.drawingCanvas.Name = "drawingCanvas";
+            this.drawingCanvas.Size = new System.Drawing.Size(1904, 828);
+            this.drawingCanvas.TabIndex = 20;
+            this.drawingCanvas.Paint += new System.Windows.Forms.PaintEventHandler(this.drawingCanvasPaint);
+            this.drawingCanvas.MouseClick += new System.Windows.Forms.MouseEventHandler(this.formClickDetect);
+            // 
+            // fitMode
+            // 
+            this.fitMode.AutoSize = true;
+            this.fitMode.Location = new System.Drawing.Point(60, 1001);
+            this.fitMode.Name = "fitMode";
+            this.fitMode.Size = new System.Drawing.Size(29, 13);
+            this.fitMode.TabIndex = 19;
+            this.fitMode.Text = "Auto";
+            // 
+            // fitLabel
+            // 
+            this.fitLabel.AutoSize = true;
+            this.fitLabel.Location = new System.Drawing.Point(6, 1001);
+            this.fitLabel.Name = "fitLabel";
+            this.fitLabel.Size = new System.Drawing.Size(48, 13);
+            this.fitLabel.TabIndex = 18;
+            this.fitLabel.Text = "Fit Mode";
             // 
             // panel1
             // 
             this.panel1.Controls.Add(this.showPoints);
             this.panel1.Controls.Add(this.showFits);
             this.panel1.Controls.Add(this.KmeansInit);
-            this.panel1.Controls.Add(this.dropGaussians);
             this.panel1.Controls.Add(this.button2);
             this.panel1.Controls.Add(this.useRandomColors);
             this.panel1.Controls.Add(this.button1);
@@ -227,17 +283,6 @@
             this.KmeansInit.Text = "K-means Init";
             this.KmeansInit.UseVisualStyleBackColor = true;
             this.KmeansInit.CheckedChanged += new System.EventHandler(this.kmeansInit_CheckedChanged);
-            // 
-            // dropGaussians
-            // 
-            this.dropGaussians.AutoSize = true;
-            this.dropGaussians.Location = new System.Drawing.Point(262, 125);
-            this.dropGaussians.Name = "dropGaussians";
-            this.dropGaussians.Size = new System.Drawing.Size(101, 17);
-            this.dropGaussians.TabIndex = 15;
-            this.dropGaussians.Text = "Drop Gaussians";
-            this.dropGaussians.UseVisualStyleBackColor = true;
-            this.dropGaussians.CheckedChanged += new System.EventHandler(this.dropGaussians_CheckedChanged);
             // 
             // button2
             // 
@@ -425,10 +470,6 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
-            // sliceImporter2D
-            // 
-            this.sliceImporter2D.FileOk += new System.ComponentModel.CancelEventHandler(this.openFileDialog1_FileOk);
-            // 
             // GMMDemoWnd
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -477,7 +518,6 @@
         private System.Windows.Forms.CheckBox showPoints;
         private System.Windows.Forms.CheckBox showFits;
         private System.Windows.Forms.CheckBox KmeansInit;
-        private System.Windows.Forms.CheckBox dropGaussians;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.CheckBox useRandomColors;
         private System.Windows.Forms.Button button1;
@@ -492,6 +532,12 @@
         private System.Windows.Forms.Label GaussiansPerLevel;
         private System.Windows.Forms.Label GaussianSamples;
         private System.Windows.Forms.Label generatedPoints;
+        private System.Windows.Forms.ToolStripMenuItem manualFitToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ManualFitButton;
+        private System.Windows.Forms.ToolStripMenuItem finalizeManualGMM;
+        private System.Windows.Forms.Label fitMode;
+        private System.Windows.Forms.Label fitLabel;
+        private System.Windows.Forms.Panel drawingCanvas;
     }
 }
 
