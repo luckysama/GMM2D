@@ -122,9 +122,8 @@ namespace GMMDemo
     {
         public Vector2 miu; //mean
         public Matrix22 Sigma; //variance
-        public bool selected; //Flag if this gaussian is selected by the user
-        public bool placeholder; //Flag if gaussian is a placeholder or not
-        public bool partitioned = true;
+        public bool selected = true; //Flag if this gaussian is selected by the user
+        public bool partition = true;
         public bool dropped = false;
 
         public Gaussian_2D()
@@ -140,8 +139,6 @@ namespace GMMDemo
             miu = miu_init;
             Sigma = new Matrix22(800, rand.Next(-10, 10),
                                 rand.Next(-10, 10), 800); ;
-            selected = true;
-            placeholder = false;
         }
 
         /// <summary>
@@ -544,11 +541,11 @@ namespace GMMDemo
             return gau_list;
         }
     }
-    public class ColorList
+    public class ColorSelector
     {
         private int currentColorIndex;
         public List<Color> colors = new List<Color>();
-        public ColorList()
+        public ColorSelector()
         {
             currentColorIndex = colors.Count - 1;
             colors.Add(Color.Blue);
