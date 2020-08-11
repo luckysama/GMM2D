@@ -34,6 +34,7 @@ namespace GMMDemo
             T = new List<List<double>>();
             current_idx = new List<int>();
             parent_idx = new List<int>();
+            log_diff_thresh = 1E-9;
 
             for (int i = 0; i < pts.Count; i++)
             {
@@ -104,7 +105,7 @@ namespace GMMDemo
                         }
 
                         //if there are fewer points than num_gaussian in the parent gaussian, stop partition
-                        if (parent_pts.Count <= (num_gaussian + Math.Round(num_gaussian * 0.2)) || gaussian_list[i].partitioned == false)
+                        if (parent_pts.Count <= num_gaussian * 2 || gaussian_list[i].partitioned == false)
                         {
                             Console.WriteLine("===========Stopping at gaussian {0}==============", i);
                             gaussian_list[i].partitioned = false;
@@ -423,9 +424,8 @@ namespace GMMDemo
 
                 foreach (int j in children)
                 {
-                    pdf.Add(class_prior[j] * matrixMath.MultivariateNormalPDF(pts[i],
-                                                                            gaussian_list[j].miu,
-                                                                            gaussian_list[j].Sigma));
+                    pdf.Add(class_prior[j] * matrixMath.MultivariateNormalPDF(pts[i], gaussian_list[j].miu,
+                                                                                gaussian_list[j].Sigma));
                 }
                 pdfs.Add(pdf);
 
@@ -442,24 +442,6 @@ namespace GMMDemo
 
         }
 
-        /// <summary>
-        /// Drop gaussians with insufficient support
-        /// </summary>
-        /// <param name="class_prior_thresh">
-        /// Threshold for minimal class prior
-        /// </param>
-        public void ClusterDrop(int level)
-        {
-            List<int> level_gaussian_idx = GetLevel(level);
-
-            foreach (int idx in level_gaussian_idx)
-            {
-                //if (gaussian.list[idx] not selected)
-                //  gaussian.list[idx].partitioned = false
-                //  Console.WriteLine("===========Stoping at gaussian {0}==============", i);
-            }
-
-        }
 
         /// <summary>
         /// Hierarchical EM: E step
@@ -492,58 +474,30 @@ namespace GMMDemo
                 //numerator: P(point=i | gaussian=j) * P(gaussian=j)
                 foreach (int j in children)
                 {
-                    pdf.Add(class_prior[j] * matrixMath.MultivariateNormalPDF(pts[i],
-                                                                            gaussian_list[j].miu,
-                                                                            gaussian_list[j].Sigma));
+                    pdf.Add(class_prior[j] * matrixMath.MultivariateNormalPDF(pts[i], gaussian_list[j].miu,
+                                                                                gaussian_list[j].Sigma));
                 }
                 pdfs.Add(pdf);
 
                 //denominator: sum(pdfs, axis = 1)
-                double sum = pdfs[i].Sum();
-                for ( int e = 0; e < pdf.Count; e++)
-                {
-                    pdfs[i][e] /= sum;
-                }
+                double sum = pdf.Sum();
+                
                 //calculate T in parallel. See paper equation 5-7
                 foreach (int j in children)
                 {
+                    pdfs[i][j - children[0]] /= sum;
                     T[j][0] += pdfs[i][j - children[0]];
                     T[j][1] += pdfs[i][j - children[0]] * pts[i].x;
                     T[j][2] += pdfs[i][j - children[0]] * pts[i].y;
+                    T[j][3] += pdfs[i][j - children[0]] * Math.Pow(pts[i].x, 2);
+                    T[j][4] = T[j][5] += pdfs[i][j - children[0]] * pts[i].x * pts[i].y;
+                    T[j][6] += pdfs[i][j - children[0]] * Math.Pow(pts[i].y, 2);
                 }
+
                 //loglikelihood
                 logs.Add(Math.Log(sum));
                 //update the gaussian index that point i belong to at current level
                 current_idx[i] = children[pdfs[i].IndexOf(pdfs[i].Max())];
-            }
-
-            List<int> level_gaussians = GetLevel(l);
-            //Mean
-            foreach (int j in level_gaussians)
-            {
-                if (l != 0 && !gaussian_list[j].partitioned)
-                {
-                    continue;
-                }
-                T[j][1] /= T[j][0];
-                T[j][2] /= T[j][0];
-            }
-
-            //covariance
-            for (int i = 0; i < pts.Count; ++i)
-            {
-                if (l != 0 && !gaussian_list[parent_idx[i]].partitioned)
-                {
-                    continue;
-                }
-
-                List<int> children = GetChild(parent_idx[i]);
-                foreach (int j in children)
-                {
-                    T[j][3] += pdfs[i][j - children[0]] * Math.Pow(pts[i].x - T[j][1], 2);
-                    T[j][4] = T[j][5] += pdfs[i][j - children[0]] * (pts[i].x - T[j][1]) * (pts[i].y - T[j][2]);
-                    T[j][6] += pdfs[i][j - children[0]] * Math.Pow(pts[i].y - T[j][2], 2);
-                }
             }
             return logs.Average();
         }
@@ -584,13 +538,15 @@ namespace GMMDemo
                 class_prior[j] = T[j][0] / point_count;
 
                 //mean
+                T[j][1] /= T[j][0];
+                T[j][2] /= T[j][0];
                 gaussian_list[j].miu.x = (float)T[j][1];
                 gaussian_list[j].miu.y = (float)T[j][2];
 
                 //covariance
-                gaussian_list[j].Sigma.m00 = (float)(T[j][3] / T[j][0]);
-                gaussian_list[j].Sigma.m10 = gaussian_list[j].Sigma.m01 = (float)(T[j][4] / T[j][0]);
-                gaussian_list[j].Sigma.m11 = (float)(T[j][6] / T[j][0]);
+                gaussian_list[j].Sigma.m00 = (float)(T[j][3] / T[j][0] - Math.Pow(T[j][1], 2));
+                gaussian_list[j].Sigma.m10 = gaussian_list[j].Sigma.m01 = (float)(T[j][4] / T[j][0] - T[j][1]* T[j][2]);
+                gaussian_list[j].Sigma.m11 = (float)(T[j][6] / T[j][0] - Math.Pow(T[j][2], 2));
 
                 //Tikhonov regularization
                 gaussian_list[j].Sigma.m00 += lambda;
@@ -601,10 +557,7 @@ namespace GMMDemo
                 {
                     T[j][i] = 0;
                 }
-
             }
-
-
         }
 
         /// <summary>
@@ -669,7 +622,6 @@ namespace GMMDemo
                     } while (iter <= max_iter);
 
                     PointRegistration(l);
-                    ClusterDrop(l);//Drop clusters with insufficient support
 
                     iter = 0;//restart EM loop
                     //max_iter *= 5;//increase max interation for next level
@@ -725,7 +677,6 @@ namespace GMMDemo
             } while (iter <= max_iter);
 
             PointRegistration(level);
-            ClusterDrop(level);//Drop clusters with insufficient support
 
             //max_iter *= 5;//increase max interation for next level
             //log_diff_thresh *= 100;//increase loglikelihood hold for next level
