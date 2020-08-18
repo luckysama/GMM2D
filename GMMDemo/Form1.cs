@@ -21,15 +21,15 @@ namespace GMMDemo
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.WindowState = FormWindowState.Maximized;
-            drawingPts = null;
             gmm = new GMM();
             label_status.Text = "Welcome to GMM demo!"; // use this control to display a line of text.
         }
 
-        List<Vector2> drawingPts = null;
-        List<Vector2> drawingLargeCircles = null;
-        List<Gaussian_2D> drawingGaussians = null;
-        List<Polygon> drawingPolygons = null;
+        List<Vector2> drawingPts = new List<Vector2>();
+        List<Vector2> drawingLargeCircles = new List<Vector2>();
+        List<Gaussian_2D> drawingGaussians = new List<Gaussian_2D>();
+        List<Gaussian_2D> groundTruthGaussians = new List<Gaussian_2D>();
+        List<Polygon> drawingPolygons = new List<Polygon>();
 
         Color pt_drawing_color = Color.Red;
         Color ground_truth_color = Color.Blue;
@@ -79,18 +79,17 @@ namespace GMMDemo
             UpdateConfigurationUnputs();
         }
 
-        private void ClearDrawingData()
-        {
-            drawingGaussians = null;
-            drawingPolygons = null;
-            drawingPts = null;
-            drawingLargeCircles = null;
-        }
         private void ResetSimulationMemory()
         {
-            gmm.pts = null;
-            gmm.sample_gaussian_list = null;
-            ClearDrawingData();
+            
+            UpdateConfigurationUnputs();
+
+            gmm.ClearPoints();
+            drawingGaussians.Clear();
+            drawingPolygons.Clear();
+            drawingPts.Clear();
+            drawingLargeCircles.Clear();
+            groundTruthGaussians.Clear();
 
             manual_mode = false;
             manual_gmm_initialized = false;
@@ -102,9 +101,13 @@ namespace GMMDemo
         private void regenerateRandomDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
             UpdateConfigurationUnputs();
-            ClearDrawingData();
-            drawingPts = gmm.GenerateRandomPoints(num_of_points, drawingCanvas.Width, drawingCanvas.Height);
-            fit_ran = false;
+
+            List<Vector2> pts;
+
+            pts = RandomPoints.Generate(num_of_points, drawingCanvas.Width, drawingCanvas.Height);
+            gmm.AddPoints(pts);
+            drawingPts.AddRange(pts);
+
             label_status.Text = "Generated " + num_of_points + " new random points at " + DateTime.Now;
             this.Refresh();
         }
@@ -112,9 +115,15 @@ namespace GMMDemo
         private void generateDummyGaussianDataToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
             UpdateConfigurationUnputs();
-            ClearDrawingData();
-            drawingPts = gmm.GenerateGaussianPoints(num_of_points, num_of_samples);
-            fit_ran = false;
+
+            List<Vector2> pts;
+            List<Gaussian_2D> gaussians;
+
+            (pts, gaussians) = GaussianPoints.Generate(num_of_points, num_of_samples);
+            gmm.AddPoints(pts);
+            drawingPts.AddRange(pts);
+            groundTruthGaussians.AddRange(gaussians);
+
             label_status.Text = "Generated " + num_of_points + " new gaussian points at " + DateTime.Now;
             this.Refresh();
         }
@@ -122,12 +131,16 @@ namespace GMMDemo
         private void generateLiDARDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
             UpdateConfigurationUnputs();
-            ClearDrawingData();
+
+            List<Vector2> pts;
             Vector2 Scanner_Position;
-            drawingPts = gmm.GenerateLidarPoints(drawing_size_x, drawing_size_y, out drawingPolygons, out Scanner_Position);
+
+            pts = LidarPoints.Generate(drawing_size_x, drawing_size_y, out drawingPolygons, out Scanner_Position);
+            gmm.AddPoints(pts);
+            drawingPts.AddRange(pts);
             drawingLargeCircles = new List<Vector2>();
             drawingLargeCircles.Add(Scanner_Position);
-            fit_ran = false;
+
             label_status.Text = "Generated simulated 2D lidar data";
             this.Refresh();
         }
@@ -135,7 +148,7 @@ namespace GMMDemo
         private void drawDummyGaussianToolStripMenuItem_Click(object sender, EventArgs e)
         {
             UpdateConfigurationUnputs();
-            drawingGaussians = gmm.DrawDummyGaussian();
+            drawingGaussians.AddRange(groundTruthGaussians);
             label_status.Text = "Displaying ground truth at " + DateTime.Now;
             this.Refresh();
         }
@@ -147,7 +160,7 @@ namespace GMMDemo
            
             ColorPoints(g, viewed_level);
 
-            if (drawingGaussians != null && show_fits)
+            if (drawingGaussians.Count > 0 && show_fits)
             {
                 if (!fit_ran)
                 {
@@ -185,11 +198,12 @@ namespace GMMDemo
                 }
             }
         }
+
         private void manualModeColoring(Graphics g)
         {
             ColorPoints(g, manual_level);
 
-            if (drawingGaussians != null)
+            if (drawingGaussians.Count > 0)
             {
                 Pen unselected = new Pen(unselected_gaussian, 2);
                 Pen selected = new Pen(selected_gaussian, 2);
@@ -224,7 +238,7 @@ namespace GMMDemo
             List<Color> point_colors = new List<Color>();
             SolidBrush defaultPointBrush = new SolidBrush(pt_drawing_color);
 
-            if (drawingPts != null && drawingPts.Count > 0 && show_points)
+            if (drawingPts.Count > 0 && drawingPts.Count > 0 && show_points)
             {
                 if (viewed_level <= drawingPts[0].gaussian_idx.Count && fit_ran)
                 {
@@ -288,7 +302,7 @@ namespace GMMDemo
         private void drawDummyLidarAssets(Graphics g)
         {
             //draw the polygon first, which will be the background of everything else
-            if (drawingPolygons != null)
+            if (drawingPolygons.Count > 0)
             {
                 SolidBrush polygonbrush = new SolidBrush(polygon_color);
                 foreach (Polygon poly in drawingPolygons)
@@ -297,7 +311,7 @@ namespace GMMDemo
                 }
             }
             //draw the large circles
-            if (drawingLargeCircles != null)
+            if (drawingLargeCircles.Count > 0)
             {
                 SolidBrush circleBrush = new SolidBrush(circle_color);
                 foreach (Vector2 vec in drawingLargeCircles)
@@ -307,29 +321,7 @@ namespace GMMDemo
             }
         }
 
-        private void drawingCanvasPaint(object sender, PaintEventArgs e)
-        {
-            drawing_size_x = e.ClipRectangle.Width;
-            drawing_size_y = e.ClipRectangle.Height;
-            Graphics g = drawingCanvas.CreateGraphics();
-
-            drawDummyLidarAssets(g);
-
-            if (!manual_mode)
-            {
-                CompleteColoring(g);
-            }
-            else if(manual_mode){
-                manualModeColoring(g);
-            }
-         
-            
-        }
-        /// How to draw the 3-sigma error ellipse of a given 2D Gaussian?
-        /// https://math.stackexchange.com/questions/395698/fast-way-to-calculate-eigen-of-2x2-matrix-using-a-formula
-        /// https://www.visiondummy.com/2014/04/draw-error-ellipse-representing-covariance-matrix/
-        /// http://people.math.harvard.edu/~knill/teaching/math21b2004/exhibits/2dmatrices/index.html
-        void Draw3SigmaEllipse(Graphics g, Gaussian_2D gaussian, Pen pen)
+        private void Draw3SigmaEllipse(Graphics g, Gaussian_2D gaussian, Pen pen)
         {
             gaussian.Sigma.UpdateEigens();
             float major_axis, minor_axis;
@@ -372,7 +364,30 @@ namespace GMMDemo
                                             y_axis));
             g.ResetTransform();
         }
-       
+
+        private void drawingCanvasPaint(object sender, PaintEventArgs e)
+        {
+            drawing_size_x = e.ClipRectangle.Width;
+            drawing_size_y = e.ClipRectangle.Height;
+            Graphics g = drawingCanvas.CreateGraphics();
+
+            drawDummyLidarAssets(g);
+
+            if (!manual_mode)
+            {
+                CompleteColoring(g);
+            }
+            else if(manual_mode){
+                manualModeColoring(g);
+            }
+         
+            
+        }
+        /// How to draw the 3-sigma error ellipse of a given 2D Gaussian?
+        /// https://math.stackexchange.com/questions/395698/fast-way-to-calculate-eigen-of-2x2-matrix-using-a-formula
+        /// https://www.visiondummy.com/2014/04/draw-error-ellipse-representing-covariance-matrix/
+        /// http://people.math.harvard.edu/~knill/teaching/math21b2004/exhibits/2dmatrices/index.html
+        
         private void rESETMEMORYToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ResetSimulationMemory();
@@ -404,8 +419,6 @@ namespace GMMDemo
         private void load2DLIDARScanToolStripMenuItem_Click(object sender, EventArgs e)
         {
             UpdateConfigurationUnputs();
-            ClearDrawingData();
-            drawingPts = new List<Vector2>();
             label_status.Text = "Loading 2D scan.";
             this.Refresh();
             // This method of getting to the scans directory might break in 
@@ -415,16 +428,20 @@ namespace GMMDemo
             sliceImporter2D.InitialDirectory = defaultImportPath;
             sliceImporter2D.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
 
+            List<Vector2> pts = new List<Vector2>();
+
             if (sliceImporter2D.ShowDialog() == DialogResult.OK)
             {
                 //Get the path of specified file
                 var pointsFile = sliceImporter2D.FileName;
-
+                
                 List<String> lines = File.ReadAllLines(pointsFile).ToList();
-                drawingPts = gmm.get2DScan(num_of_points, lines, drawingCanvas.Width, drawingCanvas.Height);
-                fit_ran = false;
+
+                pts = Scan2D.Import(num_of_points, lines, drawingCanvas.Width, drawingCanvas.Height);
+                gmm.AddPoints(pts);
+                drawingPts.AddRange(pts);
             }
-            if(drawingPts.Count < num_of_points)
+            if(pts.Count < num_of_points)
             {
                 label_status.Text = "Loaded original 2D Scan with " + drawingPts.Count + " available points after rescaling at" + DateTime.Now;
             }
@@ -432,7 +449,6 @@ namespace GMMDemo
             {
                 label_status.Text = "Loaded subsampled 2D Scan with " + num_of_points + " points after rescaling at " + DateTime.Now;
             }
-            
             this.Refresh();
         }
         
@@ -452,7 +468,7 @@ namespace GMMDemo
         {
             UpdateConfigurationUnputs();
             label_status.Text = "Calculating... ";
-            drawingGaussians = null;
+            drawingGaussians.Clear();
             this.Refresh();
             DateTime time_start = DateTime.Now;
             (drawingGaussians, drawingPts) = gmm.FitGaussians(num_of_fits, num_of_levels, init_method);
@@ -474,9 +490,9 @@ namespace GMMDemo
                 manual_level = 1;
                 fitMode.Text = "Manual";
 
-                drawingGaussians = null;
+                drawingGaussians.Clear();
 
-                gmm.InitGMM();
+                gmm.Init();
                 manual_gmm_initialized = true;
                 fit_ran = false;
             }
@@ -523,7 +539,7 @@ namespace GMMDemo
 
         private void formClickDetect(object sender, MouseEventArgs e)
         {
-            if (manual_mode && gmm.gaussian_list != null)
+            if (manual_mode && gmm.gaussian_list.Count > 0)
             {
                 //Get mouse position
                 mouse_position.x = e.Location.X;
@@ -568,24 +584,6 @@ namespace GMMDemo
             fit_ran = true;
             this.Refresh();
         }
-        private (int, int) GetGaussianIndeces(int currentLevel)
-        {
-            // Determine starting and ending index to query gaussians at current level
-            int start = 0;
-            if (currentLevel > 1)
-            {
-                for (int level = 1; level < currentLevel; level++)
-                {
-                    start += (int)Math.Pow(num_of_fits, level);
-                }
-            }
-            else
-            {
-                start = 0;
-            }
-            int end = start + (int)Math.Pow(num_of_fits, currentLevel);
-            return (start, end);
-        }
 
         private void SelectAllGaussiansButton_Click(object sender, EventArgs e)
         {
@@ -604,6 +602,24 @@ namespace GMMDemo
             init_method = (int)InitializationSelectionBox.SelectedIndex;
             this.Refresh();
         }
+
+        private (int, int) GetGaussianIndeces(int currentLevel)
+        {
+            // Determine starting and ending index to query gaussians at current level
+            int start = 0;
+            if (currentLevel > 1)
+            {
+                for (int level = 1; level < currentLevel; level++)
+                {
+                    start += (int)Math.Pow(num_of_fits, level);
+                }
+            }
+            else
+            {
+                start = 0;
+            }
+            int end = start + (int)Math.Pow(num_of_fits, currentLevel);
+            return (start, end);
+        }
     }
 }
-

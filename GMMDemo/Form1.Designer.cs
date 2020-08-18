@@ -40,12 +40,15 @@
             this.load2DLIDARScanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.manualFitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ManualFitButton = new System.Windows.Forms.ToolStripMenuItem();
+            this.SelectAllGaussiansButton = new System.Windows.Forms.ToolStripMenuItem();
             this.finalizeManualGMM = new System.Windows.Forms.ToolStripMenuItem();
             this.groupbox_canvas = new System.Windows.Forms.GroupBox();
             this.drawingCanvas = new System.Windows.Forms.Panel();
             this.fitMode = new System.Windows.Forms.Label();
             this.fitLabel = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.InitializationSelectionBox = new System.Windows.Forms.ComboBox();
             this.showPoints = new System.Windows.Forms.CheckBox();
             this.showFits = new System.Windows.Forms.CheckBox();
             this.button2 = new System.Windows.Forms.Button();
@@ -65,9 +68,6 @@
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.sliceImporter2D = new System.Windows.Forms.OpenFileDialog();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
-            this.SelectAllGaussiansButton = new System.Windows.Forms.ToolStripMenuItem();
-            this.InitializationSelectionBox = new System.Windows.Forms.ComboBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.groupbox_canvas.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -111,7 +111,6 @@
             this.dataToolStripMenuItem.Name = "dataToolStripMenuItem";
             this.dataToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
             this.dataToolStripMenuItem.Text = "Menu";
-            this.dataToolStripMenuItem.Click += new System.EventHandler(this.dataToolStripMenuItem_Click);
             // 
             // regenerateRandomDataToolStripMenuItem
             // 
@@ -168,14 +167,21 @@
             // ManualFitButton
             // 
             this.ManualFitButton.Name = "ManualFitButton";
-            this.ManualFitButton.Size = new System.Drawing.Size(180, 22);
+            this.ManualFitButton.Size = new System.Drawing.Size(177, 22);
             this.ManualFitButton.Text = "Manually Fit Level";
             this.ManualFitButton.Click += new System.EventHandler(this.manualFitButton_Click);
+            // 
+            // SelectAllGaussiansButton
+            // 
+            this.SelectAllGaussiansButton.Name = "SelectAllGaussiansButton";
+            this.SelectAllGaussiansButton.Size = new System.Drawing.Size(177, 22);
+            this.SelectAllGaussiansButton.Text = "Select All Gaussians";
+            this.SelectAllGaussiansButton.Click += new System.EventHandler(this.SelectAllGaussiansButton_Click);
             // 
             // finalizeManualGMM
             // 
             this.finalizeManualGMM.Name = "finalizeManualGMM";
-            this.finalizeManualGMM.Size = new System.Drawing.Size(180, 22);
+            this.finalizeManualGMM.Size = new System.Drawing.Size(177, 22);
             this.finalizeManualGMM.Text = "Finalize GMM";
             this.finalizeManualGMM.Click += new System.EventHandler(this.finalizeManualGMM_Click);
             // 
@@ -247,6 +253,29 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(551, 173);
             this.panel1.TabIndex = 17;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(217, 126);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(63, 13);
+            this.label1.TabIndex = 19;
+            this.label1.Text = "Init. Method";
+            // 
+            // InitializationSelectionBox
+            // 
+            this.InitializationSelectionBox.FormattingEnabled = true;
+            this.InitializationSelectionBox.Items.AddRange(new object[] {
+            "K-Means",
+            "FCM",
+            "Random"});
+            this.InitializationSelectionBox.Location = new System.Drawing.Point(286, 122);
+            this.InitializationSelectionBox.Name = "InitializationSelectionBox";
+            this.InitializationSelectionBox.Size = new System.Drawing.Size(73, 21);
+            this.InitializationSelectionBox.TabIndex = 1;
+            this.InitializationSelectionBox.Text = "K-Means";
+            this.InitializationSelectionBox.SelectedIndexChanged += new System.EventHandler(this.InitializationSelectionBox_SelectedIndexChanged);
             // 
             // showPoints
             // 
@@ -459,36 +488,6 @@
             this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
-            // 
-            // SelectAllGaussiansButton
-            // 
-            this.SelectAllGaussiansButton.Name = "SelectAllGaussiansButton";
-            this.SelectAllGaussiansButton.Size = new System.Drawing.Size(180, 22);
-            this.SelectAllGaussiansButton.Text = "Select All Gaussians";
-            this.SelectAllGaussiansButton.Click += new System.EventHandler(this.SelectAllGaussiansButton_Click);
-            // 
-            // InitializationSelectionBox
-            // 
-            this.InitializationSelectionBox.FormattingEnabled = true;
-            this.InitializationSelectionBox.Items.AddRange(new object[] {
-            "K-Means",
-            "FCM",
-            "Random"});
-            this.InitializationSelectionBox.Location = new System.Drawing.Point(286, 122);
-            this.InitializationSelectionBox.Name = "InitializationSelectionBox";
-            this.InitializationSelectionBox.Size = new System.Drawing.Size(73, 21);
-            this.InitializationSelectionBox.TabIndex = 1;
-            this.InitializationSelectionBox.Text = "K-Means";
-            this.InitializationSelectionBox.SelectedIndexChanged += new System.EventHandler(this.InitializationSelectionBox_SelectedIndexChanged);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(217, 126);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(63, 13);
-            this.label1.TabIndex = 19;
-            this.label1.Text = "Init. Method";
             // 
             // GMMDemoWnd
             // 
