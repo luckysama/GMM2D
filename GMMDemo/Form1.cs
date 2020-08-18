@@ -476,7 +476,7 @@ namespace GMMDemo
 
                 drawingGaussians = null;
 
-                gmm.InitGMM();
+                gmm.Init();
                 manual_gmm_initialized = true;
                 fit_ran = false;
             }

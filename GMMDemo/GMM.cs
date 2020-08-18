@@ -9,25 +9,25 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace GMMDemo
 {
-        public class GMM
+    public class GMM
     {
-        public Random rand = new Random();
+        private Random rand = new Random();
 
         public List<Vector2> pts = null;
         public List<Gaussian_2D> sample_gaussian_list = null;
         public List<Gaussian_2D> gaussian_list = null;//HGMM tree structure. Can be quaried via GetChild(parent_idx)
-        public int num_gaussian = 0;
-        public List<double> class_prior = null;
-        public List<List<double>> T = null;
-        public List<int> current_idx = null;
-        public List<int> parent_idx = null;
-        public int num_levels = 1;
+        private int num_gaussian = 0;
+        private List<double> class_prior = null;
+        private List<List<double>> T = null;
+        private List<int> current_idx = null;
+        private List<int> parent_idx = null;
+        private int num_levels = 1;
 
-        public int iter = 0;
-        public int max_iter = 80;//maximum iterations
-        public double log_diff_thresh = 1E-9;//loglikelihood difference threshold
+        private int iter = 0;
+        private int max_iter = 80;//maximum iterations
+        private double log_diff_thresh = 1E-9;//loglikelihood difference threshold
 
-        public void InitGMM()
+        public void Init()
         {
             gaussian_list = new List<Gaussian_2D>();
             class_prior = new List<double>();
@@ -54,107 +54,108 @@ namespace GMMDemo
             }
         }
 
+        private List<Gaussian_2D> InitGMM(int level, int init_type)
+        {
+            List<Gaussian_2D> cluster_list = new List<Gaussian_2D>();
+            if (level != 0)
+            {
+                IEnumerable<int> parent_level_gaussians = GetLevel(level - 1);
+                foreach (int i in parent_level_gaussians)
+                {
+                    List<Vector2> parent_pts = new List<Vector2>();
+                    List<Gaussian_2D> cluster_list_i = new List<Gaussian_2D>();
+                    foreach (Vector2 pt in pts)
+                    {
+                        if (pt.gaussian_idx[level - 1] == i)
+                        {
+                            parent_pts.Add(pt);
+                        }
+                    }
+
+                    //if there are fewer points than num_gaussian in the parent gaussian, stop partition
+                    if (parent_pts.Count <= num_gaussian * 2 || gaussian_list[i].partition == false)
+                    {
+                        Console.WriteLine("===========Stopping at gaussian {0}==============", i);
+                        gaussian_list[i].partition = false;
+                        for (int j = 0; j < num_gaussian; j++)
+                        {
+                            Gaussian_2D gau = new Gaussian_2D();
+                            gau.partition = false;
+                            gau.dropped = true;
+                            cluster_list_i.Add(gau);
+                        }
+                        cluster_list = cluster_list.Concat(cluster_list_i).ToList();
+                        continue;
+                    }
+
+                    if (init_type == 1)
+                    {
+                        cluster_list_i = FuzzyCMeans.fit(parent_pts, num_gaussian);
+                    }
+                    else if (init_type == 0)
+                    {
+                        cluster_list_i = KMeans.fit(parent_pts, num_gaussian);
+                    }
+                    cluster_list = cluster_list.Concat(cluster_list_i).ToList();
+
+                }
+            }
+            else
+            {
+                if (init_type == 1)
+                {
+                    cluster_list = FuzzyCMeans.fit(pts, num_gaussian);
+                }
+                else if (init_type == 0)
+                {
+                    cluster_list = KMeans.fit(pts, num_gaussian);
+                }
+
+            }
+
+            return cluster_list;
+        }
+
         /// <summary>
         /// Initialize and add new gaussians at the beginning of each level
         /// </summary>
         /// <param name="level">
         /// Level index
         /// </param>
-        public void InitLevel(int level, int init_type)
+        private void InitLevel(int level, int init_type)
         {
             Console.WriteLine("level {0} begin ", level);
 
-            KMeans kMeans = new KMeans();
-            FuzzyCMeans fuzzyCMeans = new FuzzyCMeans();
-            IEnumerable<int> current_level_gaussians = GetLevel(level);
+            List<Gaussian_2D> level_gaussian_list = new List<Gaussian_2D>();
 
             //TODO: initialize gaussians at smaller scale for deeper levels, only within the parent domain
             //gau.Sigma.m00 /= level + 1;
             //gau.Sigma.m11 /= level + 1;
             if (init_type == 0 || init_type == 1) // kmeans_init (0) || FCM_init (1) 
             {
-                List<Gaussian_2D> gau_list = new List<Gaussian_2D>();
-                if (level != 0)
-                {
-                    IEnumerable<int> parent_level_gaussians = GetLevel(level - 1);
-                    foreach (int i in parent_level_gaussians)
-                    {
-                        List<Vector2> parent_pts = new List<Vector2>();
-                        List<Gaussian_2D> gau_list_i = new List<Gaussian_2D>();
-                        foreach (Vector2 pt in pts)
-                        {
-                            if (pt.gaussian_idx[level - 1] == i)
-                            {
-                                parent_pts.Add(pt);
-                            }
-                        }
-
-                        //if there are fewer points than num_gaussian in the parent gaussian, stop partition
-                        if (parent_pts.Count <= num_gaussian * 2 || gaussian_list[i].partitioned == false)
-                        {
-                            Console.WriteLine("===========Stopping at gaussian {0}==============", i);
-                            gaussian_list[i].partition = false;
-                            for (int j = 0; j < num_gaussian; j++)
-                            {
-                                Gaussian_2D gau = new Gaussian_2D();
-                                gau.partition = false;
-                                gau.dropped = true;
-                                gau_list_i.Add(gau);
-                            }
-                            gau_list = gau_list.Concat(gau_list_i).ToList();
-                            continue;
-                        }
-
-                        if (init_type == 1)
-                        {
-                            gau_list_i = fuzzyCMeans.FCM(parent_pts, num_gaussian);
-                        }
-                        else if (init_type == 0)
-                        {
-                            gau_list_i = kMeans.KM(parent_pts, num_gaussian);
-                        }
-                        gau_list = gau_list.Concat(gau_list_i).ToList();
-
-                    }
-                }
-                else
-                {
-                    if (init_type == 1)
-                    {
-                        gau_list = fuzzyCMeans.FCM(pts, num_gaussian);
-                    }
-                    else if(init_type == 0)
-                    {
-                        gau_list = kMeans.KM(pts, num_gaussian);
-                    }
-
-                }
-
-                foreach ( Gaussian_2D gau in gau_list)
-                {
-                    gaussian_list.Add(gau);
-                    //All gaussians at each level are initialized with equal class prior
-                    class_prior.Add(1 / (double)(num_gaussian));
-                    //A list of constitute sufficient statistics for updating gaussian parameters in parallel.
-                    //See paper section 3.5
-                    T.Add(new List<double>(new double[] { 0, 0, 0, 0, 0, 0, 0 }));
-                }
+                level_gaussian_list = InitGMM(level, init_type);
             }
             else if(init_type == 2)
             {
-                foreach (int i in current_level_gaussians)
+                IEnumerable<int> level_gaussian_idx = GetLevel(level);
+                foreach (int i in level_gaussian_idx)
                 {
                     //Each gaussian is randomly initialized at four corners
-                    Gaussian_2D gau = new Gaussian_2D(rand, (i % 8) + 1, true);
-
-                    gaussian_list.Add(gau);
-                    //All gaussians at each level are initialized with equal class prior
-                    class_prior.Add(1 / (double)(num_gaussian));
-                    //A list of constitute sufficient statistics for updating gaussian parameters in parallen.
-                    //See paper section 3.5
-                    T.Add(new List<double>(new double[] { 0, 0, 0, 0, 0, 0, 0 }));
+                    Gaussian_2D gaussian_rand = new Gaussian_2D(rand, (i % 8) + 1, true);
+                    level_gaussian_list.Add(gaussian_rand);
                 }
             }
+
+            foreach (Gaussian_2D gaussian in level_gaussian_list)
+            {
+                gaussian_list.Add(gaussian);
+                //All gaussians at each level are initialized with equal class prior
+                class_prior.Add(1 / (double)(num_gaussian));
+                //A list of constitute sufficient statistics for updating gaussian parameters in parallel.
+                //See paper section 3.5
+                T.Add(new List<double>(new double[] { 0, 0, 0, 0, 0, 0, 0 }));
+            }
+
         }
 
         public List<Vector2> GenerateRandomPoints(int num_of_points, int xmax, int ymax) //x and y range from 0
@@ -290,15 +291,6 @@ namespace GMMDemo
             return pts;
         }
 
-        /// <summary>
-        /// Get point[parent]'s corresponding gaussian's children
-        /// </summary>
-        /// <param name="parent">
-        /// Parent gaussian index
-        /// </param>
-        /// <returns></returns>
-
-
         public List<Vector2> get2DScan(int num_of_points, List<String> lines, float canvasWidth, float CanvasHeight)
         {
             List<Vector2> scanned_pts = new List<Vector2>();
@@ -367,7 +359,14 @@ namespace GMMDemo
             return pts;
         }
 
-        public List<int> GetChild(int parent)
+        /// <summary>
+        /// Get point[parent]'s corresponding gaussian's children
+        /// </summary>
+        /// <param name="parent">
+        /// Parent gaussian index
+        /// </param>
+        /// <returns></returns>
+        private List<int> GetChild(int parent)
         {
            //See paper section 4
             IEnumerable<int> children = Enumerable.Range((parent + 1) * num_gaussian, num_gaussian);
@@ -382,7 +381,7 @@ namespace GMMDemo
         /// Level index
         /// </param>
         /// <returns></returns>
-        public List<int> GetLevel(int level)
+        private List<int> GetLevel(int level)
         {
             //See paper section 4
             IEnumerable<int> level_gaussians = Enumerable.Range(num_gaussian * ((int)Math.Pow(num_gaussian, level) - 1) / (num_gaussian - 1),
@@ -395,7 +394,7 @@ namespace GMMDemo
         /// Associate each point with a gaussian at each level. Requires computation of pdfs.
         /// </summary>
         /// <param name="l"></param>
-        public void PointRegistration(int l)
+        private void PointRegistration(int l)
         {
             List<List<double>> pdfs = new List<List<double>>();
 
@@ -404,7 +403,6 @@ namespace GMMDemo
             {
                 List<double> pdf = new List<double>();
                 List<int> children = GetChild(parent_idx[i]);
-                MatrixMath matrixMath = new MatrixMath();
 
                 if (l != 0 && !gaussian_list[parent_idx[i]].partition)
                 {
@@ -416,8 +414,7 @@ namespace GMMDemo
 
                 foreach (int j in children)
                 {
-                    pdf.Add(class_prior[j] * matrixMath.MultivariateNormalPDF(pts[i], gaussian_list[j].miu,
-                                                                                gaussian_list[j].Sigma));
+                    pdf.Add(class_prior[j] * MultiNormalPDF(pts[i], gaussian_list[j].miu, gaussian_list[j].Sigma));
                 }
                 pdfs.Add(pdf);
 
@@ -434,6 +431,35 @@ namespace GMMDemo
 
         }
 
+        /// <summary>
+        /// Calculate multivariate normal probablity density function. 
+        /// Hardcoded for Vector2 and Matrix22 datatype.
+        /// Use double precision to increase robustness.
+        /// </summary>
+        /// <param name="pt"></param>
+        /// <param name="miu"></param>
+        /// <param name="covariance"></param>
+        /// <returns></returns>
+        private static double MultiNormalPDF(Vector2 pt, Vector2 miu, Matrix22 covariance)
+        {
+            Vector2 x_minus_miu = pt.Minus(miu);
+            Matrix22 inv_cov = covariance.Inverse();
+
+            //Break Matrix22 into two rows (Vector2) for dot product 
+            Vector2 row1 = new Vector2(inv_cov.m00, inv_cov.m01);
+            Vector2 row2 = new Vector2(inv_cov.m10, inv_cov.m11);
+
+            float dot_row1 = row1.Dot(x_minus_miu);
+            float dot_row2 = row2.Dot(x_minus_miu);
+
+            //Assemble two rows
+            Vector2 temp_v = new Vector2(dot_row1, dot_row2);
+
+            double numerator = Math.Exp(-x_minus_miu.Dot(temp_v) / 2);
+            double denom = 2 * Math.PI * Math.Sqrt(covariance.Det());
+
+            return numerator / denom;
+        }
 
         /// <summary>
         /// Hierarchical EM: E step
@@ -442,7 +468,7 @@ namespace GMMDemo
         /// Level index
         /// </param>
         /// <returns></returns>
-        public double HEStep(int l)
+        private double HEStep(int l)
         {
             //pdfs: probability density function. 
             //shape (row, column): (num_point, num_gaussian)
@@ -455,7 +481,6 @@ namespace GMMDemo
             {
                 List<double> pdf = new List<double>();//init pdfs of point i
                 List<int> children = GetChild(parent_idx[i]);
-                MatrixMath matrixMath = new MatrixMath();
 
                 if (l != 0 && !gaussian_list[parent_idx[i]].partition)
                 {
@@ -466,8 +491,7 @@ namespace GMMDemo
                 //numerator: P(point=i | gaussian=j) * P(gaussian=j)
                 foreach (int j in children)
                 {
-                    pdf.Add(class_prior[j] * matrixMath.MultivariateNormalPDF(pts[i], gaussian_list[j].miu,
-                                                                                gaussian_list[j].Sigma));
+                    pdf.Add(class_prior[j] * MultiNormalPDF(pts[i], gaussian_list[j].miu, gaussian_list[j].Sigma));
                 }
                 pdfs.Add(pdf);
 
@@ -499,11 +523,11 @@ namespace GMMDemo
         /// </summary>
         /// <param name="level"></param>
         /// <returns></returns>
-        public void HMStep(int l)
+        private void HMStep(int l)
         {
             List<int> level_gaussians = GetLevel(l);
             //Tikhonov regularization parameter
-            float lambda = 1;
+            float lambda = .01F;
 
             foreach (int j in level_gaussians)
             {
@@ -512,8 +536,8 @@ namespace GMMDemo
                     continue;
                 }
 
-                int point_count = 0;
                 //count points in gaussian j
+                int point_count = 0;
                 for ( int i = 0; i < pts.Count(); i++)
                 {
                     List<int> children = GetChild(parent_idx[i]);
@@ -522,9 +546,6 @@ namespace GMMDemo
                         if (current_idx[i] == child) point_count++;
                     }
                 }
-
-                //Ensure at least one point
-                point_count++;
 
                 //class prior
                 class_prior[j] = T[j][0] / point_count;
@@ -558,18 +579,15 @@ namespace GMMDemo
         /// </summary>
         /// <param name="num_gaussians"></param>
         /// <returns></returns>
-        public (List<Gaussian_2D>, List<Vector2>) FitGaussians(int num_gaussians, int levels, int init_type)
+        public (List<Gaussian_2D>, List<Vector2>) FitGaussians(int num_gaussian, int num_levels, int init_type)
         {
-            num_levels = levels;
-            num_gaussian = num_gaussians;
-            int iter = 0;
-            int max_iter = 80;//maximum iterations
-            double log_diff_thresh = 1E-9;//loglikelihood difference threshold
+            this.num_levels = num_levels;
+            this.num_gaussian = num_gaussian;
             double log_diff = 0;
             double loglikelihook_new = 0;
             double loglikelihook_old = 0;
 
-            this.InitGMM();
+            Init();
 
             Console.WriteLine("Calculating...");
             if (pts != null)
@@ -617,12 +635,12 @@ namespace GMMDemo
 
             return (gaussian_list, pts);
         }
-        public (List<Gaussian_2D>, List<Vector2>) FitGaussiansManual(int num_gaussians, int level, int init_type)
+        public (List<Gaussian_2D>, List<Vector2>) FitGaussiansManual(int num_gaussian, int level, int init_type)
         {
-            num_gaussian = num_gaussians;
             iter = 0;
-            double log_diff = 0;
-            double loglikelihook_new = 0;
+            this.num_gaussian = num_gaussian;
+            double log_diff;
+            double loglikelihook_new;
             double loglikelihook_old = 0;
 
             if (pts == null)
@@ -633,7 +651,6 @@ namespace GMMDemo
             //EM algo
             InitLevel(level, init_type);
 
-            Console.WriteLine("Calculating...");
             do
             {
                 if (iter % 10 == 0)
@@ -673,11 +690,6 @@ namespace GMMDemo
         public List<Gaussian_2D> DrawDummyGaussian()
         {
             return sample_gaussian_list;
-        }
-
-        public List<Gaussian_2D> FitHierarchyGaussians()
-        {
-            return null;
         }
 
     }
