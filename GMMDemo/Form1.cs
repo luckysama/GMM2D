@@ -84,7 +84,8 @@ namespace GMMDemo
             
             UpdateConfigurationUnputs();
 
-            gmm.ClearPoints();
+            gmm = new GMM();
+            //gmm.ClearPoints();
             drawingGaussians.Clear();
             drawingPolygons.Clear();
             drawingPts.Clear();
@@ -159,6 +160,7 @@ namespace GMMDemo
             Color ellipse_color = ellipse_colors.NextColor();
            
             ColorPoints(g, viewed_level);
+            ColorLines(g);
 
             if (drawingGaussians.Count > 0 && show_fits)
             {
@@ -202,6 +204,7 @@ namespace GMMDemo
         private void manualModeColoring(Graphics g)
         {
             ColorPoints(g, manual_level);
+            ColorLines(g);
 
             if (drawingGaussians.Count > 0)
             {
@@ -227,6 +230,23 @@ namespace GMMDemo
                     }
 
                 }
+            }
+        }
+
+        private void ColorLines(Graphics g)
+        {
+            foreach (BaseModel model in gmm.baseModels)
+            {
+                if (model == null)
+                    continue;
+                Pen redPen = new Pen(Color.Red, 2);
+                //Vector2 half_eigen_vector = new Vector2(model.direction.x / 2, model.direction.y / 2);
+                //Vector2 start = model.origin.Minus(model.direction);
+                //Vector2 end = model.origin.Add(model.direction);
+
+                Point p1 = new Point((int)(model.start.x), (int)(model.start.y));
+                Point p2 = new Point((int)(model.end.x), (int)(model.end.y));
+                g.DrawLine(redPen, p1, p2);
             }
         }
 
@@ -418,7 +438,7 @@ namespace GMMDemo
 
         private void load2DLIDARScanToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            UpdateConfigurationUnputs();
+            ResetSimulationMemory();
             label_status.Text = "Loading 2D scan.";
             this.Refresh();
             // This method of getting to the scans directory might break in 
@@ -498,7 +518,8 @@ namespace GMMDemo
             }
             else
             {
-                // Since gaussians are initialized to partition=true at creation, we must check the selected state of each gaussian and set partition accordingly after level 1.
+                // Since gaussians are initialized to partition=true at creation, we must check the 
+                // selected state of each gaussian and set partition accordingly after level 1.
                 int start, end;
                 bool anySelected = false; // Checking if the user selected at least one gaussian to partition
                 (start, end) = GetGaussianIndeces(manual_level);
@@ -516,13 +537,10 @@ namespace GMMDemo
                 }
                 if (!anySelected)
                 {
-                    manual_mode = false;
-                    fitMode.Text = "Auto";
-                    manual_gmm_initialized = false;
-                    fit_ran = true;
                     label_status.Text = "No gaussians selected at level " + manual_level + ". Finalizing GMM.";
-                    this.Refresh();
-                    manual_level = 0;
+
+                    finalizGMM(); 
+                    
                     return;
                 }
                 manual_level++;
@@ -576,13 +594,22 @@ namespace GMMDemo
             }
         }
 
-        private void finalizeManualGMM_Click(object sender, EventArgs e)
+        private void finalizGMM()
         {
             manual_mode = false;
             fitMode.Text = "Auto";
             manual_gmm_initialized = false;
             fit_ran = true;
+
+            gmm.DetectLastLevel(manual_level);
+            manual_level = 0;
+
             this.Refresh();
+        }
+
+        private void finalizeManualGMM_Click(object sender, EventArgs e)
+        {
+            finalizGMM();
         }
 
         private void SelectAllGaussiansButton_Click(object sender, EventArgs e)

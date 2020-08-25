@@ -12,11 +12,6 @@ namespace GMMDemo
         private static List<Vector2> init_centroid = new List<Vector2>();
         private static Random rand = new Random();
 
-        private static List<Vector2> RandomPoint(int num_clusters)
-        {
-            return pts.OrderBy(arg => Guid.NewGuid()).Take(num_clusters).ToList();
-        }
-
         private static List<int> ClosestCentroid(List<Vector2> init_means)
         {
             List<int> closest_centroid = new List<int>();
@@ -74,8 +69,6 @@ namespace GMMDemo
                 centroid_diff += old_centroid[i].distancesquare(centroid[i]);
             }
 
-            //Console.WriteLine(centroid_diff);
-
             if (centroid_diff < centroid_diff_thresh)
             {
                 return true;
@@ -94,7 +87,7 @@ namespace GMMDemo
             List<Gaussian_2D> gau_list = new List<Gaussian_2D>();
 
             int iter_counter = 0;
-            init_centroid = RandomPoint(num_clusters);
+            init_centroid = random_state.choice(pts, num_clusters);
             List<int> closest_centroid = new List<int>();
             List<Vector2> centroid = init_centroid;
             List<Vector2> old_centroid = init_centroid;

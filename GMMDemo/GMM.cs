@@ -21,6 +21,7 @@ namespace GMMDemo
         private List<int> current_idx = null;
         private List<int> parent_idx = null;
         private int num_levels = 1;
+        public List<BaseModel> baseModels = new List<BaseModel>();
 
         private int iter = 0;
         private int max_iter = 80;//maximum iterations
@@ -29,7 +30,8 @@ namespace GMMDemo
         public void Init()
         {
             gaussian_list = new List<Gaussian_2D>();
-            class_prior = new List<double>();
+            class_prior = new List<double>(); 
+            baseModels = new List<BaseModel>();
             T = new List<List<double>>();
 
             if (pts != null)
@@ -53,6 +55,28 @@ namespace GMMDemo
             }
         }
 
+        public void DetectLastLevel(int level)
+        {
+            IEnumerable<int> level_gaussians = GetLevel(level-1);
+            foreach (int i in level_gaussians)
+            {
+                List<Vector2> gaussian_i_pts = new List<Vector2>();
+
+                foreach (Vector2 pt in pts)
+                {
+                    if (pt.gaussian_idx[level-1] == i)
+                        gaussian_i_pts.Add(pt);
+                }
+
+                if (gaussian_i_pts.Count < 3)
+                    continue;
+                
+                BaseModel lineModel = new LineModel();
+                lineModel = RANSAC.Fit(gaussian_i_pts, lineModel);
+                baseModels.Add(lineModel);
+            }
+        }
+
         private List<Gaussian_2D> ClusteringInitGMM(int level, int init_type)
         {
             List<Gaussian_2D> cluster_list = new List<Gaussian_2D>();
@@ -63,19 +87,19 @@ namespace GMMDemo
                 {
                     List<Vector2> parent_pts = new List<Vector2>();
                     List<Gaussian_2D> cluster_list_i = new List<Gaussian_2D>();
+
                     foreach (Vector2 pt in pts)
                     {
                         if (pt.gaussian_idx[level - 1] == i)
-                        {
                             parent_pts.Add(pt);
-                        }
                     }
 
                     //if there are fewer points than num_gaussian * 2 in the parent gaussian, stop partition
-                    if (parent_pts.Count <= num_gaussian * 2 || gaussian_list[i].partition == false)
+                    //if (parent_pts.Count <= num_gaussian * 2 || gaussian_list[i].partition == false)
+                    if (parent_pts.Count < num_gaussian || gaussian_list[i].partition == false)
                     {
                         Console.WriteLine("===========Stopping at gaussian {0}==============", i);
-                        gaussian_list[i].partition = false;
+                        //gaussian_list[i].partition = false;
                         for (int j = 0; j < num_gaussian; j++)
                         {
                             Gaussian_2D gau = new Gaussian_2D();
@@ -84,6 +108,14 @@ namespace GMMDemo
                             cluster_list_i.Add(gau);
                         }
                         cluster_list = cluster_list.Concat(cluster_list_i).ToList();
+
+                        if (parent_pts.Count > 2 && gaussian_list[i].dropped == false)
+                        {
+                            BaseModel lineModel = new LineModel();
+                            lineModel = RANSAC.Fit(parent_pts, lineModel);
+                            baseModels.Add(lineModel);
+                        }
+
                         continue;
                     }
 
@@ -156,8 +188,6 @@ namespace GMMDemo
             }
 
         }
-
-        
 
         /// <summary>
         /// Get point[parent]'s corresponding gaussian's children
@@ -324,7 +354,7 @@ namespace GMMDemo
                     continue;
                 }
 
-                //count points in gaussian j ()
+                //count points in gaussian j
                 int point_count = 0;
                 foreach (int idx in current_idx)
                 {
@@ -337,7 +367,7 @@ namespace GMMDemo
                     point_count += 1;
                     //gaussian_list[j].partition = false;
                     //gaussian_list[j].dropped = true;
-                    //continue;
+                    continue;
                 }
 
                 //class prior
@@ -425,8 +455,15 @@ namespace GMMDemo
                     //TODO: drop tiny gaussians
 
                     Console.WriteLine("level {0} done ", l);
+
+                    if (l == num_levels - 1)
+                    {
+                        DetectLastLevel(l + 1);
+                    }
                 }
             }
+
+
             Console.WriteLine("Done!");
 
             return (gaussian_list, pts);
@@ -492,6 +529,7 @@ namespace GMMDemo
         public void ClearPoints()
         {
             pts.Clear();
+            baseModels.Clear();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace GMMDemo
 {
@@ -59,6 +60,13 @@ namespace GMMDemo
             return this.x * rhs.x + this.y * rhs.y;
         }
 
+        public void Normalize()
+        {
+            float norm = (float)Math.Sqrt(x * x + y * y);
+            x /= norm;
+            y /= norm;
+        }
+
     }
 
     public class Matrix22
@@ -99,7 +107,7 @@ namespace GMMDemo
         {
             degenerate = false;
             trace = m00 + m11;
-            det = m00 * m11 - m10 * m01;
+            det = Det();
             float r = trace * trace * 0.25f - det;
             if (r > 0)
             {
@@ -225,6 +233,81 @@ namespace GMMDemo
             }
         }
     }
+
+    public static class Matrix
+    {
+        public static Vector2 Mean(List<Vector2> pts)
+        {
+            float x_sum = 0;
+            float y_sum = 0;
+            foreach (Vector2 pt in pts)
+            {
+                x_sum += pt.x;
+                y_sum += pt.y;
+            }
+
+            return new Vector2(x_sum/pts.Count, y_sum / pts.Count);
+        }
+
+        public static List<Vector2> Minus(List<Vector2> pts, Vector2 pt)
+        {
+            List<Vector2> result_pts = new List<Vector2>();
+
+            for ( int i = 0; i < pts.Count; i++)
+            {
+                result_pts.Add(pts[i].Minus(pt));
+            }
+
+            return result_pts;
+        }
+
+        public static List<List<float>> Inverse(List<Vector2> pts)
+        {
+            return null;
+        }
+
+        public static Vector2 SVD_V(Vector2 origin, List<Vector2> pts)
+        {
+            Matrix22 ATA = new Matrix22();
+            Vector2 start;
+            Vector2 direction_length;
+            Vector2 end;
+            Vector2 direction;
+
+            foreach (Vector2 pt in pts)
+            {
+                ATA.m00 += pt.x * pt.x;
+                ATA.m10 = ATA.m01 += pt.x * pt.y;
+                ATA.m11 += pt.y * pt.y;
+            }
+
+            ATA.UpdateEigens();
+            ATA.eigenvector_0.Normalize();
+            ATA.eigenvector_1.Normalize();
+
+            //float major_axis;
+
+            if (ATA.eigenvalue_0 > ATA.eigenvalue_1)
+            {
+                //major_axis = (float)(Math.Sqrt(ATA.eigenvalue_0));
+                //direction_length = new Vector2(major_axis * ATA.eigenvector_0.x / 2, major_axis * ATA.eigenvector_0.y / 2);
+                direction = ATA.eigenvector_0;
+            }
+            else
+            {
+                //major_axis = (float)(Math.Sqrt(ATA.eigenvalue_1));
+                //direction_length = new Vector2(major_axis * ATA.eigenvector_1.x / 2, major_axis * ATA.eigenvector_1.y / 2);
+                direction = ATA.eigenvector_1;
+            }
+
+            //start = origin.Minus(direction_length);
+            //end = origin.Add(direction_length);
+
+            return direction;
+            //return (start, end, direction);
+        }
+    }
+
 
     public class ColorSelector
     {

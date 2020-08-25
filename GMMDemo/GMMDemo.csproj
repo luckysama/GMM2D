@@ -54,6 +54,8 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="GMM.cs" />
+    <Compile Include="utils\utils.cs" />
+    <Compile Include="utils\primitivedetection.cs" />
     <Compile Include="utils\mathsutilities.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
