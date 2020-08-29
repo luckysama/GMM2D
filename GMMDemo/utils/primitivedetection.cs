@@ -65,15 +65,15 @@ namespace GMMDemo
                 origin_to_pt = pt.Minus(origin);
                 residual = Math.Abs(origin_to_pt.Cross2d(direction));
                 residuals.Add(residual);
-                sum += residual * residual;
+                //sum += residual * residual;
             }
-
+            /*
             sum = (float)Math.Sqrt(sum);
 
             for( int i = 0; i < residuals.Count; i++)
             {
                 residuals[i] /= sum;
-            }
+            }*/
 
             return residuals;
         }
@@ -84,22 +84,26 @@ namespace GMMDemo
 
             Vector2 origin_to_pt;
             float projection_x;
+            float projection_y;
             float max_projection_x = 0;
             float min_projection_x = 0;
             foreach (Vector2 pt in pts)
             {
                 origin_to_pt = pt.Minus(origin);
-                residual = Math.Abs(origin_to_pt.Cross2d(direction));
-                projection_x = origin_to_pt.x + residual * direction.y;
+                //residual = Math.Abs(origin_to_pt.Cross2d(direction));
+                residual = origin_to_pt.Cross2d(direction);
+                projection_x = origin_to_pt.x - residual * direction.y;
                 if (projection_x > max_projection_x)
                 {
                     max_projection_x = projection_x;
-                    end = pt;
+                    projection_y = projection_x * direction.y / direction.x;
+                    end = new Vector2(origin.x + projection_x, origin.y + projection_y);
                 }
                 else if (projection_x < min_projection_x)
                 {
                     min_projection_x = projection_x;
-                    start = pt;
+                    projection_y = projection_x * direction.y / direction.x;
+                    start = new Vector2(origin.x + projection_x, origin.y + projection_y);
                 }
             }
 
@@ -153,7 +157,7 @@ namespace GMMDemo
             int stop_sample_num = 10000000;
             float stop_residuals_sum = 0;
             //float stop_probability = 1;
-            float residual_threshold = 0.050F;
+            float residual_threshold = 2.00F;
 
             BaseModel sample_model;
             int sample_inlier_num;
@@ -196,6 +200,8 @@ namespace GMMDemo
                     best_inlier_num = sample_inlier_num;
                     best_inlier_residuals_sum = sample_model_residuals_sum;
                     best_inliers = sample_model_inliers;
+                    float accuracy = (float)best_inliers.Count / (float)pts.Count;
+                    Console.WriteLine("Inliers / all points : {0}", accuracy);
                     //TODO: dynamic max trials
                     if (best_inlier_num >= stop_sample_num
                         || best_inlier_residuals_sum <= stop_residuals_sum
@@ -207,6 +213,7 @@ namespace GMMDemo
                     
                 num_trials++;
             }
+            Console.WriteLine("Inum_trials : {0}", num_trials);
 
             //estimate final model using all inliers
             if (best_inliers != null)
@@ -216,7 +223,7 @@ namespace GMMDemo
                 best_inliers = GetInliers(best_model_residuals, residual_threshold, pts);
                 best_model.UpdateLineEnds(best_inliers);
                 float accuracy = (float)best_inliers.Count / (float)pts.Count;
-                Console.WriteLine("Inliers / all points : {0}", accuracy);
+                Console.WriteLine("### Inliers / all points : {0}", accuracy);
             }
         
             return best_model;

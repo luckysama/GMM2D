@@ -109,12 +109,14 @@ namespace GMMDemo
                         }
                         cluster_list = cluster_list.Concat(cluster_list_i).ToList();
 
+                        /*
                         if (parent_pts.Count > 2 && gaussian_list[i].dropped == false)
                         {
                             BaseModel lineModel = new LineModel();
                             lineModel = RANSAC.Fit(parent_pts, lineModel);
                             baseModels.Add(lineModel);
                         }
+                        */
 
                         continue;
                     }
@@ -211,7 +213,7 @@ namespace GMMDemo
         /// Level index
         /// </param>
         /// <returns></returns>
-        private List<int> GetLevel(int level)
+        public List<int> GetLevel(int level)
         {
             //See paper section 4
             IEnumerable<int> level_gaussians = Enumerable.Range(num_gaussian * ((int)Math.Pow(num_gaussian, level) - 1) / (num_gaussian - 1),

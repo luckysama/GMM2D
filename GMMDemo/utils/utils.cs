@@ -11,7 +11,6 @@ namespace GMMDemo
             IOrderedEnumerable<Vector2> ordered_pts = pts.OrderBy(arg => Guid.NewGuid());
             List<Vector2> sample_pts = ordered_pts.Take(pts_count).ToList();
             return sample_pts;
-            //return pts.OrderBy(arg => Guid.NewGuid()).Take(pts_count).ToList(); ;
         }
     }
         
