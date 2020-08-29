@@ -18,7 +18,7 @@ namespace GMMDemo
         public GMMDemoWnd()
         {
             InitializeComponent();
-            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            //this.FormBorderStyle = FormBorderStyle.FixedDialog;
             //this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.WindowState = FormWindowState.Maximized;
             gmm = new GMM();
@@ -52,6 +52,7 @@ namespace GMMDemo
         bool show_fits;
         bool fit_ran = false;
         bool use_random_colors;
+        int selected_gaussian_idx;
 
         bool manual_mode = false;
         bool manual_gmm_initialized = false;
@@ -211,10 +212,9 @@ namespace GMMDemo
                 Pen unselected = new Pen(unselected_gaussian, 2);
                 Pen selected = new Pen(selected_gaussian, 2);
 
-                int start, end;
-                (start, end) = GetGaussianIndeces(manual_level);
+                List<int> level_gaussians = gmm.GetLevel(manual_level - 1);
 
-                for (int i = start; i<end; i++)
+                foreach (int i in level_gaussians)
                 {
                     if (!drawingGaussians[i].dropped)
                     {
@@ -520,10 +520,10 @@ namespace GMMDemo
             {
                 // Since gaussians are initialized to partition=true at creation, we must check the 
                 // selected state of each gaussian and set partition accordingly after level 1.
-                int start, end;
                 bool anySelected = false; // Checking if the user selected at least one gaussian to partition
-                (start, end) = GetGaussianIndeces(manual_level);
-                for (int i = start; i < end; i++)
+                List<int> level_gaussians = gmm.GetLevel(manual_level - 1);
+
+                foreach (int i in level_gaussians)
                 {
                     if (gmm.gaussian_list[i].selected)
                     {
@@ -557,19 +557,19 @@ namespace GMMDemo
 
         private void formClickDetect(object sender, MouseEventArgs e)
         {
+            
+
             if (manual_mode && gmm.gaussian_list.Count > 0)
             {
                 //Get mouse position
                 mouse_position.x = e.Location.X;
                 mouse_position.y = e.Location.Y;
 
-                int start, end;
-                (start, end) = GetGaussianIndeces(manual_level);
+                List<int> level_gaussians = gmm.GetLevel(manual_level - 1);
 
                 //Find non-placeholder gaussian with shortest mean distance to mouse.
                 float minDistance = 1000000000000000; // Large number so that mouse is always closer to at least one gaussian
-                int select = 0;
-                for (int i=start; i<end; i++)
+                foreach (int i in level_gaussians)
                 {
                     if (!gmm.gaussian_list[i].dropped)
                     {
@@ -577,19 +577,32 @@ namespace GMMDemo
                         if(distance < minDistance)
                         {
                             minDistance = distance;
-                            select = i;
+                            selected_gaussian_idx = i;
                         }
                     }
                 }
-                if (gmm.gaussian_list[select].selected)
+
+                switch (e.Button)
                 {
-                    gmm.gaussian_list[select].selected = false;
+                    case MouseButtons.Left:
+                        if (gmm.gaussian_list[selected_gaussian_idx].selected)
+                        {
+                            gmm.gaussian_list[selected_gaussian_idx].selected = false;
+                        }
+                        else
+                        {
+                            gmm.gaussian_list[selected_gaussian_idx].selected = true;
+                        }
+                        drawingGaussians = gmm.gaussian_list;
+
+                        break;
+
+                    case MouseButtons.Right:
+                        Point pt = new Point(e.Location.X, e.Location.Y + 55);
+                        contextMenuStrip1.Show(pt);
+                        break;
                 }
-                else
-                {
-                    gmm.gaussian_list[select].selected = true;
-                }
-                drawingGaussians = gmm.gaussian_list;
+
                 this.Refresh();
             }
         }
@@ -614,12 +627,14 @@ namespace GMMDemo
 
         private void SelectAllGaussiansButton_Click(object sender, EventArgs e)
         {
-            int start, end;
-            (start, end) = GetGaussianIndeces(manual_level);
+            List<int> level_gaussians = gmm.GetLevel(manual_level - 1);
 
-            for (int i = start; i < end; i++)
+            foreach (int i in level_gaussians)
             {
-                gmm.gaussian_list[i].selected = true;
+                if (!gmm.gaussian_list[i].dropped)
+                {
+                    gmm.gaussian_list[i].selected = true;
+                }
             }
             this.Refresh();
         }
@@ -630,23 +645,38 @@ namespace GMMDemo
             this.Refresh();
         }
 
-        private (int, int) GetGaussianIndeces(int currentLevel)
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // Determine starting and ending index to query gaussians at current level
-            int start = 0;
-            if (currentLevel > 1)
+            this.Close();
+        }
+
+        private void fitLineToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            List<Vector2> gaussian_i_pts = new List<Vector2>();
+
+            foreach (Vector2 pt in gmm.pts)
             {
-                for (int level = 1; level < currentLevel; level++)
-                {
-                    start += (int)Math.Pow(num_of_fits, level);
-                }
+                if (pt.gaussian_idx[manual_level - 1] == selected_gaussian_idx)
+                    gaussian_i_pts.Add(pt);
             }
-            else
-            {
-                start = 0;
-            }
-            int end = start + (int)Math.Pow(num_of_fits, currentLevel);
-            return (start, end);
+
+            BaseModel lineModel = new LineModel();
+            lineModel = RANSAC.Fit(gaussian_i_pts, lineModel);
+            gmm.baseModels.Add(lineModel);
+
+            drawingGaussians[selected_gaussian_idx].dropped = true;
+            gmm.gaussian_list[selected_gaussian_idx].dropped = true;
+            drawingGaussians[selected_gaussian_idx].selected = false;
+            gmm.gaussian_list[selected_gaussian_idx].selected = false;
+
+            this.Refresh();
+        }
+
+        private void fitCircleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

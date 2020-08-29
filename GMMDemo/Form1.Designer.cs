@@ -66,6 +66,9 @@
             this.GaussianSamples = new System.Windows.Forms.Label();
             this.generatedPoints = new System.Windows.Forms.Label();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.fitLineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fitCircleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sliceImporter2D = new System.Windows.Forms.OpenFileDialog();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.menuStrip1.SuspendLayout();
@@ -76,26 +79,30 @@
             ((System.ComponentModel.ISupportInitialize)(this.LayerNumber)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.SampleNumber)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.FitNumber)).BeginInit();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // label_status
             // 
             this.label_status.AutoSize = true;
-            this.label_status.Location = new System.Drawing.Point(6, 1021);
+            this.label_status.Location = new System.Drawing.Point(11, 1649);
+            this.label_status.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label_status.Name = "label_status";
-            this.label_status.Size = new System.Drawing.Size(35, 13);
+            this.label_status.Size = new System.Drawing.Size(76, 21);
             this.label_status.TabIndex = 0;
             this.label_status.Text = "label1";
             // 
             // menuStrip1
             // 
+            this.menuStrip1.GripMargin = new System.Windows.Forms.Padding(2, 2, 0, 2);
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.dataToolStripMenuItem,
             this.manualFitToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1904, 24);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(11, 3, 0, 3);
+            this.menuStrip1.Size = new System.Drawing.Size(2164, 42);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -109,48 +116,48 @@
             this.generateLiDARDataToolStripMenuItem,
             this.load2DLIDARScanToolStripMenuItem});
             this.dataToolStripMenuItem.Name = "dataToolStripMenuItem";
-            this.dataToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
+            this.dataToolStripMenuItem.Size = new System.Drawing.Size(89, 36);
             this.dataToolStripMenuItem.Text = "Menu";
             // 
             // regenerateRandomDataToolStripMenuItem
             // 
             this.regenerateRandomDataToolStripMenuItem.Name = "regenerateRandomDataToolStripMenuItem";
-            this.regenerateRandomDataToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.regenerateRandomDataToolStripMenuItem.Size = new System.Drawing.Size(422, 40);
             this.regenerateRandomDataToolStripMenuItem.Text = "Generate Random Data";
             this.regenerateRandomDataToolStripMenuItem.Click += new System.EventHandler(this.regenerateRandomDataToolStripMenuItem_Click);
             // 
             // generateDummyGaussianDataToolStripMenuItem
             // 
             this.generateDummyGaussianDataToolStripMenuItem.Name = "generateDummyGaussianDataToolStripMenuItem";
-            this.generateDummyGaussianDataToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.generateDummyGaussianDataToolStripMenuItem.Size = new System.Drawing.Size(422, 40);
             this.generateDummyGaussianDataToolStripMenuItem.Text = "Generate Gaussian Data";
             this.generateDummyGaussianDataToolStripMenuItem.Click += new System.EventHandler(this.generateDummyGaussianDataToolStripMenuItem_Click_1);
             // 
             // fitGMMsToolStripMenuItem
             // 
             this.fitGMMsToolStripMenuItem.Name = "fitGMMsToolStripMenuItem";
-            this.fitGMMsToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.fitGMMsToolStripMenuItem.Size = new System.Drawing.Size(422, 40);
             this.fitGMMsToolStripMenuItem.Text = "Fit HGMM";
             this.fitGMMsToolStripMenuItem.Click += new System.EventHandler(this.fitGMMsToolStripMenuItem_Click);
             // 
             // drawDummyGaussianToolStripMenuItem
             // 
             this.drawDummyGaussianToolStripMenuItem.Name = "drawDummyGaussianToolStripMenuItem";
-            this.drawDummyGaussianToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.drawDummyGaussianToolStripMenuItem.Size = new System.Drawing.Size(422, 40);
             this.drawDummyGaussianToolStripMenuItem.Text = "Draw Gaussian Ground Truth";
             this.drawDummyGaussianToolStripMenuItem.Click += new System.EventHandler(this.drawDummyGaussianToolStripMenuItem_Click);
             // 
             // generateLiDARDataToolStripMenuItem
             // 
             this.generateLiDARDataToolStripMenuItem.Name = "generateLiDARDataToolStripMenuItem";
-            this.generateLiDARDataToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.generateLiDARDataToolStripMenuItem.Size = new System.Drawing.Size(422, 40);
             this.generateLiDARDataToolStripMenuItem.Text = "Generate Fake LiDAR Data";
             this.generateLiDARDataToolStripMenuItem.Click += new System.EventHandler(this.generateLiDARDataToolStripMenuItem_Click);
             // 
             // load2DLIDARScanToolStripMenuItem
             // 
             this.load2DLIDARScanToolStripMenuItem.Name = "load2DLIDARScanToolStripMenuItem";
-            this.load2DLIDARScanToolStripMenuItem.Size = new System.Drawing.Size(224, 22);
+            this.load2DLIDARScanToolStripMenuItem.Size = new System.Drawing.Size(422, 40);
             this.load2DLIDARScanToolStripMenuItem.Text = "Load 2D LIDAR Scan";
             this.load2DLIDARScanToolStripMenuItem.Click += new System.EventHandler(this.load2DLIDARScanToolStripMenuItem_Click);
             // 
@@ -161,27 +168,27 @@
             this.SelectAllGaussiansButton,
             this.finalizeManualGMM});
             this.manualFitToolStripMenuItem.Name = "manualFitToolStripMenuItem";
-            this.manualFitToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
+            this.manualFitToolStripMenuItem.Size = new System.Drawing.Size(138, 36);
             this.manualFitToolStripMenuItem.Text = "Manual Fit";
             // 
             // ManualFitButton
             // 
             this.ManualFitButton.Name = "ManualFitButton";
-            this.ManualFitButton.Size = new System.Drawing.Size(177, 22);
+            this.ManualFitButton.Size = new System.Drawing.Size(331, 40);
             this.ManualFitButton.Text = "Manually Fit Level";
             this.ManualFitButton.Click += new System.EventHandler(this.manualFitButton_Click);
             // 
             // SelectAllGaussiansButton
             // 
             this.SelectAllGaussiansButton.Name = "SelectAllGaussiansButton";
-            this.SelectAllGaussiansButton.Size = new System.Drawing.Size(177, 22);
+            this.SelectAllGaussiansButton.Size = new System.Drawing.Size(331, 40);
             this.SelectAllGaussiansButton.Text = "Select All Gaussians";
             this.SelectAllGaussiansButton.Click += new System.EventHandler(this.SelectAllGaussiansButton_Click);
             // 
             // finalizeManualGMM
             // 
             this.finalizeManualGMM.Name = "finalizeManualGMM";
-            this.finalizeManualGMM.Size = new System.Drawing.Size(177, 22);
+            this.finalizeManualGMM.Size = new System.Drawing.Size(331, 40);
             this.finalizeManualGMM.Text = "Finalize GMM";
             this.finalizeManualGMM.Click += new System.EventHandler(this.finalizeManualGMM_Click);
             // 
@@ -196,17 +203,20 @@
             this.groupbox_canvas.Controls.Add(this.label_status);
             this.groupbox_canvas.Controls.Add(this.panel1);
             this.groupbox_canvas.Location = new System.Drawing.Point(0, 0);
+            this.groupbox_canvas.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.groupbox_canvas.Name = "groupbox_canvas";
-            this.groupbox_canvas.Size = new System.Drawing.Size(1920, 1080);
+            this.groupbox_canvas.Padding = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.groupbox_canvas.Size = new System.Drawing.Size(3503, 1688);
             this.groupbox_canvas.TabIndex = 2;
             this.groupbox_canvas.TabStop = false;
             this.groupbox_canvas.Text = "Data Plot";
             // 
             // drawingCanvas
             // 
-            this.drawingCanvas.Location = new System.Drawing.Point(0, 27);
+            this.drawingCanvas.Location = new System.Drawing.Point(0, 44);
+            this.drawingCanvas.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.drawingCanvas.Name = "drawingCanvas";
-            this.drawingCanvas.Size = new System.Drawing.Size(1904, 828);
+            this.drawingCanvas.Size = new System.Drawing.Size(3491, 1338);
             this.drawingCanvas.TabIndex = 20;
             this.drawingCanvas.Paint += new System.Windows.Forms.PaintEventHandler(this.drawingCanvasPaint);
             this.drawingCanvas.MouseClick += new System.Windows.Forms.MouseEventHandler(this.formClickDetect);
@@ -214,18 +224,20 @@
             // fitMode
             // 
             this.fitMode.AutoSize = true;
-            this.fitMode.Location = new System.Drawing.Point(60, 1001);
+            this.fitMode.Location = new System.Drawing.Point(110, 1617);
+            this.fitMode.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.fitMode.Name = "fitMode";
-            this.fitMode.Size = new System.Drawing.Size(29, 13);
+            this.fitMode.Size = new System.Drawing.Size(54, 21);
             this.fitMode.TabIndex = 19;
             this.fitMode.Text = "Auto";
             // 
             // fitLabel
             // 
             this.fitLabel.AutoSize = true;
-            this.fitLabel.Location = new System.Drawing.Point(6, 1001);
+            this.fitLabel.Location = new System.Drawing.Point(11, 1617);
+            this.fitLabel.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.fitLabel.Name = "fitLabel";
-            this.fitLabel.Size = new System.Drawing.Size(48, 13);
+            this.fitLabel.Size = new System.Drawing.Size(98, 21);
             this.fitLabel.TabIndex = 18;
             this.fitLabel.Text = "Fit Mode";
             // 
@@ -249,17 +261,19 @@
             this.panel1.Controls.Add(this.GaussiansPerLevel);
             this.panel1.Controls.Add(this.GaussianSamples);
             this.panel1.Controls.Add(this.generatedPoints);
-            this.panel1.Location = new System.Drawing.Point(1341, 861);
+            this.panel1.Location = new System.Drawing.Point(2459, 1391);
+            this.panel1.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(551, 173);
+            this.panel1.Size = new System.Drawing.Size(1010, 279);
             this.panel1.TabIndex = 17;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(217, 126);
+            this.label1.Location = new System.Drawing.Point(398, 204);
+            this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(63, 13);
+            this.label1.Size = new System.Drawing.Size(142, 21);
             this.label1.TabIndex = 19;
             this.label1.Text = "Init. Method";
             // 
@@ -270,9 +284,10 @@
             "K-Means",
             "FCM",
             "Random"});
-            this.InitializationSelectionBox.Location = new System.Drawing.Point(286, 122);
+            this.InitializationSelectionBox.Location = new System.Drawing.Point(524, 197);
+            this.InitializationSelectionBox.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.InitializationSelectionBox.Name = "InitializationSelectionBox";
-            this.InitializationSelectionBox.Size = new System.Drawing.Size(73, 21);
+            this.InitializationSelectionBox.Size = new System.Drawing.Size(131, 29);
             this.InitializationSelectionBox.TabIndex = 1;
             this.InitializationSelectionBox.Text = "K-Means";
             this.InitializationSelectionBox.SelectedIndexChanged += new System.EventHandler(this.InitializationSelectionBox_SelectedIndexChanged);
@@ -282,9 +297,10 @@
             this.showPoints.AutoSize = true;
             this.showPoints.Checked = true;
             this.showPoints.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.showPoints.Location = new System.Drawing.Point(220, 45);
+            this.showPoints.Location = new System.Drawing.Point(403, 73);
+            this.showPoints.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.showPoints.Name = "showPoints";
-            this.showPoints.Size = new System.Drawing.Size(85, 17);
+            this.showPoints.Size = new System.Drawing.Size(157, 25);
             this.showPoints.TabIndex = 18;
             this.showPoints.Text = "Show Points";
             this.showPoints.UseVisualStyleBackColor = true;
@@ -295,9 +311,10 @@
             this.showFits.AutoSize = true;
             this.showFits.Checked = true;
             this.showFits.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.showFits.Location = new System.Drawing.Point(220, 71);
+            this.showFits.Location = new System.Drawing.Point(403, 115);
+            this.showFits.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.showFits.Name = "showFits";
-            this.showFits.Size = new System.Drawing.Size(72, 17);
+            this.showFits.Size = new System.Drawing.Size(135, 25);
             this.showFits.TabIndex = 17;
             this.showFits.Text = "Show Fits";
             this.showFits.UseVisualStyleBackColor = true;
@@ -305,9 +322,10 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(30, 144);
+            this.button2.Location = new System.Drawing.Point(55, 233);
+            this.button2.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(147, 27);
+            this.button2.Size = new System.Drawing.Size(270, 44);
             this.button2.TabIndex = 14;
             this.button2.Text = "RESET MEMORY";
             this.button2.UseVisualStyleBackColor = true;
@@ -316,9 +334,10 @@
             // useRandomColors
             // 
             this.useRandomColors.AutoSize = true;
-            this.useRandomColors.Location = new System.Drawing.Point(220, 99);
+            this.useRandomColors.Location = new System.Drawing.Point(403, 160);
+            this.useRandomColors.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.useRandomColors.Name = "useRandomColors";
-            this.useRandomColors.Size = new System.Drawing.Size(98, 17);
+            this.useRandomColors.Size = new System.Drawing.Size(179, 25);
             this.useRandomColors.TabIndex = 13;
             this.useRandomColors.Text = "Random Colors";
             this.useRandomColors.UseVisualStyleBackColor = true;
@@ -326,9 +345,10 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(377, 17);
+            this.button1.Location = new System.Drawing.Point(691, 27);
+            this.button1.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.Size = new System.Drawing.Size(138, 37);
             this.button1.TabIndex = 12;
             this.button1.Text = "Refresh";
             this.button1.UseVisualStyleBackColor = true;
@@ -336,14 +356,15 @@
             // 
             // ViewedLayerNumber
             // 
-            this.ViewedLayerNumber.Location = new System.Drawing.Point(468, 149);
+            this.ViewedLayerNumber.Location = new System.Drawing.Point(858, 241);
+            this.ViewedLayerNumber.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.ViewedLayerNumber.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
             this.ViewedLayerNumber.Name = "ViewedLayerNumber";
-            this.ViewedLayerNumber.Size = new System.Drawing.Size(81, 20);
+            this.ViewedLayerNumber.Size = new System.Drawing.Size(149, 31);
             this.ViewedLayerNumber.TabIndex = 11;
             this.ViewedLayerNumber.Value = new decimal(new int[] {
             1,
@@ -356,24 +377,27 @@
             // ViewedLayer
             // 
             this.ViewedLayer.AutoSize = true;
-            this.ViewedLayer.Location = new System.Drawing.Point(392, 151);
+            this.ViewedLayer.Location = new System.Drawing.Point(719, 244);
+            this.ViewedLayer.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.ViewedLayer.Name = "ViewedLayer";
-            this.ViewedLayer.Size = new System.Drawing.Size(70, 13);
+            this.ViewedLayer.Size = new System.Drawing.Size(153, 21);
             this.ViewedLayer.TabIndex = 10;
             this.ViewedLayer.Text = "Current Level";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(474, 17);
+            this.label5.Location = new System.Drawing.Point(869, 27);
+            this.label5.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(69, 13);
+            this.label5.Size = new System.Drawing.Size(153, 21);
             this.label5.TabIndex = 9;
             this.label5.Text = "Configuration";
             // 
             // PointNumber
             // 
-            this.PointNumber.Location = new System.Drawing.Point(468, 45);
+            this.PointNumber.Location = new System.Drawing.Point(858, 73);
+            this.PointNumber.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.PointNumber.Maximum = new decimal(new int[] {
             1000000000,
             0,
@@ -385,7 +409,7 @@
             0,
             0});
             this.PointNumber.Name = "PointNumber";
-            this.PointNumber.Size = new System.Drawing.Size(81, 20);
+            this.PointNumber.Size = new System.Drawing.Size(149, 31);
             this.PointNumber.TabIndex = 8;
             this.PointNumber.Value = new decimal(new int[] {
             3000,
@@ -397,14 +421,15 @@
             // 
             // LayerNumber
             // 
-            this.LayerNumber.Location = new System.Drawing.Point(468, 123);
+            this.LayerNumber.Location = new System.Drawing.Point(858, 199);
+            this.LayerNumber.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.LayerNumber.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
             this.LayerNumber.Name = "LayerNumber";
-            this.LayerNumber.Size = new System.Drawing.Size(81, 20);
+            this.LayerNumber.Size = new System.Drawing.Size(149, 31);
             this.LayerNumber.TabIndex = 7;
             this.LayerNumber.Value = new decimal(new int[] {
             1,
@@ -416,14 +441,15 @@
             // 
             // SampleNumber
             // 
-            this.SampleNumber.Location = new System.Drawing.Point(468, 71);
+            this.SampleNumber.Location = new System.Drawing.Point(858, 115);
+            this.SampleNumber.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.SampleNumber.Maximum = new decimal(new int[] {
             100000,
             0,
             0,
             0});
             this.SampleNumber.Name = "SampleNumber";
-            this.SampleNumber.Size = new System.Drawing.Size(81, 20);
+            this.SampleNumber.Size = new System.Drawing.Size(149, 31);
             this.SampleNumber.TabIndex = 6;
             this.SampleNumber.Value = new decimal(new int[] {
             20,
@@ -435,9 +461,10 @@
             // 
             // FitNumber
             // 
-            this.FitNumber.Location = new System.Drawing.Point(468, 97);
+            this.FitNumber.Location = new System.Drawing.Point(858, 157);
+            this.FitNumber.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.FitNumber.Name = "FitNumber";
-            this.FitNumber.Size = new System.Drawing.Size(81, 20);
+            this.FitNumber.Size = new System.Drawing.Size(149, 31);
             this.FitNumber.TabIndex = 5;
             this.FitNumber.Value = new decimal(new int[] {
             4,
@@ -450,53 +477,84 @@
             // HierarchicalLayers
             // 
             this.HierarchicalLayers.AutoSize = true;
-            this.HierarchicalLayers.Location = new System.Drawing.Point(365, 126);
+            this.HierarchicalLayers.Location = new System.Drawing.Point(669, 204);
+            this.HierarchicalLayers.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.HierarchicalLayers.Name = "HierarchicalLayers";
-            this.HierarchicalLayers.Size = new System.Drawing.Size(97, 13);
+            this.HierarchicalLayers.Size = new System.Drawing.Size(219, 21);
             this.HierarchicalLayers.TabIndex = 3;
             this.HierarchicalLayers.Text = "Hierarchical Levels";
             // 
             // GaussiansPerLevel
             // 
             this.GaussiansPerLevel.AutoSize = true;
-            this.GaussiansPerLevel.Location = new System.Drawing.Point(358, 99);
+            this.GaussiansPerLevel.Location = new System.Drawing.Point(656, 160);
+            this.GaussiansPerLevel.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.GaussiansPerLevel.Name = "GaussiansPerLevel";
-            this.GaussiansPerLevel.Size = new System.Drawing.Size(104, 13);
+            this.GaussiansPerLevel.Size = new System.Drawing.Size(219, 21);
             this.GaussiansPerLevel.TabIndex = 2;
             this.GaussiansPerLevel.Text = "Gaussians Per Level";
             // 
             // GaussianSamples
             // 
             this.GaussianSamples.AutoSize = true;
-            this.GaussianSamples.Location = new System.Drawing.Point(365, 73);
+            this.GaussianSamples.Location = new System.Drawing.Point(669, 118);
+            this.GaussianSamples.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.GaussianSamples.Name = "GaussianSamples";
-            this.GaussianSamples.Size = new System.Drawing.Size(97, 13);
+            this.GaussianSamples.Size = new System.Drawing.Size(197, 21);
             this.GaussianSamples.TabIndex = 1;
             this.GaussianSamples.Text = "Sample Gaussians ";
             // 
             // generatedPoints
             // 
             this.generatedPoints.AutoSize = true;
-            this.generatedPoints.Location = new System.Drawing.Point(370, 52);
+            this.generatedPoints.Location = new System.Drawing.Point(678, 84);
+            this.generatedPoints.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.generatedPoints.Name = "generatedPoints";
-            this.generatedPoints.Size = new System.Drawing.Size(89, 13);
+            this.generatedPoints.Size = new System.Drawing.Size(186, 21);
             this.generatedPoints.TabIndex = 0;
             this.generatedPoints.Text = "Generated Points";
             // 
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fitLineToolStripMenuItem,
+            this.fitCircleToolStripMenuItem,
+            this.exitToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(170, 106);
+            // 
+            // fitLineToolStripMenuItem
+            // 
+            this.fitLineToolStripMenuItem.Name = "fitLineToolStripMenuItem";
+            this.fitLineToolStripMenuItem.Size = new System.Drawing.Size(169, 34);
+            this.fitLineToolStripMenuItem.Text = "Fit line";
+            this.fitLineToolStripMenuItem.Click += new System.EventHandler(this.fitLineToolStripMenuItem_Click);
+            // 
+            // fitCircleToolStripMenuItem
+            // 
+            this.fitCircleToolStripMenuItem.Name = "fitCircleToolStripMenuItem";
+            this.fitCircleToolStripMenuItem.Size = new System.Drawing.Size(169, 34);
+            this.fitCircleToolStripMenuItem.Text = "Fit circle";
+            this.fitCircleToolStripMenuItem.Click += new System.EventHandler(this.fitCircleToolStripMenuItem_Click);
+            // 
+            // exitToolStripMenuItem
+            // 
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(169, 34);
+            this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // GMMDemoWnd
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1904, 1041);
+            this.AutoSize = true;
+            this.ClientSize = new System.Drawing.Size(2164, 1682);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.groupbox_canvas);
             this.MainMenuStrip = this.menuStrip1;
+            this.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "GMMDemoWnd";
@@ -513,6 +571,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.LayerNumber)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.SampleNumber)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.FitNumber)).EndInit();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -559,6 +618,9 @@
         private System.Windows.Forms.ToolStripMenuItem SelectAllGaussiansButton;
         private System.Windows.Forms.ComboBox InitializationSelectionBox;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ToolStripMenuItem fitLineToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fitCircleToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
     }
 }
 
