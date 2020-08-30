@@ -48,6 +48,10 @@ namespace GMMDemo
         int num_of_levels;
         int viewed_level;
         int init_method = 0;
+
+        float line_res;
+        float circle_res;
+
         bool show_points;
         bool show_fits;
         bool fit_ran = false;
@@ -68,6 +72,8 @@ namespace GMMDemo
             num_of_fits = (int)FitNumber.Value;
             num_of_levels = (int)LayerNumber.Value;
             viewed_level = (int)ViewedLayerNumber.Value;
+            circle_res = (float)CircleResolution.Value;
+            line_res = (float)LineResolution.Value;
             use_random_colors = (bool)useRandomColors.Checked;
             show_points = (bool)showPoints.Checked;
             show_fits = (bool)showFits.Checked;
@@ -161,7 +167,21 @@ namespace GMMDemo
             Color ellipse_color = ellipse_colors.NextColor();
            
             ColorPoints(g, viewed_level);
-            ColorLines(g);
+
+            foreach (BaseModel model in gmm.baseModels)
+            {
+                if (model == null)
+                    continue;
+                switch (model.GetType().ToString())
+                {
+                    case "GMMDemo.LineModel":
+                        ColorLines(g, model);
+                        break;
+                    case "GMMDemo.CircleModel":
+                        ColorCircles(g, model);
+                        break;
+                }
+            }
 
             if (drawingGaussians.Count > 0 && show_fits)
             {
@@ -182,7 +202,11 @@ namespace GMMDemo
                     int gaussian_count = 0;
                     int layer_count = 1;
                     int cumulative_limit = num_of_fits;
-                    foreach (Gaussian_2D gaussian in drawingGaussians)
+
+
+                    List<int> level_gaussians = gmm.GetLevel(viewed_level - 1);
+
+                    foreach (int i in level_gaussians)
                     {
                         if (gaussian_count >= cumulative_limit)
                         {
@@ -192,9 +216,9 @@ namespace GMMDemo
                             cumulative_limit += (int)Math.Pow(num_of_fits, layer_count);
                         }
 
-                        if (!gaussian.dropped)
+                        if (!drawingGaussians[i].dropped)
                         {
-                            Draw3SigmaEllipse(g, gaussian, ellipse_pen);
+                            Draw3SigmaEllipse(g, drawingGaussians[i], ellipse_pen);
                         }
                         gaussian_count++;
                     }
@@ -205,7 +229,21 @@ namespace GMMDemo
         private void manualModeColoring(Graphics g)
         {
             ColorPoints(g, manual_level);
-            ColorLines(g);
+
+            foreach (BaseModel model in gmm.baseModels)
+            {
+                //if (model == null)
+                //    continue;
+                switch (model.GetType().ToString())
+                {
+                    case "GMMDemo.LineModel":
+                        ColorLines(g, model);
+                        break;
+                    case "GMMDemo.CircleModel":
+                        ColorCircles(g, model);
+                        break;
+                }
+            }
 
             if (drawingGaussians.Count > 0)
             {
@@ -233,21 +271,23 @@ namespace GMMDemo
             }
         }
 
-        private void ColorLines(Graphics g)
+        private void ColorLines(Graphics g, BaseModel model)
         {
-            foreach (BaseModel model in gmm.baseModels)
-            {
-                if (model == null)
-                    continue;
-                Pen redPen = new Pen(Color.Red, 2);
-                //Vector2 half_eigen_vector = new Vector2(model.direction.x / 2, model.direction.y / 2);
-                //Vector2 start = model.origin.Minus(model.direction);
-                //Vector2 end = model.origin.Add(model.direction);
+            Pen redPen = new Pen(Color.Red, 2);
 
-                Point p1 = new Point((int)(model.start.x), (int)(model.start.y));
-                Point p2 = new Point((int)(model.end.x), (int)(model.end.y));
-                g.DrawLine(redPen, p1, p2);
-            }
+            Point p1 = new Point((int)(model.Start.x), (int)(model.Start.y));
+            Point p2 = new Point((int)(model.End.x), (int)(model.End.y));
+            g.DrawLine(redPen, p1, p2);
+        }
+
+        private void ColorCircles(Graphics g, BaseModel model)
+        {
+            Pen bluePen = new Pen(Color.Blue, 2);
+            float top_left_x = model.Center.x - model.R;
+            float top_left_y = model.Center.y - model.R;
+            float width = model.R * 2;
+
+            g.DrawEllipse(bluePen, top_left_x, top_left_y, width, width);
         }
 
         private void ColorPoints(Graphics g, int currentLevel)
@@ -425,10 +465,6 @@ namespace GMMDemo
             this.Refresh();
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            this.Refresh();
-        }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
@@ -547,7 +583,16 @@ namespace GMMDemo
             }
 
             DateTime time_start = DateTime.Now;
+
             (drawingGaussians, drawingPts) = gmm.FitGaussiansManual(num_of_fits, manual_level-1, init_method);
+
+            // TODO: deep copy of gmm.gaussian_list
+            //List<Gaussian_2D> drawingGaussians_temp;
+            //List<Vector2> drawingPts_temp;
+            //drawingGaussians = new List<Gaussian_2D>(drawingGaussians_temp.Count);
+            //drawingGaussians_temp.CopyTo(drawingGaussians);
+            //drawingPts = drawingPts_temp.ToList();
+
             fit_ran = true;
             DateTime time_end = DateTime.Now;
 
@@ -573,7 +618,8 @@ namespace GMMDemo
                 {
                     if (!gmm.gaussian_list[i].dropped)
                     {
-                        float distance = (float)Math.Sqrt(Math.Pow(gmm.gaussian_list[i].miu.x - mouse_position.x, 2) + Math.Pow(gmm.gaussian_list[i].miu.y - mouse_position.y, 2));
+                        
+                        float distance = (float)Math.Sqrt(gmm.gaussian_list[i].miu.distancesquare(mouse_position));
                         if(distance < minDistance)
                         {
                             minDistance = distance;
@@ -595,15 +641,15 @@ namespace GMMDemo
                         }
                         drawingGaussians = gmm.gaussian_list;
 
+                        this.Refresh();
+
                         break;
 
                     case MouseButtons.Right:
-                        Point pt = new Point(e.Location.X, e.Location.Y + 55);
-                        contextMenuStrip1.Show(pt);
+                        Point pt = new Point(e.Location.X, e.Location.Y);
+                        contextMenuStrip1.Show(drawingCanvas, pt);
                         break;
                 }
-
-                this.Refresh();
             }
         }
 
@@ -645,12 +691,6 @@ namespace GMMDemo
             this.Refresh();
         }
 
-
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
-
         private void fitLineToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
@@ -662,21 +702,60 @@ namespace GMMDemo
                     gaussian_i_pts.Add(pt);
             }
 
+            if (gaussian_i_pts.Count < 2)
+                return;
+
             BaseModel lineModel = new LineModel();
-            lineModel = RANSAC.Fit(gaussian_i_pts, lineModel);
+            lineModel = RANSAC.Fit(gaussian_i_pts, lineModel, 2, line_res);
             gmm.baseModels.Add(lineModel);
 
             drawingGaussians[selected_gaussian_idx].dropped = true;
-            gmm.gaussian_list[selected_gaussian_idx].dropped = true;
             drawingGaussians[selected_gaussian_idx].selected = false;
+            gmm.gaussian_list[selected_gaussian_idx].dropped = true;
             gmm.gaussian_list[selected_gaussian_idx].selected = false;
 
             this.Refresh();
+            // TODO: deep copy of gmm.gaussian_list
+            //gmm.gaussian_list[selected_gaussian_idx].dropped = false;
         }
 
         private void fitCircleToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
+            List<Vector2> gaussian_i_pts = new List<Vector2>();
+
+            foreach (Vector2 pt in gmm.pts)
+            {
+                if (pt.gaussian_idx[manual_level - 1] == selected_gaussian_idx)
+                    gaussian_i_pts.Add(pt);
+            }
+
+            if (gaussian_i_pts.Count < 3)
+                return;
+            
+            BaseModel circleModel = new CircleModel();
+            circleModel = RANSAC.Fit(gaussian_i_pts, circleModel, 3, circle_res);
+            gmm.baseModels.Add(circleModel);
+
+            drawingGaussians[selected_gaussian_idx].dropped = true;
+            drawingGaussians[selected_gaussian_idx].selected = false;
+            gmm.gaussian_list[selected_gaussian_idx].dropped = true;
+            gmm.gaussian_list[selected_gaussian_idx].selected = false;
+
+            this.Refresh();
+            // TODO: deep copy of gmm.gaussian_list
+            //gmm.gaussian_list[selected_gaussian_idx].dropped = false;
+        }
+
+        private void ignoreToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            drawingGaussians[selected_gaussian_idx].dropped = true;
+            drawingGaussians[selected_gaussian_idx].selected = false;
+            gmm.gaussian_list[selected_gaussian_idx].dropped = true;
+            gmm.gaussian_list[selected_gaussian_idx].selected = false;
+            this.Refresh();
+            // TODO: deep copy of gmm.gaussian_list
+            //gmm.gaussian_list[selected_gaussian_idx].dropped = false;
         }
     }
 }

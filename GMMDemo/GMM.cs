@@ -68,11 +68,11 @@ namespace GMMDemo
                         gaussian_i_pts.Add(pt);
                 }
 
-                if (gaussian_i_pts.Count < 3)
+                if (gaussian_i_pts.Count < 2)
                     continue;
                 
                 BaseModel lineModel = new LineModel();
-                lineModel = RANSAC.Fit(gaussian_i_pts, lineModel);
+                lineModel = RANSAC.Fit(gaussian_i_pts, lineModel, 2, 2.00F);
                 baseModels.Add(lineModel);
             }
         }
@@ -109,14 +109,12 @@ namespace GMMDemo
                         }
                         cluster_list = cluster_list.Concat(cluster_list_i).ToList();
 
-                        /*
                         if (parent_pts.Count > 2 && gaussian_list[i].dropped == false)
                         {
                             BaseModel lineModel = new LineModel();
-                            lineModel = RANSAC.Fit(parent_pts, lineModel);
+                            lineModel = RANSAC.Fit(parent_pts, lineModel, 2, 2.00F);
                             baseModels.Add(lineModel);
                         }
-                        */
 
                         continue;
                     }
@@ -366,7 +364,7 @@ namespace GMMDemo
                 //In progress
                 if (point_count == 0)
                 {
-                    point_count += 1;
+                    //point_count += 1;
                     //gaussian_list[j].partition = false;
                     //gaussian_list[j].dropped = true;
                     continue;
