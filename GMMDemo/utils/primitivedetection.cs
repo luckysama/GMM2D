@@ -8,21 +8,30 @@ namespace GMMDemo
 {
     public interface BaseModel
     {
-        Vector2 start { get; set; }
-        Vector2 end { get; set; }
+        // Line model parameters
+        Vector2 Start { get; set; }
+        Vector2 End { get; set; }
+
+        // Circle model parameters
+        Vector2 Center { get; set; }
+        float R { get; set; }
 
         void Estimate(List<Vector2> pts);
         List<float> Residual(List<Vector2> pts);
         void UpdateLineEnds(List<Vector2> pts);
-        BaseModel ShallowCopy();
     }
     
     public class LineModel : BaseModel
     {
-        public Vector2 start { get; set; }
-        public Vector2 end { get; set; }
-        private Vector2 origin;
-        private Vector2 direction;
+        // Line model parameters
+        public Vector2 Start { get; set; }
+        public Vector2 End { get; set; }
+        private Vector2 origin = null;
+        private Vector2 direction = null;
+
+        // Circle model parameters
+        public Vector2 Center { get; set; }
+        public float R { get; set; }
 
         public void Estimate(List<Vector2> pts)
         {
@@ -31,8 +40,8 @@ namespace GMMDemo
 
             if(centered_pts.Count == 2)
             {
-                start = centered_pts[0];
-                end = centered_pts[1];
+                Start = centered_pts[0];
+                End = centered_pts[1];
                 direction = centered_pts[1].Minus(centered_pts[0]);
                 float norm = (float)Math.Sqrt(centered_pts[1].distancesquare(centered_pts[0]));
                 direction.x /= norm;
@@ -40,11 +49,11 @@ namespace GMMDemo
             } 
             else if (centered_pts.Count > 2)
             {
-                direction = Matrix.SVD_V(origin, centered_pts);
+                direction = Matrix.SVD_V(centered_pts);
             }
             else
             {
-                throw new System.ArgumentException("At least 2 input points needed.", "original");
+                throw new ArgumentException("At least 2 input points needed.", "original");
             }
         }
 
@@ -52,12 +61,11 @@ namespace GMMDemo
         {
             if (origin == null || direction == null)
             {
-                throw new System.ArgumentException("Parameters cannot be None.", "original");
+                throw new ArgumentException("Parameters cannot be None.", "original");
             }
 
             List<float> residuals = new List<float>();
             float residual;
-            float sum = 0;
 
             Vector2 origin_to_pt;
             foreach (Vector2 pt in pts)
@@ -65,15 +73,7 @@ namespace GMMDemo
                 origin_to_pt = pt.Minus(origin);
                 residual = Math.Abs(origin_to_pt.Cross2d(direction));
                 residuals.Add(residual);
-                //sum += residual * residual;
             }
-            /*
-            sum = (float)Math.Sqrt(sum);
-
-            for( int i = 0; i < residuals.Count; i++)
-            {
-                residuals[i] /= sum;
-            }*/
 
             return residuals;
         }
@@ -81,7 +81,6 @@ namespace GMMDemo
         public void UpdateLineEnds(List<Vector2> pts)
         {
             float residual;
-
             Vector2 origin_to_pt;
             float projection_x;
             float projection_y;
@@ -97,43 +96,116 @@ namespace GMMDemo
                 {
                     max_projection_x = projection_x;
                     projection_y = projection_x * direction.y / direction.x;
-                    end = new Vector2(origin.x + projection_x, origin.y + projection_y);
+                    End = new Vector2(origin.x + projection_x, origin.y + projection_y);
                 }
                 else if (projection_x < min_projection_x)
                 {
                     min_projection_x = projection_x;
                     projection_y = projection_x * direction.y / direction.x;
-                    start = new Vector2(origin.x + projection_x, origin.y + projection_y);
+                    Start = new Vector2(origin.x + projection_x, origin.y + projection_y);
                 }
             }
 
         }
 
-        public BaseModel ShallowCopy()
-        {
-            return (BaseModel)this.MemberwiseClone();
-        }
     }
-    /*
+    
     public class CircleModel : BaseModel
     {
-        public Vector2 origin { get; set; }
-        public Vector2 direction { get; set; }
+        // Line model parameters
+        public Vector2 Start { get; set; }
+        public Vector2 End { get; set; }
+
+        // Circle model parameters
+        public Vector2 Center { get; set; } = null;
+        public float R { get; set; } = 0;
 
         public void Estimate(List<Vector2> pts)
         {
+            // http://www.dtcenter.org/sites/default/files/community-code/met/docs/write-ups/circle_fit.pdf
+            float a;
+            float b;
+            float x2;
+            float y2;
+            float uc;
+            float vc;
+
+            Matrix22 m1;
+            Matrix22 m2;
+            Matrix22 m3;
+
+            float sum_x2 = 0;
+            float sum_y2 = 0;
+            float sum_xy = 0;
+            float sum_x3 = 0;
+            float sum_y3 = 0;
+            float sum_xy2 = 0;
+            float sum_yx2 = 0;
+
+            Vector2 origin = Matrix.Mean(pts);
+            List<Vector2> centered_pts = Matrix.Minus(pts, origin);
+
+            foreach (Vector2 pt in centered_pts)
+            {
+                x2 = pt.x * pt.x;
+                y2 = pt.y * pt.y;
+                sum_x2 += x2;
+                sum_y2 += y2;
+                sum_xy += pt.x * pt.y;
+                sum_x3 += x2 * pt.x;
+                sum_y3 += y2 * pt.y;
+                sum_xy2 += pt.x * y2;
+                sum_yx2 += pt.y * x2;
+            }
+
+            a = (sum_x3 + sum_xy2) / 2;
+            b = (sum_y3 + sum_yx2) / 2;
+
+            // Solve 2-dimensional linear equation using Cramer’s rule:
+            // https://www.geeksforgeeks.org/system-linear-equations-three-variables-using-cramers-rule/
+            m1 = new Matrix22(sum_x2, sum_xy, sum_xy, sum_y2);
+            m2 = new Matrix22(a, sum_xy, b, sum_y2);
+            m3 = new Matrix22(sum_x2, a, sum_xy, b);
+
+            uc = m2.Det() / m1.Det();
+            vc = m3.Det() / m1.Det();
+
+            Center = new Vector2(uc, vc).Add(origin);
+            R = (float)Math.Sqrt(uc * uc + vc * vc + (sum_x2 + sum_y2) / centered_pts.Count);
         }
 
         public List<float> Residual(List<Vector2> pts)
         {
-            return null;
+            if (Center == null || R == 0)
+            {
+                throw new ArgumentException("Parameters cannot be None.", "original");
+            }
+
+            float x2;
+            float y2;
+            float residual;
+            Vector2 centered_pt;
+
+            List<float> residuals = new List<float>();
+            foreach (Vector2 pt in pts)
+            {
+                centered_pt = pt.Minus(Center);
+                x2 = centered_pt.x * centered_pt.x;
+                y2 = centered_pt.y * centered_pt.y;
+
+                residual = Math.Abs(R - (float)Math.Sqrt(x2 + y2));
+                residuals.Add(residual);
+            }
+
+            return residuals;
         }
 
-        public BaseModel ShallowCopy()
+        public void UpdateLineEnds(List<Vector2> pts)
         {
-            return (BaseModel)this.MemberwiseClone();
+            // Place holder
         }
-    }*/
+
+    }
 
     public static class RANSAC
     {
@@ -150,14 +222,13 @@ namespace GMMDemo
             return inliers;
         }
 
-        public static BaseModel Fit(List<Vector2> pts, BaseModel model_class, int min_samples=2)
+        public static BaseModel Fit(List<Vector2> pts, BaseModel model_class, int min_samples, float residual_threshold)
         {
             int max_trials = 200;
             int num_trials = 0;
             int stop_sample_num = 10000000;
             float stop_residuals_sum = 0;
             //float stop_probability = 1;
-            float residual_threshold = 2.00F;
 
             BaseModel sample_model;
             int sample_inlier_num;
@@ -200,8 +271,6 @@ namespace GMMDemo
                     best_inlier_num = sample_inlier_num;
                     best_inlier_residuals_sum = sample_model_residuals_sum;
                     best_inliers = sample_model_inliers;
-                    float accuracy = (float)best_inliers.Count / (float)pts.Count;
-                    Console.WriteLine("Inliers / all points : {0}", accuracy);
                     //TODO: dynamic max trials
                     if (best_inlier_num >= stop_sample_num
                         || best_inlier_residuals_sum <= stop_residuals_sum

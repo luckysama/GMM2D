@@ -144,7 +144,6 @@ namespace GMMDemo
     {
         public static List<Vector2> Import(int num_of_points, List<String> lines, float canvasWidth, float CanvasHeight)
         {
-            List<Vector2> scanned_pts = new List<Vector2>();
             List<Vector2> pts = new List<Vector2>();
             // Highest values in list of x y coordinates of imported text file
             float xMax = 0;
@@ -155,58 +154,35 @@ namespace GMMDemo
                 {
                     continue;
                 }
+
                 string[] coordinates = line.Split(' ');
                 float x = float.Parse(coordinates[0]);
+                float y = float.Parse(coordinates[1]);
+
                 if (x > xMax)
                 {
                     xMax = x;
                 }
-
-                float y = float.Parse(coordinates[1]);
                 if (y > yMax)
                 {
                     yMax = y;
                 }
-                scanned_pts.Add(new Vector2(x, y));
+                
+                pts.Add(new Vector2(x, y));
             }
 
-            float xScale = canvasWidth / xMax;
+            pts = pts.Distinct().ToList();
+
+            pts = random_state.choice(pts, num_of_points);
+
+            //float xScale = canvasWidth / xMax;
             float yScale = CanvasHeight / yMax;
-            for (int i = 0; i < scanned_pts.Count; i++)
+            for (int i = 0; i < pts.Count; i++)
             {
-                scanned_pts[i].x = (int)Math.Round(scanned_pts[i].x * xScale);
-                scanned_pts[i].y = (int)Math.Round(scanned_pts[i].y * yScale);
-
+                pts[i].x = (int)Math.Round((xMax - pts[i].x) * yScale);
+                pts[i].y = (int)Math.Round((yMax - pts[i].y) * yScale);
             }
 
-            for (int raw = 0; raw < scanned_pts.Count; raw++)
-            {
-                bool duplicate = false;
-                for (int compare = 0; compare < raw; compare++)
-                {
-                    if ((scanned_pts[raw].x == scanned_pts[compare].x) && (scanned_pts[raw].y == scanned_pts[compare].y))
-                    {
-                        duplicate = true;
-                        break;
-                    }
-                }
-                if (!duplicate)
-                {
-                    pts.Add(new Vector2(scanned_pts[raw].x, scanned_pts[raw].y));
-                }
-            }
-
-            if (pts.Count > num_of_points)
-            {
-                Random deletePoint = new Random();
-                int index = 0;
-                int overflow = pts.Count - num_of_points;
-                for (int loop = 0; loop < overflow; loop++)
-                {
-                    index = deletePoint.Next(pts.Count);
-                    pts.RemoveAt(index);
-                }
-            }
             return pts;
         }
     }

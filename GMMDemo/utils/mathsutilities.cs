@@ -81,7 +81,8 @@ namespace GMMDemo
         {
             //matrix with init value
             m00 = m00_init;
-            m10 = m01 = m01_init;
+            m01 = m01_init;
+            m10 = m10_init;
             m11 = m11_init;
         }
 
@@ -163,9 +164,9 @@ namespace GMMDemo
         public Gaussian_2D(Random rand, Vector2 miu_init)
         {
             //init with zeros
+            int rand_num = rand.Next(-10, 10);
             miu = miu_init;
-            Sigma = new Matrix22(800, rand.Next(-10, 10),
-                                rand.Next(-10, 10), 800); ;
+            Sigma = new Matrix22(800, rand_num, rand_num, 800); ;
         }
 
         /// <summary>
@@ -184,11 +185,12 @@ namespace GMMDemo
         public Gaussian_2D(Random rand, int corner = 0, bool init=false)
         {
             //init input datapoints with random value
+            int rand_num = rand.Next(-10, 10);
             if (!init && corner == 0)
             {
                 miu = new Vector2(rand.Next(100, 1700), rand.Next(50, 900));
-                Sigma = new Matrix22(rand.Next(100, 900), rand.Next(-100, 100),
-                                rand.Next(-100, 100), rand.Next(100, 900));
+                Sigma = new Matrix22(rand.Next(100, 900), rand_num,
+                                    rand_num, rand.Next(100, 900));
             }
             //init new gaussians at one of the four corners
             else
@@ -228,8 +230,8 @@ namespace GMMDemo
 
                 }
                 //init covariance
-                Sigma = new Matrix22(2000, rand.Next(-10, 10),
-                                rand.Next(-10, 10), 2000);
+                Sigma = new Matrix22(2000, rand_num,
+                                rand_num, 2000);
             }
         }
     }
@@ -266,12 +268,9 @@ namespace GMMDemo
             return null;
         }
 
-        public static Vector2 SVD_V(Vector2 origin, List<Vector2> pts)
+        public static Vector2 SVD_V(List<Vector2> pts)
         {
             Matrix22 ATA = new Matrix22();
-            Vector2 start;
-            Vector2 direction_length;
-            Vector2 end;
             Vector2 direction;
 
             foreach (Vector2 pt in pts)
@@ -285,29 +284,18 @@ namespace GMMDemo
             ATA.eigenvector_0.Normalize();
             ATA.eigenvector_1.Normalize();
 
-            //float major_axis;
-
             if (ATA.eigenvalue_0 > ATA.eigenvalue_1)
             {
-                //major_axis = (float)(Math.Sqrt(ATA.eigenvalue_0));
-                //direction_length = new Vector2(major_axis * ATA.eigenvector_0.x / 2, major_axis * ATA.eigenvector_0.y / 2);
                 direction = ATA.eigenvector_0;
             }
             else
             {
-                //major_axis = (float)(Math.Sqrt(ATA.eigenvalue_1));
-                //direction_length = new Vector2(major_axis * ATA.eigenvector_1.x / 2, major_axis * ATA.eigenvector_1.y / 2);
                 direction = ATA.eigenvector_1;
             }
 
-            //start = origin.Minus(direction_length);
-            //end = origin.Add(direction_length);
-
             return direction;
-            //return (start, end, direction);
         }
     }
-
 
     public class ColorSelector
     {
